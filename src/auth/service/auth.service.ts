@@ -34,18 +34,18 @@ export class AuthService {
   }
 
 
-  async onboardBackOfficeUser(onboard:CreateSuperUserDto){
+  async onboardBackOfficeUser(onboard:CreateSuperUserDto, backOfficeUserID){
     const user = await this.userService.create(onboard)
-    return this.authenticateBackOfficeUser(user)
+    return this.authenticateNewBackOfficeUser(user, backOfficeUserID)
     // TODO if you're an admin and have such right to create an admin
   }
 
 
 
   private async authenticateBackOfficeUser(user) {
-    const { email } = user;
+    const { email , role, } = user;
 
-    const payload: JwtPayload = { email };
+    const payload: JwtPayload = { email, role };
     const token = await this.tokenService.generateAccessToken(payload);
     const refreshToken = await this.tokenService.generateRefreshToken(payload);
     await this.userService.updateUser(email, refreshToken);
@@ -53,6 +53,16 @@ export class AuthService {
     return { token, refreshToken, backOfficeUser };
   }
 
+  private async authenticateNewBackOfficeUser(user, creatorMail:string) {
+    const { email } = user;
+
+    const payload: JwtPayload = { email };
+    const token = await this.tokenService.generateAccessToken(payload);
+    // const refreshToken = await this.tokenService.generateRefreshToken(payload);
+    await this.userService.updateNewUser(email, creatorMail);
+    const backOfficeUser = await this.userService.findByEmailAndExcludeFields(email);
+    return {  backOfficeUser };
+  }
 
 
 

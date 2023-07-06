@@ -22,4 +22,13 @@ model User {
   createdDate  DateTime @default(now())
   modifiedBy   String?
   modifiedDate DateTime @updatedAt
+
+  role Role @default(STAFF)
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  SUPPORT
+  STAFF
 }

@@ -7,6 +7,7 @@ export class UserDto extends BaseDto{
   firstname: string;
   surname: string;
   password: string;
+  role?:any
 }
 
 export class CreateSuperUserDto extends BaseDto {

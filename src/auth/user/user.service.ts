@@ -30,13 +30,37 @@ export class UserService implements OnModuleInit {
         surname: "Admin",
         phoneNumber: "01001111111",
         password: "root.admin@2023",
+        role: 'SUPER_ADMIN',
         authPayload: { email: "rootadmin@kris.io" }
       } as CreateSuperUserDto;
 
-      await this.saveUser(superUserDTO);
+      await this.saveSuperUser(superUserDTO);
       this.logger.log(`SUPER ADMIN CREATED SUCCESSFULLY<>$$$$$$$`);
     }
 
+  }
+
+
+  async saveSuperUser(user: UserDto): Promise<any> {
+    try {
+      const saved = await this.prismaService.user.create({
+        data: {
+          email: user.email,
+          firstname: user.firstname,
+          surname: user.surname,
+          phoneNumber: user.phoneNumber,
+          password: await argon.hash(user.password),
+          role: user.role
+        }
+      });
+      this.logger.log(`User ${user.email} saved successfully`);
+      return saved;
+
+    } catch (e) {
+      const msg = `Error creating user ${user.email}`;
+      this.logger.error(msg);
+      throw new AppConflictException(AppConst.error, { context: msg });
+    }
   }
 
   async create(dto: CreateSuperUserDto) {
@@ -45,6 +69,8 @@ export class UserService implements OnModuleInit {
     dto.phoneNumber = this.utilService.getPhoneNumber(dto.phoneNumber);
     return this.saveUser(dto);
   }
+
+
 
   async saveUser(user: UserDto): Promise<any> {
     try {
@@ -66,8 +92,6 @@ export class UserService implements OnModuleInit {
       throw new AppConflictException(AppConst.error, { context: msg });
     }
   }
-
-
 
 
   async validaEmailRequest(user) {
@@ -132,20 +156,15 @@ export class UserService implements OnModuleInit {
     });
   }
 
+  async updateNewUser(email: string,  creatorMail) {
+    await this.prismaService.user.update({
+      where: { email },
+      data: {
 
-  // async validateRequest(user) {
-  //   const { email, phoneNumber } = user;
-  //   const resultEmail = await this.prismaService.user.findMany({
-  //     where: { email }
-  //   });
-  //   const resultPhoneNumber = await this.prismaService.user.findMany({
-  //     where: { phoneNumber }
-  //   });
-  //   if (resultEmail || resultPhoneNumber) {
-  //     const errMessage = `Email: ${resultEmail} or Phone Number: ${resultPhoneNumber} already exists `;
-  //     this.logger.error(errMessage);
-  //     throw new AppConflictException(errMessage);
-  //   }
-  //
-  // }
+        createdBy: creatorMail
+      }
+    });
+  }
+
+
 }
