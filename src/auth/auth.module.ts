@@ -7,6 +7,8 @@ import { PassportModule } from "@nestjs/passport";
 import { JwtStrategy } from "@auth/strategies/jwt-strategy";
 import { TokenService } from "@auth/token/token.service";
 import { AuthController } from "@auth/controller/auth.controller";
+import { UtilService } from "@core/utils/util.service";
+import { UserController } from "@auth/user/user.controller";
 
 @Module({
   imports:[JwtModule.register({
@@ -14,8 +16,8 @@ import { AuthController } from "@auth/controller/auth.controller";
   }),
     PassportModule.register({defaultStrategy:'jwt', session:false}),
   ],
-  controllers:[AuthController],
-  providers:[UserService, AuthService, ConfigService, JwtStrategy, TokenService],
+  controllers:[AuthController,UserController],
+  providers:[UserService, AuthService, ConfigService, JwtStrategy, TokenService,UtilService],
   exports:[JwtStrategy, PassportModule]
 })
 export class AuthModule {}

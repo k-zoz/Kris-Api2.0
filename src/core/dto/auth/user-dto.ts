@@ -12,14 +12,13 @@ export class UserDto extends BaseDto{
 export class CreateSuperUserDto extends BaseDto {
   @IsNotEmpty({ message: "Email is required" })
   email: string;
-  @IsOptional()
+  @IsNotEmpty({ message: "Phone number is required" })
   phoneNumber: string;
   @IsNotEmpty({ message: "First name is required" })
   firstname: string;
   @IsNotEmpty({ message: "Surname is required" })
   surname: string;
   @IsString()
-  @IsOptional()
   @IsStrongPassword({minNumbers:8, minSymbols:1,minLowercase:1,minUppercase:1,minLength:2})
   password: string;
 

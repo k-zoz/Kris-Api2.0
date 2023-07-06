@@ -3,9 +3,11 @@ import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "@prisma/prisma.service";
 import { LoginRequest } from "@auth/model/login-request";
 import { UserService } from "@auth/user/user.service";
-import { AppUnauthorizedException } from "@core/exception/app-exception";
+import { AppTokenExpiredException, AppUnauthorizedException } from "@core/exception/app-exception";
 import { JwtPayload } from "@auth/model/jwt-payload";
 import { TokenService } from "@auth/token/token.service";
+import { JwtService } from "@nestjs/jwt";
+import { CreateSuperUserDto } from "@core/dto/auth/user-dto";
 
 @Injectable()
 export class AuthService {
@@ -13,7 +15,8 @@ export class AuthService {
 
   constructor(private readonly configService: ConfigService,
               private readonly userService: UserService,
-              private readonly tokenService: TokenService
+              private readonly tokenService: TokenService,
+              private readonly jwtService: JwtService
   ) {
   }
 
@@ -30,14 +33,42 @@ export class AuthService {
     return this.authenticateBackOfficeUser(user);
   }
 
+
+  async onboardBackOfficeUser(onboard:CreateSuperUserDto){
+    const user = await this.userService.create(onboard)
+    return this.authenticateBackOfficeUser(user)
+    // TODO if you're an admin and have such right to create an admin
+  }
+
+
+
   private async authenticateBackOfficeUser(user) {
     const { email } = user;
 
-    const payload: JwtPayload = { email: email };
+    const payload: JwtPayload = { email };
     const token = await this.tokenService.generateAccessToken(payload);
-    const refreshToken = await this.tokenService.generateRefreshToken(payload)
-    await this.userService.updateUser(email, refreshToken)
-    const backOfficeUser = await this.userService.findByEmailAndExcludeFields(email)
-    return {token, refreshToken, backOfficeUser}
+    const refreshToken = await this.tokenService.generateRefreshToken(payload);
+    await this.userService.updateUser(email, refreshToken);
+    const backOfficeUser = await this.userService.findByEmailAndExcludeFields(email);
+    return { token, refreshToken, backOfficeUser };
   }
+
+
+
+
+  async refreshToken(refreshToken: string) {
+    const token = this.jwtService.verify(refreshToken, { secret: this.configService.get("REFRESH_TOKEN_SECRET") });
+
+    /// token belongs to user
+    const user = await this.userService.findByEmail(token.jwtid);
+    if (user.refreshToken != refreshToken) {
+      throw  new AppTokenExpiredException(`Token is Invalid`);
+    }
+
+    const { email } = user;
+    const payload: JwtPayload = { email };
+    return this.tokenService.generateAccessToken(payload);
+  }
+
+
 }

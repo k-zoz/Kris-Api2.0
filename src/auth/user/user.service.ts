@@ -3,13 +3,17 @@ import { PrismaService } from "@prisma/prisma.service";
 import * as argon from "argon2";
 import { CreateSuperUserDto, UserDto } from "@core/dto/auth/user-dto";
 import { AppConflictException, AppNotFoundException } from "@core/exception/app-exception";
-import { prismaExclude } from "@prisma/utils";
+import { prismaExclude } from "@prisma/prisma-utils";
+import { UtilService } from "@core/utils/util.service";
+import { AppConst } from "@core/const/app.const";
 
 @Injectable()
 export class UserService implements OnModuleInit {
   private readonly logger = new Logger(UserService.name);
 
-  constructor(private readonly prismaService: PrismaService) {
+  constructor(private readonly prismaService: PrismaService,
+              private readonly utilService: UtilService
+  ) {
   }
 
   async onModuleInit(): Promise<void> {
@@ -35,6 +39,13 @@ export class UserService implements OnModuleInit {
 
   }
 
+  async create(dto: CreateSuperUserDto) {
+    await this.validatePhoneNumberRequest(dto.phoneNumber);
+    await this.validaEmailRequest(dto.email);
+    dto.phoneNumber = this.utilService.getPhoneNumber(dto.phoneNumber);
+    return this.saveUser(dto);
+  }
+
   async saveUser(user: UserDto): Promise<any> {
     try {
       const saved = await this.prismaService.user.create({
@@ -50,14 +61,39 @@ export class UserService implements OnModuleInit {
       return saved;
 
     } catch (e) {
-      // const errName = e.meta.target[0];
-      // const errMessage = `${errName} already exists. Try another`;
-      console.log(e);
       const msg = `Error creating user ${user.email}`;
       this.logger.error(msg);
-      // throw new AppConflictException(errMessage);
+      throw new AppConflictException(AppConst.error, { context: msg });
     }
   }
+
+
+
+
+  async validaEmailRequest(user) {
+    const { email } = user;
+    const result = await this.prismaService.user.findMany({
+      where: { email }
+    });
+    if (result) {
+      const errMessage = `Email: ${result} or already exists `;
+      this.logger.error(errMessage);
+      throw new AppConflictException(errMessage);
+    }
+  }
+
+  async validatePhoneNumberRequest(user) {
+    const { phoneNumber } = user;
+    const result = await this.prismaService.user.findMany({
+      where: { phoneNumber }
+    });
+    if (result) {
+      const errMessage = `Phone Number: ${result} or already exists `;
+      this.logger.error(errMessage);
+      throw new AppConflictException(errMessage);
+    }
+  }
+
 
   async findByEmail(email: string) {
     const user = await this.prismaService.user.findUnique({ where: { email } });
@@ -95,4 +131,21 @@ export class UserService implements OnModuleInit {
       }
     });
   }
+
+
+  // async validateRequest(user) {
+  //   const { email, phoneNumber } = user;
+  //   const resultEmail = await this.prismaService.user.findMany({
+  //     where: { email }
+  //   });
+  //   const resultPhoneNumber = await this.prismaService.user.findMany({
+  //     where: { phoneNumber }
+  //   });
+  //   if (resultEmail || resultPhoneNumber) {
+  //     const errMessage = `Email: ${resultEmail} or Phone Number: ${resultPhoneNumber} already exists `;
+  //     this.logger.error(errMessage);
+  //     throw new AppConflictException(errMessage);
+  //   }
+  //
+  // }
 }

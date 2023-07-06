@@ -7,9 +7,7 @@ import { LoginRequest } from "@auth/model/login-request";
 @Controller("auth")
 export class AuthController extends BaseController {
 
-  constructor(
-    private readonly authService: AuthService
-  ) {
+  constructor(private readonly authService: AuthService) {
     super();
   }
 
@@ -20,4 +18,6 @@ export class AuthController extends BaseController {
       message: `Login Successful`
     });
   }
+
+
 }

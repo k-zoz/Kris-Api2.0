@@ -12,7 +12,7 @@ const port = process.env.PORT || 4041;
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bodyParser: false });
-
+  app.useGlobalPipes(new ValidationPipe());
 
   app.use(helmet());
   app.enableCors({
@@ -29,7 +29,7 @@ async function bootstrap() {
   app.use(urlencoded({ limit: "100mb", extended: true, parameterLimit: 100000000 }));
   // app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   app.setGlobalPrefix("api");
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  // app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
 
   const config = new DocumentBuilder()
