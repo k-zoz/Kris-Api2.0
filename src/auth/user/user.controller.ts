@@ -29,6 +29,7 @@ export class UserController extends BaseController {
     });
   };
 
+  //Testing
   @Get("onboarders")
   @Permission(UserRoleEnum.SUPER_ADMIN, UserRoleEnum.STAFF)
   async getOnboarders(@GetUser() payload: AuthPayload) {

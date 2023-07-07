@@ -21,15 +21,25 @@ export class CurrentUserMiddleware implements NestMiddleware {
     //set the token as payload for the jwt strategy to use
     const payload = req as any;
     const authPayload = new AuthPayload();
-    const request = payload.rawHeaders[1];
-    if (!request.startsWith("Bearer")) {
-      throw new AppTokenExpiredException("Token not provided. Kindly sign in");
-    } else {
-      const requestSplit = request.split(" ");
-      const token = requestSplit[1];
-      payload.authPayload = await this.jwtService.verify(token, { secret: this.configService.get("ACCESS_TOKEN_SECRET") });
+    const request1 = payload.rawHeaders;
+
+    // Loop through the array and check for strings starting with 'Bearer'
+    let bearerString:string;
+    for (const str of request1) {
+      if (str.startsWith('Bearer')) {
+        bearerString = str;
+        break; // Exit the loop after finding the first match
+      }
     }
 
+    if(!bearerString){
+      throw new AppTokenExpiredException("Token not provided. Kindly sign in");
+    }else {
+      const bearerStringSplit = bearerString.split(" ")
+      const token = bearerStringSplit[1]
+      payload.authPayload = await this.jwtService.verify(token, { secret: this.configService.get("ACCESS_TOKEN_SECRET") });
+      console.log(token)
+    }
     next();
   }
 
