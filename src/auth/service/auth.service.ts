@@ -35,9 +35,7 @@ export class AuthService {
 
 
   async onboardBackOfficeUser(onboard:CreateSuperUserDto, backOfficeUserEmail){
-    const user = await this.userService.create(onboard)
-    return this.authenticateNewBackOfficeUser(user, backOfficeUserEmail.email)
-    // TODO if you're an admin and have such right to create an admin
+    return  await this.userService.create(onboard,backOfficeUserEmail )
   }
 
 
@@ -52,19 +50,6 @@ export class AuthService {
     const backOfficeUser = await this.userService.findByEmailAndExcludeFields(email);
     return { token, refreshToken, backOfficeUser };
   }
-
-  private async authenticateNewBackOfficeUser(user, creatorMail:string) {
-    const { email } = user;
-
-    const payload: JwtPayload = { email };
-    const token = await this.tokenService.generateAccessToken(payload);
-    // const refreshToken = await this.tokenService.generateRefreshToken(payload);
-    await this.userService.updateNewUser(email, creatorMail);
-    const backOfficeUser = await this.userService.findByEmailAndExcludeFields(email);
-    return {  backOfficeUser };
-  }
-
-
 
   async refreshToken(refreshToken: string) {
     const token = this.jwtService.verify(refreshToken, { secret: this.configService.get("REFRESH_TOKEN_SECRET") });

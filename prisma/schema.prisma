@@ -23,7 +23,7 @@ model User {
   modifiedBy   String?
   modifiedDate DateTime @updatedAt
 
-  role Role @default(STAFF)
+  role Role
 }
 
 enum Role {

@@ -23,7 +23,7 @@ export class UserController extends BaseController {
   async onboard(@GetUser() payload: AuthPayload,
                 @Body(new ValidationPipe()) request: CreateSuperUserDto) {
     return super.response({
-      payload: await this.authService.onboardBackOfficeUser(request, payload),
+      payload: await this.authService.onboardBackOfficeUser(request, payload.email),
       status: HttpStatus.CREATED,
       message: "Account created successfully"
     });
@@ -31,7 +31,7 @@ export class UserController extends BaseController {
 
   //Testing
   @Get("onboarders")
-  @Permission(UserRoleEnum.SUPER_ADMIN, UserRoleEnum.STAFF)
+  @Permission(UserRoleEnum.STAFF)
   async getOnboarders(@GetUser() payload: AuthPayload) {
     console.log(payload);
   }

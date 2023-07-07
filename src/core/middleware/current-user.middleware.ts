@@ -38,7 +38,6 @@ export class CurrentUserMiddleware implements NestMiddleware {
       const bearerStringSplit = bearerString.split(" ")
       const token = bearerStringSplit[1]
       payload.authPayload = await this.jwtService.verify(token, { secret: this.configService.get("ACCESS_TOKEN_SECRET") });
-      console.log(token)
     }
     next();
   }

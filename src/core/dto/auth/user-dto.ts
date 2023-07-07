@@ -1,13 +1,15 @@
 import { BaseDto } from "@core/dto/global/base-dto";
 import { IsEmail, IsNotEmpty, IsOptional, IsString, IsStrongPassword } from "class-validator";
+import { Transform } from "class-transformer";
 
-export class UserDto extends BaseDto{
-  email: string;
-  phoneNumber: string;
-  firstname: string;
-  surname: string;
-  password: string;
-  role?:any
+export class UserDto extends BaseDto {
+  email?: string;
+  phoneNumber?: string;
+  firstname?: string;
+  surname?: string;
+  password?: string;
+  createdBy?: string;
+  role?: any;
 }
 
 export class CreateSuperUserDto extends BaseDto {
@@ -20,8 +22,13 @@ export class CreateSuperUserDto extends BaseDto {
   firstname: string;
   @IsNotEmpty({ message: "Surname is required" })
   surname: string;
-  @IsStrongPassword({minNumbers:1, minSymbols:1,minLowercase:1,minUppercase:1,minLength:8})
+  @IsStrongPassword({ minNumbers: 1, minSymbols: 1, minLowercase: 1, minUppercase: 1, minLength: 8 })
   password: string;
+  @IsOptional()
+  createdBy: string;
+  @IsNotEmpty({ message: "Role is required" })
+  // @Transform(({ value }) => value.toUpperCase())
+  role: string;
 
 }
 

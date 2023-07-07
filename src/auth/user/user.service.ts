@@ -30,46 +30,23 @@ export class UserService implements OnModuleInit {
         surname: "Admin",
         phoneNumber: "01001111111",
         password: "root.admin@2023",
-        role: 'SUPER_ADMIN',
+        role: "SUPER_ADMIN",
+        createdBy: "root.admin@2023",
         authPayload: { email: "rootadmin@kris.io" }
       } as CreateSuperUserDto;
 
-      await this.saveSuperUser(superUserDTO);
+      await this.saveUser(superUserDTO);
       this.logger.log(`SUPER ADMIN CREATED SUCCESSFULLY<>$$$$$$$`);
     }
 
   }
 
-
-  async saveSuperUser(user: UserDto): Promise<any> {
-    try {
-      const saved = await this.prismaService.user.create({
-        data: {
-          email: user.email,
-          firstname: user.firstname,
-          surname: user.surname,
-          phoneNumber: user.phoneNumber,
-          password: await argon.hash(user.password),
-          role: user.role
-        }
-      });
-      this.logger.log(`User ${user.email} saved successfully`);
-      return saved;
-
-    } catch (e) {
-      const msg = `Error creating user ${user.email}`;
-      this.logger.error(msg);
-      throw new AppConflictException(AppConst.error, { context: msg });
-    }
-  }
-
-  async create(dto: CreateSuperUserDto) {
+  async create(dto: CreateSuperUserDto, creatorEmail?: string) {
     await this.validatePhoneNumberRequest(dto);
     await this.validaEmailRequest(dto);
-    // dto.phoneNumber = this.utilService.getPhoneNumber(dto.phoneNumber);
+    dto.createdBy = creatorEmail;
     return this.saveUser(dto);
   }
-
 
 
   async saveUser(user: UserDto): Promise<any> {
@@ -80,12 +57,13 @@ export class UserService implements OnModuleInit {
           firstname: user.firstname,
           surname: user.surname,
           phoneNumber: user.phoneNumber,
-          password: await argon.hash(user.password)
+          role: user.role,
+          password: await argon.hash(user.password),
+          createdBy: user.createdBy
         }
       });
       this.logger.log(`User ${user.email} saved successfully`);
       return saved;
-
     } catch (e) {
       const msg = `Error creating user ${user.email}`;
       this.logger.error(msg);
@@ -150,17 +128,7 @@ export class UserService implements OnModuleInit {
     await this.prismaService.user.update({
       where: { email },
       data: {
-        refreshToken,
-        createdBy: email
-      }
-    });
-  }
-
-  async updateNewUser(email: string,  creatorMail) {
-    await this.prismaService.user.update({
-      where: { email },
-      data: {
-        createdBy: creatorMail
+        refreshToken
       }
     });
   }
