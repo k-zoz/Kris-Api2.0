@@ -52,7 +52,7 @@ export class AppTokenExpiredException extends HttpException {
   context: unknown;
 
   constructor(message = AppConst.error, payload?: { context?: unknown, }) {
-    super(message ?? `Token is expired!!`, HttpStatus.UNAUTHORIZED);
+    super(message ?? `Token is expired!!!`, HttpStatus.UNAUTHORIZED);
     if (payload) {
       const { context } = payload;
       this.context = context;

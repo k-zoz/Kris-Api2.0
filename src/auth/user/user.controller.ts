@@ -11,7 +11,7 @@ import { UserRoleEnum } from "@core/enum/user-role-enum";
 
 @Controller("users")
 @UseGuards(AuthGuard())
-// @UseGuards(RolesGuard)
+@UseGuards(RolesGuard)
 export class UserController extends BaseController {
   constructor(private readonly authService: AuthService
   ) {
@@ -30,7 +30,7 @@ export class UserController extends BaseController {
   };
 
   @Get("onboarders")
-  @Permission(UserRoleEnum.SUPER_ADMIN, UserRoleEnum.ADMIN)
+  @Permission(UserRoleEnum.SUPER_ADMIN, UserRoleEnum.STAFF)
   async getOnboarders(@GetUser() payload: AuthPayload) {
     console.log(payload);
   }

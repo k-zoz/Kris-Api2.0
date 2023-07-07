@@ -18,22 +18,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
       passReqToCallback: true,
       secretOrKey: config.get("ACCESS_TOKEN_SECRET")
-
     });
   }
 
   async validate(payload) {
-    console.log(payload);
-
-
-    const { email, role } = payload;
-    if (!email || !role) {
-      throw new AppTokenExpiredException("Token not provided!");
+    const jwtPayload: JwtPayload = payload.authPayload;
+    const { email, role, exp } = jwtPayload;
+    const expiry = exp * 1000;
+    if (Date.now() > expiry) {
+      throw new AppTokenExpiredException();
     }
-    const user = await this.userService.findByEmail(email);
-    return { email: user.email, role: user.role } as AuthPayload;
-
-
+    return { email, role };
   }
 
 }

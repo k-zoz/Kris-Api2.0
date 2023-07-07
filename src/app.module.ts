@@ -1,12 +1,9 @@
-import { MiddlewareConsumer, Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "@auth/auth.module";
 import { PrismaModule } from "@prisma/prisma.module";
 import { ConfigModule } from "@nestjs/config";
-import configuration from "@config/configuration";
-import { utilities as nestWinstonModuleUtilities, WinstonModule } from "nest-winston";
-import winston from "winston";
 import moment from "moment";
 import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
 import { AppExceptionFilter } from "@core/filter/app-exception.filter";
@@ -33,6 +30,7 @@ import { AppInterceptor } from "@core/interceptor/app.interceptor";
     AuthModule, PrismaModule],
   controllers: [AppController],
   providers: [
+
     {
       provide: APP_INTERCEPTOR,
       useClass: AppInterceptor
@@ -45,10 +43,12 @@ import { AppInterceptor } from "@core/interceptor/app.interceptor";
       provide: "MomentWrapper",
       useValue: moment
     },
-    AppService,CurrentUserMiddleware, JwtService]
+    AppService, CurrentUserMiddleware, JwtService]
 })
 export class AppModule {
-  // configure(consumer:MiddlewareConsumer){
-  //   consumer.apply(CurrentUserMiddleware).forRoutes('*')
-  // }
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CurrentUserMiddleware)
+      .exclude({ path: "auth/login", method: RequestMethod.POST })
+      .forRoutes({ path: "*", method: RequestMethod.ALL });
+  }
 }

@@ -7,19 +7,12 @@ import { AppTokenExpiredException, AppUnauthorizedException } from "@core/except
 import { UserRoleEnum } from "@core/enum/user-role-enum";
 
 @Injectable()
-export class RolesGuard extends AuthGuard() implements CanActivate {
+export class RolesGuard implements CanActivate {
 
   constructor(private reflector: Reflector) {
-    super();
   }
 
-
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const auth = await super.canActivate(context);
-    //if there is no token in the request
-    if (!auth) {
-      return false
-    }
 
     const requiredRoles = this.reflector.getAllAndOverride<UserRoleEnum[]>(ROLE_KEY, [
       context.getHandler(),
@@ -30,12 +23,15 @@ export class RolesGuard extends AuthGuard() implements CanActivate {
     if (!requiredRoles) {
       return true;
     }
+
     // from the payload, the signed user's mail and role saved on the request, it is then payload is cross-checked
-    const user = context.switchToHttp().getRequest().user;
-    if (user.role) {
-      if (!requiredRoles.some((importantRoles) => user.role?.includes(importantRoles))) {
-        throw new AppUnauthorizedException("You are not authorized to take this action");
-      }
+    const user = context.switchToHttp().getRequest().authPayload;
+
+    if (requiredRoles.some((role) => user.role?.includes(role))) {
+      // User has at least one of the required roles
+      return true;
+    } else {
+      throw new AppUnauthorizedException("You are not authorized to take this action");
     }
 
 

@@ -4,6 +4,7 @@ import { UserService } from "@auth/user/user.service";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { AuthPayload } from "@core/dto/auth/auth-payload";
+import { AppTokenExpiredException } from "@core/exception/app-exception";
 
 @Injectable()
 export class CurrentUserMiddleware implements NestMiddleware {
@@ -20,17 +21,15 @@ export class CurrentUserMiddleware implements NestMiddleware {
     //set the token as payload for the jwt strategy to use
     const payload = req as any;
     const authPayload = new AuthPayload();
-    const request = payload?.rawHeaders[1]
-
-    if (!request) {
-      payload.authPayload = authPayload;
+    const request = payload.rawHeaders[1];
+    if (!request.startsWith("Bearer")) {
+      throw new AppTokenExpiredException("Token not provided. Kindly sign in");
     } else {
-      const requestSplit = request.split(" ")
+      const requestSplit = request.split(" ");
       const token = requestSplit[1];
-      payload.authPayload =  await this.jwtService.verify(token, { secret: this.configService.get("ACCESS_TOKEN_SECRET") });
+      payload.authPayload = await this.jwtService.verify(token, { secret: this.configService.get("ACCESS_TOKEN_SECRET") });
     }
 
-    // console.log(`Middleware`, token, decoded);
     next();
   }
 

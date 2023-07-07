@@ -29,7 +29,7 @@ export class AppInterceptor implements NestInterceptor {
       }
     }
     return next.handle().pipe(
-      tap(() => console.log(`After... ${Date.now() - Date.now()}ms`))
+      tap(() => this.logger.log(`After... ${Date.now() - Date.now()}ms`))
     );
   }
 }
