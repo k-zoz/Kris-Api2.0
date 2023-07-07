@@ -13,7 +13,7 @@ export class TokenService {
   }
 
   async generateAccessToken(payload: JwtPayload) {
-    return this.jwtService.sign(payload);
+    return this.jwtService.signAsync(payload);
   }
 
   async generateRefreshToken(payload: JwtPayload) {

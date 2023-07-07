@@ -11,7 +11,7 @@ import { UserRoleEnum } from "@core/enum/user-role-enum";
 
 @Controller("users")
 @UseGuards(AuthGuard())
-@UseGuards(RolesGuard)
+// @UseGuards(RolesGuard)
 export class UserController extends BaseController {
   constructor(private readonly authService: AuthService
   ) {
@@ -19,12 +19,11 @@ export class UserController extends BaseController {
   }
 
   @Post("/:backOfficeID/onboard")
-  // @Permission("SUPER_ADMIN")
-  async onboard(@GetUser() payload:AuthPayload,
-                @Body(new ValidationPipe()) request:CreateSuperUserDto) {
-    console.log(payload);
+  @Permission(UserRoleEnum.SUPER_ADMIN)
+  async onboard(@GetUser() payload: AuthPayload,
+                @Body(new ValidationPipe()) request: CreateSuperUserDto) {
     return super.response({
-      payload: await this.authService.onboardBackOfficeUser(request, payload.email),
+      payload: await this.authService.onboardBackOfficeUser(request, payload),
       status: HttpStatus.CREATED,
       message: "Account created successfully"
     });
@@ -32,7 +31,7 @@ export class UserController extends BaseController {
 
   @Get("onboarders")
   @Permission(UserRoleEnum.SUPER_ADMIN, UserRoleEnum.ADMIN)
-  async getOnboarders( @GetUser() payload:AuthPayload,){
+  async getOnboarders(@GetUser() payload: AuthPayload) {
     console.log(payload);
   }
 }

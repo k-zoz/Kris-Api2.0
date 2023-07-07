@@ -7,6 +7,7 @@ import { JwtPayload } from "@auth/model/jwt-payload";
 import { Request } from "express";
 import { UserService } from "@auth/user/user.service";
 import { AuthPayload } from "@core/dto/auth/auth-payload";
+import { AppTokenExpiredException } from "@core/exception/app-exception";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -16,16 +17,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       passReqToCallback: true,
-      secretOrKey: config.get("JWT_SECRET"),
-
+      secretOrKey: config.get("ACCESS_TOKEN_SECRET")
 
     });
   }
 
-  async validate(request: Request, payload: JwtPayload) {
-    const { email } = payload;
+  async validate(payload) {
+    console.log(payload);
+
+
+    const { email, role } = payload;
+    if (!email || !role) {
+      throw new AppTokenExpiredException("Token not provided!");
+    }
     const user = await this.userService.findByEmail(email);
-    return {  email: user.email, role: user.role } as AuthPayload;
+    return { email: user.email, role: user.role } as AuthPayload;
+
+
   }
 
 }

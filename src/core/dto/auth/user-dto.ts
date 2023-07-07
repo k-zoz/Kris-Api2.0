@@ -1,5 +1,5 @@
 import { BaseDto } from "@core/dto/global/base-dto";
-import { IsNotEmpty, IsOptional, IsString, IsStrongPassword } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsStrongPassword } from "class-validator";
 
 export class UserDto extends BaseDto{
   email: string;
@@ -12,6 +12,7 @@ export class UserDto extends BaseDto{
 
 export class CreateSuperUserDto extends BaseDto {
   @IsNotEmpty({ message: "Email is required" })
+  @IsEmail()
   email: string;
   @IsNotEmpty({ message: "Phone number is required" })
   phoneNumber: string;
@@ -19,14 +20,10 @@ export class CreateSuperUserDto extends BaseDto {
   firstname: string;
   @IsNotEmpty({ message: "Surname is required" })
   surname: string;
-  @IsString()
-  @IsStrongPassword({minNumbers:8, minSymbols:1,minLowercase:1,minUppercase:1,minLength:2})
+  @IsStrongPassword({minNumbers:1, minSymbols:1,minLowercase:1,minUppercase:1,minLength:8})
   password: string;
 
 }
 
 
 
- interface SuperUser {
-
-}

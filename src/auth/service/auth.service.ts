@@ -34,9 +34,9 @@ export class AuthService {
   }
 
 
-  async onboardBackOfficeUser(onboard:CreateSuperUserDto, backOfficeUserID){
+  async onboardBackOfficeUser(onboard:CreateSuperUserDto, backOfficeUserEmail){
     const user = await this.userService.create(onboard)
-    return this.authenticateNewBackOfficeUser(user, backOfficeUserID)
+    return this.authenticateNewBackOfficeUser(user, backOfficeUserEmail.email)
     // TODO if you're an admin and have such right to create an admin
   }
 
