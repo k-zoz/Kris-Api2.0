@@ -23,7 +23,10 @@ model User {
   modifiedBy   String?
   modifiedDate DateTime @updatedAt
 
-  role Role
+  role    Role
+  version Int?
+
+  @@unique([phoneNumber, email])
 }
 
 enum Role {

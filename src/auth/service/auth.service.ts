@@ -23,7 +23,7 @@ export class AuthService {
   async backOfficeLogin(request: LoginRequest) {
     const { email, password } = request;
 
-    const user = await this.userService.findByEmail(email);
+    const user = await this.userService.findFirst(email);
 
     if (!user || !(await this.userService.validatePassword(user, password))) {
       this.logger.error(`Login failed ${email}`);
@@ -46,7 +46,7 @@ export class AuthService {
     const payload: JwtPayload = { email, role };
     const token = await this.tokenService.generateAccessToken(payload);
     const refreshToken = await this.tokenService.generateRefreshToken(payload);
-    await this.userService.updateUser(email, refreshToken);
+    await this.userService.setUserRefreshToken(email, refreshToken);
     const backOfficeUser = await this.userService.findByEmailAndExcludeFields(email);
     return { token, refreshToken, backOfficeUser };
   }
