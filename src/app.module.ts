@@ -10,31 +10,37 @@ import { AppExceptionFilter } from "@core/filter/app-exception.filter";
 import { CurrentUserMiddleware } from "@core/middleware/current-user.middleware";
 import { JwtService } from "@nestjs/jwt";
 import { AppInterceptor } from "@core/interceptor/app.interceptor";
+import { utilities as nestWinstonModuleUtilities, WinstonModule } from "nest-winston";
+import * as winston from "winston";
+import configuration from "@config/configuration";
 
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    //
-    // WinstonModule.forRoot({
-    //   transports: [
-    //     new winston.transports.Console({
-    //       format: winston.format.combine(
-    //         winston.format.timestamp(),
-    //         nestWinstonModuleUtilities.format.nestLike()
-    //       )
-    //     })
-    //   ]
-    // }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration]
+    }),
+
+    WinstonModule.forRoot({
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            nestWinstonModuleUtilities.format.nestLike()
+          )
+        })
+      ]
+    }),
 
     AuthModule, PrismaModule],
   controllers: [AppController],
   providers: [
 
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: AppInterceptor
-    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: AppInterceptor
+    // },
     {
       provide: APP_FILTER,
       useClass: AppExceptionFilter

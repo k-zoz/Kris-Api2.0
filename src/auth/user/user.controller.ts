@@ -63,7 +63,7 @@ export class UserController extends BaseController {
   }
 
   @Post("updateProfile")
-  @Permission(UserRoleEnum.SUPER_ADMIN, UserRoleEnum.ADMIN, UserRoleEnum.STAFF, UserRoleEnum.SUPPORT)
+  // @Permission(UserRoleEnum.SUPER_ADMIN, UserRoleEnum.ADMIN, UserRoleEnum.STAFF, UserRoleEnum.SUPPORT)
   async updateProfile(@GetUser() payload:AuthPayload,
                       @Body(ValidationPipe) request:UpdateBackOfficeProfile
   ){

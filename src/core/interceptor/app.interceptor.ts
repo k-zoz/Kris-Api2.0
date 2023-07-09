@@ -19,6 +19,7 @@ export class AppInterceptor implements NestInterceptor {
 
     if (body && (method === "POST" || method === "PUT" || method === "PATCH")) {
       const currentUser = context.getArgs()[0].user as AuthPayload;
+
       const payload = body as any;
       const authPayload = new AuthPayload();
 

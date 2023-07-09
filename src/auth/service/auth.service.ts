@@ -38,8 +38,6 @@ export class AuthService {
     return  await this.userService.create(onboard,backOfficeUserEmail )
   }
 
-
-
   private async authenticateBackOfficeUser(user) {
     const { email , role, } = user;
 
