@@ -15,22 +15,30 @@ import { AuthPayload } from "@core/dto/auth/auth-payload";
 import { UserRoleEnum } from "@core/enum/user-role-enum";
 import { UserService } from "@auth/user/user.service";
 import { SearchRequest } from "@core/model/search-request";
+import { AppService } from "../../app.service";
 
 @Controller("users")
 @UseGuards(AuthGuard())
 @UseGuards(RolesGuard)
 export class UserController extends BaseController {
   constructor(private readonly authService: AuthService,
-              private readonly userService: UserService
+              private readonly userService: UserService,
+              private readonly appService: AppService
   ) {
     super();
+  }
+
+  @Get("roles")
+  @Permission(UserRoleEnum.SUPER_ADMIN)
+  allRoles() {
+    return this.response({ payload: this.appService.roles() });
   }
 
   @Post("onboard")
   @Permission(UserRoleEnum.SUPER_ADMIN)
   async onboard(@GetUser() payload: AuthPayload,
                 @Body(ValidationPipe) request: CreateSuperUserDto) {
-    return super.response({
+    return this.response({
       payload: await this.authService.onboardBackOfficeUser(request, payload.email),
       status: HttpStatus.CREATED,
       message: "Account created successfully"
@@ -38,55 +46,60 @@ export class UserController extends BaseController {
   };
 
 
-  @Post("updateRole/:email")
+  @Post("changeRole/:ID")
   @Permission(UserRoleEnum.SUPER_ADMIN)
-  async updateBackOfficeRole(@GetUser() payload: AuthPayload,
-                             @Param("email") email: string,
+  async changeBackOfficeRole(@GetUser() payload: AuthPayload,
+                             @Param("ID") id: string,
                              @Body(ValidationPipe) request: UpdateBackOfficeUserRole) {
-    return super.response({
-      payload: await this.userService.changeUserRole(payload.email, email, request.role),
+    return this.response({
+      payload: await this.userService.changeUserRole(payload.email, id, request.role),
       status: HttpStatus.OK,
       message: "Role successfully changed"
     });
   }
 
-  @Post("updatePassword/:email")
+  @Post("changePassword/:ID")
   @Permission(UserRoleEnum.SUPER_ADMIN)
-  async updateBackOfficePassword(@GetUser() payload: AuthPayload,
-                                 @Param("email") email: string,
+  async changeBackOfficePassword(@GetUser() payload: AuthPayload,
+                                 @Param("ID") id: string,
                                  @Body(ValidationPipe) request: UpdateBackOfficeUserPassword
   ) {
-    return super.response({
-      payload: await this.userService.changeUserPassword(payload.email, email, request.password),
+    return this.response({
+      payload: await this.userService.changeUserPassword(payload.email, id, request.password),
       status: HttpStatus.OK,
       message: "Password Changed"
     });
   }
 
-  @Post("updateProfile")
+  @Get("/:ID")
+  async findUserByID(@Param("ID") id: string) {
+    return this.response({ payload: await this.userService.findUserById(id) });
+  }
+
+  @Post("editProfile")
   // @Permission(UserRoleEnum.SUPER_ADMIN, UserRoleEnum.ADMIN, UserRoleEnum.STAFF, UserRoleEnum.SUPPORT)
   async updateProfile(@GetUser() payload: AuthPayload,
                       @Body(ValidationPipe) request: UpdateBackOfficeProfile
   ) {
-    return super.response({
-      payload: await this.userService.updateProfile(payload.email, request),
+    return this.response({
+      payload: await this.userService.editProfile(payload.email, request),
       status: HttpStatus.OK,
-      message: "Profile Updated"
+      message: "Changes saved successfully"
     });
   }
 
   @Post()
   @Permission(UserRoleEnum.SUPER_ADMIN)
-  async getAllUsers(@Body(ValidationPipe) searchRequest:SearchRequest) {
-    return super.response({
+  async getAllUsers(@Body(ValidationPipe) searchRequest: SearchRequest) {
+    return this.response({
       payload: await this.userService.findAllUsers(searchRequest)
-    })
+    });
 
   }
 
-  @Get('userProfile')
+  @Get("userProfile")
   userProfile(@GetUser() payload: AuthPayload) {
-    return this.response({payload});
+    return this.response({ payload });
   }
 
 

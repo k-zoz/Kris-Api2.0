@@ -14,8 +14,9 @@ import { utilities as nestWinstonModuleUtilities, WinstonModule } from "nest-win
 import * as winston from "winston";
 import configuration from "@config/configuration";
 import { CacheModule } from "@nestjs/cache-manager";
-import type { RedisClientOptions } from 'redis';
-import * as redisStore from 'cache-manager'
+import type { RedisClientOptions } from "redis";
+import * as redisStore from "cache-manager";
+import { BackOfficeModule } from "@back-office/back-office.module";
 
 
 @Module({
@@ -47,7 +48,7 @@ import * as redisStore from 'cache-manager'
     //   })
     // }),
 
-    AuthModule, PrismaModule],
+    BackOfficeModule, AuthModule, PrismaModule],
   controllers: [AppController],
   providers: [
 

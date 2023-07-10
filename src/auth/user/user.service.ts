@@ -40,7 +40,7 @@ export class UserService implements OnModuleInit {
         password: "root.admin@2023",
         role: "SUPER_ADMIN",
         createdBy: "rootadmin@kris.io",
-        authPayload: { email: "rootadmin@kris.io" }
+        authPayload: { email: "rootadmin@kris.io", role: "SUPER_ADMIN" }
       } as CreateSuperUserDto;
 
       await this.saveUser(superUserDTO);
@@ -56,11 +56,20 @@ export class UserService implements OnModuleInit {
     return this.saveNewUser(dto);
   }
 
-  async updateProfile(requesterMail: string, dto: UpdateBackOfficeProfile) {
+  async editProfile(requesterMail: string, dto: UpdateBackOfficeProfile) {
     await this.validateChangeProfileRequest(dto);
-    const user = await this.editUser(requesterMail, dto);
-    return await this.findByEmailAndExcludeFields(user.email);
+    return this.editUser(requesterMail, dto);
+  }
 
+
+  async findUserById(id: string) {
+    const found = await this.prismaService.user.findFirst({ where: { id } });
+    if (!found) {
+      const msg = `User with id ${id} not found`;
+      this.logger.error(msg);
+      throw new AppNotFoundException(msg);
+    }
+    return this.findAndExcludeFields(found);
   }
 
   async validateChangeProfileRequest(dto) {
@@ -145,17 +154,17 @@ export class UserService implements OnModuleInit {
     });
   }
 
-  async changeUserRole(modifierMail: string, userMail: string, role: string) {
-    const user = await this.findByEmail(userMail);
+  async changeUserRole(modifierMail: string, id: string, role: string) {
+    const user = await this.findUserById(id);
     const modifier = await this.findByEmail(modifierMail);
-    this.utilService.compareEmails(user.email, modifier.email);
+    await this.utilService.compareEmails(user.email, modifier.email);
     await this.changeRole(user.email, modifier.email, role);
     return `User ${user.email} role is updated successfully`;
   }
 
 
-  async changeUserPassword(modifierMail: string, userMail: string, newPassword: string) {
-    const user = await this.findByEmail(userMail);
+  async changeUserPassword(modifierMail: string, id: string, newPassword: string) {
+    const user = await this.findUserById(id);
     const modifier = await this.findByEmail(modifierMail);
     return await this.changePassword(user.email, modifier.email, newPassword);
 
@@ -175,14 +184,11 @@ export class UserService implements OnModuleInit {
           password: await argon.hash(profile.password)
         }
       });
-
     } catch (e) {
       const msg = `Error updating profile`;
       this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: msg });
     }
-
-
   }
 
   async changeRole(email: string, modifiedBy: string, role) {
@@ -270,17 +276,17 @@ export class UserService implements OnModuleInit {
     return user;
   }
 
-  async findByEmailAndExcludeFields(email: string) {
-    const user = await this.prismaService.user.findUniqueOrThrow({
-      where: { email },
+  async findAndExcludeFields(user) {
+    const found = await this.prismaService.user.findUniqueOrThrow({
+      where: { email: user.email },
       select: prismaExclude("User", ["password", "refreshToken"])
     });
-    if (!user) {
-      const errMessage = `Email ${email} not found`;
+    if (!found) {
+      const errMessage = `Email ${user.email} not found`;
       this.logger.error(errMessage);
       throw new AppNotFoundException(errMessage);
     }
-    return user;
+    return found;
   }
 
   async validatePassword(user, password: string): Promise<boolean> {
@@ -313,8 +319,9 @@ export class UserService implements OnModuleInit {
       this.logger.error(AppException);
       throw new AppException();
     }
-
-
   }
+
+
+  
 
 }

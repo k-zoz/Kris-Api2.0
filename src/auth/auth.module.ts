@@ -9,6 +9,7 @@ import { TokenService } from "@auth/token/token.service";
 import { AuthController } from "@auth/controller/auth.controller";
 import { UtilService } from "@core/utils/util.service";
 import { UserController } from "@auth/user/user.controller";
+import { AppService } from "../app.service";
 
 @Module({
   imports: [JwtModule.registerAsync({
@@ -23,7 +24,7 @@ import { UserController } from "@auth/user/user.controller";
     PassportModule.register({ defaultStrategy: "jwt", session: false })
   ],
   controllers: [AuthController, UserController],
-  providers: [UserService, AuthService, ConfigService, JwtStrategy, TokenService, UtilService],
+  providers: [UserService, AuthService, ConfigService, JwtStrategy, TokenService, UtilService, AppService],
   exports: [JwtStrategy, PassportModule, UserService]
 })
 export class AuthModule {

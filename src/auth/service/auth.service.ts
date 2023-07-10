@@ -22,14 +22,11 @@ export class AuthService {
 
   async backOfficeLogin(request: LoginRequest) {
     const { email, password } = request;
-
     const user = await this.userService.findFirst(email);
-
     if (!user || !(await this.userService.validatePassword(user, password))) {
       this.logger.error(`Login failed ${email}`);
       throw new AppUnauthorizedException("Invalid email or password");
     }
-
     return this.authenticateBackOfficeUser(user);
   }
 
@@ -40,12 +37,11 @@ export class AuthService {
 
   private async authenticateBackOfficeUser(user) {
     const { email , role, } = user;
-
     const payload: JwtPayload = { email, role };
     const token = await this.tokenService.generateAccessToken(payload);
     const refreshToken = await this.tokenService.generateRefreshToken(payload);
     await this.userService.setUserRefreshToken(email, refreshToken);
-    const backOfficeUser = await this.userService.findByEmailAndExcludeFields(email);
+    const backOfficeUser = await this.userService.findAndExcludeFields(user);
     return { token, refreshToken, backOfficeUser };
   }
 

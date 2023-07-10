@@ -29,6 +29,9 @@
       ],
       "@prisma/*": [
         "prisma/*"
+      ],
+      "@back-office/*": [
+        "back-office/*"
       ]
     }
   }
