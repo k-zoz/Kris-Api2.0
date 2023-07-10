@@ -28,8 +28,6 @@ export class UtilService {
   compareEmails(email1: string, email2: string) {
     if (email1 === email2) {
       throw new AppConflictException("You cannot change your role");
-    } else {
-
     }
   }
 }

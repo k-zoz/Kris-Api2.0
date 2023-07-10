@@ -7,11 +7,13 @@ import {
   UpdateBackOfficeUserRole,
   UserDto
 } from "@core/dto/auth/user-dto";
-import { AppConflictException, AppNotFoundException } from "@core/exception/app-exception";
+import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { prismaExclude } from "@prisma/prisma-utils";
 import { UtilService } from "@core/utils/util.service";
 import { AppConst } from "@core/const/app.const";
 import { UserRoleEnum } from "@core/enum/user-role-enum";
+import { SearchRequest } from "@core/model/search-request";
+import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class UserService implements OnModuleInit {
@@ -283,6 +285,36 @@ export class UserService implements OnModuleInit {
 
   async validatePassword(user, password: string): Promise<boolean> {
     return await argon.verify(user.password, password);
+  }
+
+  async findAllUsers(request: SearchRequest) {
+    const { skip, take } = request;
+
+    try {
+      const [users, total] = await this.prismaService.$transaction([
+          this.prismaService.user.findMany({
+            select: {
+              id: true,
+              surname: true,
+              firstname: true,
+              phoneNumber: true,
+              email: true,
+              role: true
+            },
+            skip,
+            take
+          }),
+          this.prismaService.user.count()
+        ]
+      );
+      const totalPage = Math.ceil(total / take) || 1;
+      return { total, totalPage, users };
+    } catch (e) {
+      this.logger.error(AppException);
+      throw new AppException();
+    }
+
+
   }
 
 }

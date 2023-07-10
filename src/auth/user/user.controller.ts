@@ -14,6 +14,7 @@ import { GetUser } from "@auth/model/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload";
 import { UserRoleEnum } from "@core/enum/user-role-enum";
 import { UserService } from "@auth/user/user.service";
+import { SearchRequest } from "@core/model/search-request";
 
 @Controller("users")
 @UseGuards(AuthGuard())
@@ -57,22 +58,37 @@ export class UserController extends BaseController {
   ) {
     return super.response({
       payload: await this.userService.changeUserPassword(payload.email, email, request.password),
-      status:HttpStatus.OK,
-      message:"Password Changed"
-    })
+      status: HttpStatus.OK,
+      message: "Password Changed"
+    });
   }
 
   @Post("updateProfile")
   // @Permission(UserRoleEnum.SUPER_ADMIN, UserRoleEnum.ADMIN, UserRoleEnum.STAFF, UserRoleEnum.SUPPORT)
-  async updateProfile(@GetUser() payload:AuthPayload,
-                      @Body(ValidationPipe) request:UpdateBackOfficeProfile
-  ){
+  async updateProfile(@GetUser() payload: AuthPayload,
+                      @Body(ValidationPipe) request: UpdateBackOfficeProfile
+  ) {
     return super.response({
-      payload:await this.userService.updateProfile(payload.email,request),
-      status:HttpStatus.OK,
+      payload: await this.userService.updateProfile(payload.email, request),
+      status: HttpStatus.OK,
       message: "Profile Updated"
-    })
+    });
   }
+
+  @Post()
+  @Permission(UserRoleEnum.SUPER_ADMIN)
+  async getAllUsers(@Body(ValidationPipe) searchRequest:SearchRequest) {
+    return super.response({
+      payload: await this.userService.findAllUsers(searchRequest)
+    })
+
+  }
+
+  @Get('userProfile')
+  userProfile(@GetUser() payload: AuthPayload) {
+    return this.response({payload});
+  }
+
 
   //Testing
   @Get("onboarders")
