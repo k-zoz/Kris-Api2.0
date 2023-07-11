@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
-import { CreateOrgDto } from "@core/dto/back-office/organization.dto";
+import { CreateOrgDto, EditOrgDto } from "@core/dto/back-office/organization.dto";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { AppConst } from "@core/const/app.const";
 import { SearchRequest } from "@core/model/search-request";
@@ -13,13 +13,19 @@ export class OrganizationService {
   }
 
   async onboardOrganization(org: CreateOrgDto, creatorEmail: string) {
-    await this.validateCreateDtoRequest(org);
+    await this.validateDtoRequest(org);
     org.createdBy = creatorEmail;
     return this.saveOrganization(org);
   }
 
 
-  async validateCreateDtoRequest(dto) {
+  async editOrganization(org: EditOrgDto, id, modifierMail: string) {
+    await this.validateDtoRequest(org);
+    org.modifiedBy = modifierMail;
+    return this.updateOrg(id, org);
+  }
+
+  async validateDtoRequest(dto) {
     await this.checkPropertyExists("orgName", dto.orgName, "");
     await this.checkPropertyExists("orgWebsite", dto.orgWebsite, "Website");
     await this.checkPropertyExists("orgEmail", dto.orgEmail, "Email address");
@@ -37,6 +43,21 @@ export class OrganizationService {
         this.logger.error(errMsg);
         throw new AppConflictException(errMsg);
       }
+    }
+  }
+
+  async updateOrg(id, org) {
+    try {
+      return await this.prismaService.organization.update({
+        where: { id },
+        data: {
+          ...org
+        }
+      });
+    } catch (e) {
+      const msg = `Error updating Organization ${org.orgName}`;
+      this.logger.error(msg);
+      throw new AppConflictException(AppConst.error, { context: msg });
     }
   }
 

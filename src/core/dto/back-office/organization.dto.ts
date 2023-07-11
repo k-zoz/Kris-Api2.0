@@ -26,3 +26,29 @@ export class CreateOrgDto extends BaseDto {
   createdBy:string;
   modifiedBy:string
 }
+
+
+export class EditOrgDto extends BaseDto {
+  @IsOptional()
+  orgName: string;
+  @IsOptional()
+  orgWebsite: string;
+  @IsOptional()
+  @IsEmail()
+  orgEmail: string;
+  @IsOptional()
+  orgAddress: string;
+  @IsOptional()
+  orgNumber:string;
+  @IsOptional()
+  orgAddress2 ?: string;
+  @IsOptional()
+  orgState: string;
+  @IsOptional()
+  orgCountry: string;
+  @IsOptional()
+  orgRCnumber: string;
+  @IsOptional()
+  orgIndustry: string;
+  modifiedBy:string
+}
