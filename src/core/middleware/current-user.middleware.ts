@@ -1,43 +1,48 @@
 import { Injectable, NestMiddleware } from "@nestjs/common";
-import { NextFunction, request, Request, Response } from "express";
-import { UserService } from "@auth/user/user.service";
+import { NextFunction, Request, Response } from "express";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
-import { AuthPayload } from "@core/dto/auth/auth-payload";
+import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { AppTokenExpiredException } from "@core/exception/app-exception";
 
 @Injectable()
 export class CurrentUserMiddleware implements NestMiddleware {
-  constructor(private readonly userService: UserService,
-              private readonly jwtService: JwtService,
+  constructor(private readonly jwtService: JwtService,
               private readonly configService: ConfigService
   ) {
   }
 
+  //This middleware was created, for authorization.
+  // To  access the incoming request, the req header needs the user(payload property)
+  //It also need the Authorization and Bearer from the raw headers of the incoming request
+  // It splits the Bearer from the signed token
+  //Verifies the token
+  //then set the token as payload for the jwt strategy to use
   async use(req: Request, res: Response, next: NextFunction) {
-    //so this middleware was created because, for authorization to make a request, the req header needs the user(payload property)
-    // it took the property, then split the Bearer from the signed token
-    //verified the token
-    //set the token as payload for the jwt strategy to use
     const payload = req as any;
     const authPayload = new AuthPayload();
-    const request1 = payload.rawHeaders;
+    const request = payload.rawHeaders;
 
     // Loop through the array and check for strings starting with 'Bearer'
-    let bearerString:string;
-    for (const str of request1) {
-      if (str.startsWith('Bearer')) {
+    let bearerString: string;
+    for (const str of request) {
+      if (str.startsWith("Bearer")) {
         bearerString = str;
         break; // Exit the loop after finding the first match
       }
     }
 
-    if(!bearerString){
-      throw new AppTokenExpiredException("Token not provided. Kindly sign in");
-    }else {
-      const bearerStringSplit = bearerString.split(" ")
-      const token = bearerStringSplit[1]
-      payload.authPayload = await this.jwtService.verify(token, { secret: this.configService.get("ACCESS_TOKEN_SECRET") });
+    if (!bearerString) {
+      throw new AppTokenExpiredException("Token not provided. Kindly sign in.");
+    } else {
+      try {
+        const bearerStringSplit = bearerString.split(" ");
+        const token = bearerStringSplit[1];
+        payload.authPayload = await this.jwtService.verify(token, { secret: this.configService.get("accessTokenSecret") });
+      } catch (err) {
+        throw new AppTokenExpiredException("Invalid or Expired token! Kindly sign in.");
+      }
+
     }
     next();
   }

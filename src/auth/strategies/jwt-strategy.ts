@@ -6,7 +6,7 @@ import { ConfigService } from "@nestjs/config";
 import { JwtPayload } from "@auth/model/jwt-payload";
 import { Request } from "express";
 import { UserService } from "@auth/user/user.service";
-import { AuthPayload } from "@core/dto/auth/auth-payload";
+import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { AppTokenExpiredException } from "@core/exception/app-exception";
 
 @Injectable()
@@ -27,8 +27,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const expiry = exp * 1000;
     if (Date.now() > expiry) {
       throw new AppTokenExpiredException();
-      //TODO work on the middleware , to give a custom msg if the token is expired.
-      //TODO the middleware receives and verifies the token first that's why
     }
     return { email, role };
   }

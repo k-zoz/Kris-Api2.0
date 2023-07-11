@@ -1,6 +1,6 @@
 import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from "@nestjs/common";
 import { Observable, tap } from "rxjs";
-import { AuthPayload } from "@core/dto/auth/auth-payload";
+import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 
 @Injectable()
 export class AppInterceptor implements NestInterceptor {

@@ -7,7 +7,7 @@ import { AppTokenExpiredException, AppUnauthorizedException } from "@core/except
 import { JwtPayload } from "@auth/model/jwt-payload";
 import { TokenService } from "@auth/token/token.service";
 import { JwtService } from "@nestjs/jwt";
-import { CreateSuperUserDto } from "@core/dto/auth/user-dto";
+import { CreateSuperUserDto } from "@core/dto/auth/user.dto";
 
 @Injectable()
 export class AuthService {

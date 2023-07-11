@@ -6,7 +6,7 @@ import {
   UpdateBackOfficeProfile,
   UpdateBackOfficeUserRole,
   UserDto
-} from "@core/dto/auth/user-dto";
+} from "@core/dto/auth/user.dto";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { prismaExclude } from "@prisma/prisma-utils";
 import { UtilService } from "@core/utils/util.service";
@@ -14,6 +14,8 @@ import { AppConst } from "@core/const/app.const";
 import { UserRoleEnum } from "@core/enum/user-role-enum";
 import { SearchRequest } from "@core/model/search-request";
 import { Prisma } from "@prisma/client";
+import { CodeValue } from "@core/dto/global/code-value";
+import { EnumValues } from "enum-values";
 
 @Injectable()
 export class UserService implements OnModuleInit {
@@ -321,7 +323,9 @@ export class UserService implements OnModuleInit {
     }
   }
 
-
+  roles(): Array<CodeValue> {
+    return EnumValues.getNamesAndValues(UserRoleEnum).map(value => CodeValue.of(value.name, value.value as string))
+  }
   
 
 }

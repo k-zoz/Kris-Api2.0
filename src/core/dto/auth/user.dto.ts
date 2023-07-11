@@ -1,4 +1,4 @@
-import { BaseDto } from "@core/dto/global/base-dto";
+import { BaseDto } from "@core/dto/global/base.dto";
 import { IsEmail, IsNotEmpty, IsOptional, IsString, IsStrongPassword } from "class-validator";
 import { Transform } from "class-transformer";
 import { IsValidBackOfficeRole } from "@core/validators/back-office-validator";

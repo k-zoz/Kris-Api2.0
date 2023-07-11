@@ -7,15 +7,15 @@ import {
   UpdateBackOfficeProfile,
   UpdateBackOfficeUserPassword,
   UpdateBackOfficeUserRole
-} from "@core/dto/auth/user-dto";
+} from "@core/dto/auth/user.dto";
 import { RolesGuard } from "@core/guard/roles.guard";
 import { Permission } from "@core/decorator/roles.decorator";
 import { GetUser } from "@auth/model/get-user.decorator";
-import { AuthPayload } from "@core/dto/auth/auth-payload";
+import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { UserRoleEnum } from "@core/enum/user-role-enum";
 import { UserService } from "@auth/user/user.service";
 import { SearchRequest } from "@core/model/search-request";
-import { AppService } from "../../app.service";
+
 
 @Controller("users")
 @UseGuards(AuthGuard())
@@ -23,7 +23,6 @@ import { AppService } from "../../app.service";
 export class UserController extends BaseController {
   constructor(private readonly authService: AuthService,
               private readonly userService: UserService,
-              private readonly appService: AppService
   ) {
     super();
   }
@@ -31,7 +30,7 @@ export class UserController extends BaseController {
   @Get("roles")
   @Permission(UserRoleEnum.SUPER_ADMIN)
   allRoles() {
-    return this.response({ payload: this.appService.roles() });
+    return this.response({ payload: this.userService.roles() });
   }
 
   @Post("onboard")
@@ -90,7 +89,7 @@ export class UserController extends BaseController {
 
   @Post()
   @Permission(UserRoleEnum.SUPER_ADMIN)
-  async getAllUsers(@Body(ValidationPipe) searchRequest: SearchRequest) {
+  async allUsers(@Body(ValidationPipe) searchRequest: SearchRequest) {
     return this.response({
       payload: await this.userService.findAllUsers(searchRequest)
     });
@@ -103,11 +102,11 @@ export class UserController extends BaseController {
   }
 
 
-  //Testing
-  @Get("onboarders")
-  @Permission(UserRoleEnum.STAFF)
-  async getOnboarders(@GetUser() payload: AuthPayload) {
-    console.log(payload);
-  }
+  // //Testing
+  // @Get("onboarders")
+  // @Permission(UserRoleEnum.STAFF)
+  // async getOnboarders(@GetUser() payload: AuthPayload) {
+  //   console.log(payload);
+  // }
 }
 

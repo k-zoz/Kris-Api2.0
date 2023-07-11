@@ -31,7 +31,40 @@ model User {
 
 enum Role {
   SUPER_ADMIN
-  ADMIN
   SUPPORT
   STAFF
+}
+
+model Organization {
+  id          String  @id @default(uuid())
+  orgName     String  @unique
+  orgWebsite  String  @unique
+  orgEmail    String  @unique
+  orgNumber   String  @unique
+  orgAddress  String
+  orgAddress2 String?
+  orgState    String
+  orgCountry  String
+  orgRCnumber String  @unique
+  orgIndustry String
+
+  employees  Employee[]
+  createdBy  String?
+  modifiedBy String?
+
+  createdDate  DateTime @default(now())
+  modifiedDate DateTime @updatedAt
+
+  @@unique([orgName, orgWebsite, orgEmail, orgNumber, orgRCnumber])
+}
+
+model Employee {
+  id       String @id @default(uuid())
+  empEmail String @unique
+
+  organizationId String
+  Organization   Organization @relation(fields: [organizationId], references: [id])
+
+  createdDate  DateTime @default(now())
+  modifiedDate DateTime @updatedAt
 }
