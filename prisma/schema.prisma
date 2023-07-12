@@ -58,13 +58,31 @@ model Organization {
   @@unique([orgName, orgWebsite, orgEmail, orgNumber, orgRCnumber])
 }
 
+enum Employee_Role {
+  MANAGEMENT
+  HUMAN_RESOURCE
+  FINANCE
+  REGULAR
+}
+
 model Employee {
-  id       String @id @default(uuid())
-  empEmail String @unique
+  id             String @id @default(uuid())
+  empEmail       String @unique
+  empFirstName   String
+  empLastName    String
+  empIDNumber    String @unique
+  empPhoneNumber String @unique
+
+  emp_role Employee_Role[]
+
+  createdBy  String?
+  modifiedBy String?
 
   organizationId String
   Organization   Organization @relation(fields: [organizationId], references: [id])
 
   createdDate  DateTime @default(now())
   modifiedDate DateTime @updatedAt
+
+  @@unique([empEmail, empIDNumber, empPhoneNumber])
 }

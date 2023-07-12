@@ -19,7 +19,7 @@ export class RolesGuard implements CanActivate {
       context.getClass()
     ]);
 
-    //if there is no role decorator on the controller, it means it's accessible to all
+    //if there is no Permission decorator on the controller, it means it's accessible to all
     if (!requiredRoles) {
       return true;
     }

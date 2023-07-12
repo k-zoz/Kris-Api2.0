@@ -2,7 +2,6 @@ import { registerDecorator, ValidationOptions, ValidatorConstraint, ValidatorCon
 
 export interface BackOfficeRole {
   SUPER_ADMIN: string;
-  ADMIN: string;
   SUPPORT: string;
   STAFF: string;
 }
@@ -12,7 +11,6 @@ export class IsValidBackOfficeRoleConstraint implements ValidatorConstraintInter
   validate(value: any, args: ValidationArguments) {
     const backOfficeRoles: BackOfficeRole = {
       SUPER_ADMIN: 'SUPER_ADMIN',
-      ADMIN: 'ADMIN',
       SUPPORT: 'SUPPORT',
       STAFF: 'STAFF',
     };

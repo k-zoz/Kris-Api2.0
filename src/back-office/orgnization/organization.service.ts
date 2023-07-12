@@ -1,97 +1,45 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
-import { CreateOrgDto, EditOrgDto } from "@core/dto/back-office/organization.dto";
+import { CreateOrgDto, EditOrgDto } from "@core/dto/global/organization.dto";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { AppConst } from "@core/const/app.const";
 import { SearchRequest } from "@core/model/search-request";
+import { EmployeeDto } from "@core/dto/global/employee.dto";
+import { OrganizationHelperService } from "@back-office/orgnization/helper-services/organization-helper.service";
 
 @Injectable()
 export class OrganizationService {
   private readonly logger = new Logger(OrganizationService.name);
 
-  constructor(private readonly prismaService: PrismaService) {
+  constructor(private readonly prismaService: PrismaService,
+              private readonly orgHelperService:OrganizationHelperService,
+              ) {
   }
 
   async onboardOrganization(org: CreateOrgDto, creatorEmail: string) {
-    await this.validateDtoRequest(org);
+    await this.orgHelperService.validateDtoRequest(org);
     org.createdBy = creatorEmail;
-    return this.saveOrganization(org);
+    return this.orgHelperService.saveOrganization(org);
   }
 
 
   async editOrganization(org: EditOrgDto, id, modifierMail: string) {
-    await this.validateDtoRequest(org);
+    await this.orgHelperService.validateDtoRequest(org);
     org.modifiedBy = modifierMail;
-    return this.updateOrg(id, org);
+    return this.orgHelperService.updateOrg(id, org);
   }
 
-  async validateDtoRequest(dto) {
-    await this.checkPropertyExists("orgName", dto.orgName, "");
-    await this.checkPropertyExists("orgWebsite", dto.orgWebsite, "Website");
-    await this.checkPropertyExists("orgEmail", dto.orgEmail, "Email address");
-    await this.checkPropertyExists("orgNumber", dto.orgNumber, "Phone number");
-    await this.checkPropertyExists("orgRCnumber", dto.orgRCnumber, "RC Number");
+  async createOrgEmployee(orgEmp: EmployeeDto, orgID, creatorMail) {
+    await this.orgHelperService.validateRequest(orgEmp);
+    await  this.findOrgByID(orgID)
+    orgEmp.createdBy = creatorMail;
+    return this.orgHelperService.createEmployee(orgEmp, orgID);
   }
-
-  async checkPropertyExists(propertyName, propertyValue, propertyDescription) {
-    if (propertyValue) {
-      const result = await this.prismaService.organization.findUnique({
-        where: { [propertyName]: propertyValue }
-      });
-      if (result) {
-        const errMsg = `${propertyDescription} ${result[propertyName]} already exists`;
-        this.logger.error(errMsg);
-        throw new AppConflictException(errMsg);
-      }
-    }
-  }
-
-  async updateOrg(id, org) {
-    try {
-      return await this.prismaService.organization.update({
-        where: { id },
-        data: {
-          ...org
-        }
-      });
-    } catch (e) {
-      const msg = `Error updating Organization ${org.orgName}`;
-      this.logger.error(msg);
-      throw new AppConflictException(AppConst.error, { context: msg });
-    }
-  }
-
-
-  async saveOrganization(org) {
-    try {
-      const saved = await this.prismaService.organization.create({
-        data: {
-          orgName: org.orgName,
-          orgEmail: org.orgEmail,
-          orgNumber: org.orgNumber,
-          orgWebsite: org.orgWebsite,
-          orgRCnumber: org.orgRCnumber,
-          orgAddress: org.orgAddress,
-          orgState: org.orgState,
-          orgCountry: org.orgCountry,
-          orgIndustry: org.orgIndustry,
-          createdBy: org.createdBy
-        }
-      });
-      this.logger.log(`Organization ${saved.orgName} saved successfully`);
-      return `${saved.orgName} saved successfully`;
-    } catch (e) {
-      const msg = `Error creating Organization ${org.orgName}`;
-      this.logger.error(msg);
-      throw new AppConflictException(AppConst.error, { context: msg });
-    }
-  }
-
 
   async findOrgByID(id) {
     const found = await this.prismaService.organization.findFirst({ where: { id } });
     if (!found) {
-      const msg = `Organization with id ${id} not found`;
+      const msg = `Organization with id ${id} does not exist`;
       this.logger.error(msg);
       throw new AppNotFoundException(msg);
     }
