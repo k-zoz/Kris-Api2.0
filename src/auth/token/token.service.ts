@@ -12,15 +12,15 @@ export class TokenService {
   ) {
   }
 
-  async generateAccessToken(payload: JwtPayload) {
+  async generateAccessToken(payload: any) {
     return this.jwtService.signAsync(payload);
   }
 
-  async generateRefreshToken(payload: JwtPayload) {
+  async generateRefreshToken(payload: any) {
     return this.jwtService.sign(payload, {
       secret: this.configService.get("REFRESH_TOKEN_SECRET"),
       expiresIn: this.configService.get("REFRESH_TOKEN_LIFETIME"),
-      jwtid: payload.email
+      // jwtid: payload.email
     });
   }
 

@@ -279,16 +279,10 @@ export class UserService implements OnModuleInit {
   }
 
   async findAndExcludeFields(user) {
-    const found = await this.prismaService.user.findUniqueOrThrow({
+    return this.prismaService.user.findUniqueOrThrow({
       where: { email: user.email },
       select: prismaExclude("User", ["password", "refreshToken"])
     });
-    if (!found) {
-      const errMessage = `Email ${user.email} not found`;
-      this.logger.error(errMessage);
-      throw new AppNotFoundException(errMessage);
-    }
-    return found;
   }
 
   async validatePassword(user, password: string): Promise<boolean> {
@@ -324,8 +318,8 @@ export class UserService implements OnModuleInit {
   }
 
   roles(): Array<CodeValue> {
-    return EnumValues.getNamesAndValues(UserRoleEnum).map(value => CodeValue.of(value.name, value.value as string))
+    return EnumValues.getNamesAndValues(UserRoleEnum).map(value => CodeValue.of(value.name, value.value as string));
   }
-  
+
 
 }

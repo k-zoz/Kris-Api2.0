@@ -5,3 +5,10 @@ export interface JwtPayload {
   readonly exp?: number;
   readonly refreshToken?: string;
 }
+
+export interface EmpJwtPayload {
+  readonly empEmail?:string;
+  readonly emp_role?:string;
+  readonly iat?: number;
+  readonly exp?: number;
+}

@@ -2,10 +2,10 @@ import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
 import { CreateOrgDto, EditOrgDto } from "@core/dto/global/organization.dto";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
-import { AppConst } from "@core/const/app.const";
 import { SearchRequest } from "@core/model/search-request";
 import { EmployeeDto } from "@core/dto/global/employee.dto";
 import { OrganizationHelperService } from "@back-office/orgnization/helper-services/organization-helper.service";
+import * as argon from "argon2";
 
 @Injectable()
 export class OrganizationService {
@@ -33,7 +33,9 @@ export class OrganizationService {
     await this.orgHelperService.validateRequest(orgEmp);
     await  this.findOrgByID(orgID)
     orgEmp.createdBy = creatorMail;
-    return this.orgHelperService.createEmployee(orgEmp, orgID);
+    orgEmp.empPassword = await argon.hash(orgEmp.empPassword)
+    const employee = await this.orgHelperService.createEmployee(orgEmp, orgID);
+    return this.orgHelperService.findAndExcludeFields(employee)
   }
 
   async findOrgByID(id) {
@@ -75,5 +77,4 @@ export class OrganizationService {
   }
 
 }
-
 

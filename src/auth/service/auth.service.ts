@@ -32,7 +32,7 @@ export class AuthService {
 
 
   async onboardBackOfficeUser(onboard:CreateSuperUserDto, backOfficeUserEmail){
-    return  await this.userService.create(onboard,backOfficeUserEmail )
+    return  await this.userService.create(onboard,backOfficeUserEmail)
   }
 
   private async authenticateBackOfficeUser(user) {

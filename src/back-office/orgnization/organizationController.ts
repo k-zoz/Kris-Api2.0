@@ -45,7 +45,6 @@ export class OrganizationController extends BaseController {
     });
   }
 
-
   @Post()
   @Permission(UserRoleEnum.SUPPORT)
   async allOrganizations(@Body(ValidationPipe) searchRequest: SearchRequest) {

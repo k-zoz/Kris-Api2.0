@@ -32,6 +32,9 @@
       ],
       "@back-office/*": [
         "back-office/*"
+      ],
+      "@organization/*": [
+        "organization/*"
       ]
     }
   }

@@ -1,7 +1,8 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
-import { AppConflictException } from "@core/exception/app-exception";
+import { AppConflictException, AppNotFoundException } from "@core/exception/app-exception";
 import { AppConst } from "@core/const/app.const";
+import { prismaExclude } from "@prisma/prisma-utils";
 
 @Injectable()
 export class OrganizationHelperService {
@@ -10,21 +11,23 @@ export class OrganizationHelperService {
   constructor(private readonly prismaService: PrismaService) {
   }
 
-
   async createEmployee(orgEmp, orgID) {
     try {
       return await this.prismaService.employee.create({
         data: {
           empEmail: orgEmp.empEmail,
+          empFirstName: orgEmp.empFirstName,
+          empPassword: orgEmp.empPassword,
+          empLastName: orgEmp.empLastName,
+          empPhoneNumber: orgEmp.empPhoneNumber,
+          empIDNumber: orgEmp.empIDNumber,
+          emp_role: orgEmp.employee_role,
           createdBy: orgEmp.createdBy,
           Organization: {
             connect: {
               id: orgID
             }
           }
-        },
-        include: {
-          Organization: true
         }
       });
     } catch (e) {
@@ -52,7 +55,7 @@ export class OrganizationHelperService {
         }
       });
       this.logger.log(`Organization ${saved.orgName} saved successfully`);
-      return `${saved.orgName} saved successfully`;
+      return saved;
     } catch (e) {
       const msg = `Error creating Organization ${org.orgName}`;
       this.logger.error(msg);
@@ -75,9 +78,9 @@ export class OrganizationHelperService {
     }
   }
 
-// for the Employee model in prisma
-  //all the properties to be checked here are unique properties, so it checks to see if these unique properties have already been taken
-  //property name a.k.a first argument in the checkEmpPropertyExists function must tally with how the name is saved in the Employee model in prisma
+  //For the Employee model in prisma.
+  //All the properties to be checked here are unique properties, so it checks to see if these unique properties have already been taken.
+  //Property name a.k.a first argument in the checkEmpPropertyExists function must tally with how the name is saved in the Employee model in prisma.
   async validateRequest(dto) {
     await this.checkEmpPropertyExists("empEmail", dto.empEmail, "Email address");
     await this.checkEmpPropertyExists("empIDNumber", dto.empIDNumber, "ID Number");
@@ -97,10 +100,9 @@ export class OrganizationHelperService {
     }
   }
 
-  // for the Organization model in prisma
-  //all the properties to be checked here are unique properties, so it checks to see if these unique properties have already been taken
-  //property name a.k.a first argument in the checkEmpPropertyExists function must tally with how the name is saved in the Organization model in prisma
-
+  //For the Organization model in prisma.
+  //All the properties to be checked here are unique properties, so it checks to see if these unique properties have already been taken.
+  //Property name a.k.a first argument in the checkEmpPropertyExists function must tally with how the name is saved in the Organization model in prisma.
   async validateDtoRequest(dto) {
     await this.checkOrgPropertyExists("orgName", dto.orgName, "");
     await this.checkOrgPropertyExists("orgWebsite", dto.orgWebsite, "Website");
@@ -121,4 +123,14 @@ export class OrganizationHelperService {
       }
     }
   }
+
+
+  async findAndExcludeFields(user) {
+    return this.prismaService.employee.findUniqueOrThrow({
+      where: { empEmail: user.empEmail },
+      select: prismaExclude("Employee", ["empPassword"])
+    });
+  }
+
+
 }

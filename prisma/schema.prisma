@@ -66,12 +66,14 @@ enum Employee_Role {
 }
 
 model Employee {
-  id             String @id @default(uuid())
-  empEmail       String @unique
+  id             String  @id @default(uuid())
+  empEmail       String  @unique
+  empPassword    String
   empFirstName   String
   empLastName    String
-  empIDNumber    String @unique
-  empPhoneNumber String @unique
+  empIDNumber    String  @unique
+  empPhoneNumber String  @unique
+  refreshToken   String?
 
   emp_role Employee_Role[]
 
