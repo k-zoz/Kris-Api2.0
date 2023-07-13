@@ -41,16 +41,11 @@ export class Employee {
 }
 
 
-export class ChangeEmployeeRoleDto  {
+export class RoleToEmployee {
   @IsNotEmpty({ message: "Employee role is required" })
   @IsValidEmployeeRole({ message: "Role must be a valid employee role!" })
   employee_role: any;
   modifiedBy?: string;
 }
 
-export class AddRolesToEmployee {
-  @IsNotEmpty({ message: "Employee role is required" })
-  @IsValidEmployeeRole({ message: "Role must be a valid employee role!" })
-  employee_role: any;
-  modifiedBy?: string;
-}
+

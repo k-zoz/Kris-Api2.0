@@ -7,10 +7,13 @@ import { EmployeeRoleGuard } from "@core/guard/employee-role.guard";
 import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
-import { AddRolesToEmployee, ChangeEmployeeRoleDto, CreateEmployeeDto } from "@core/dto/global/employee.dto";
-import { AuthMsg } from "@core/const/security-msg-const";
+import {
+  CreateEmployeeDto,
+  RoleToEmployee
+} from "@core/dto/global/employee.dto";
 import { LocaleService } from "@locale/locale.service";
 import { SearchRequest } from "@core/model/search-request";
+import { AuthMsg } from "@core/const/security-msg-const";
 
 
 @Controller("employee")
@@ -42,7 +45,7 @@ export class EmployeeController extends BaseController {
   async changeEmployeeRole(@GetUser() payload: AuthPayload,
                            @Param("orgID") orgID: string,
                            @Param("empID") empID: string,
-                           @Body(ValidationPipe) request: ChangeEmployeeRoleDto
+                           @Body(ValidationPipe) request: RoleToEmployee
   ) {
     return this.response({
       message: "Changes saved successfully",
@@ -55,12 +58,27 @@ export class EmployeeController extends BaseController {
   async addRoleToEmployee(@GetUser() payload: AuthPayload,
                           @Param("orgID") orgID: string,
                           @Param("empID") empID: string,
-                          @Body(ValidationPipe) request:AddRolesToEmployee
-  ){
+                          @Body(ValidationPipe) request: RoleToEmployee
+  ) {
     return this.response({
+      message: AuthMsg.ROLE_ADDED,
       payload: await this.employeeService.addMoreRolesToEmployee(request, orgID, empID, payload.email)
-    })
+    });
   }
+
+  @Post("/:orgID/profile/:empID/deleteRole")
+  @EmpPermission(EmployeeRoleEnum.MANAGEMENT)
+  async deleteRoleFromEmployee(@GetUser() payload: AuthPayload,
+                               @Param("orgID") orgID: string,
+                               @Param("empID") empID: string,
+                               @Body(ValidationPipe) request: RoleToEmployee
+  ) {
+    return this.response({
+      message: AuthMsg.ROLE_REMOVED_SUCCESSFULLY,
+      payload: await this.employeeService.removeRoleFrmEmp(request, orgID, empID, payload.email)
+    });
+  }
+
 
   @Get("profile")
   employeeProfile(@GetUser() payload: AuthPayload) {
@@ -71,8 +89,8 @@ export class EmployeeController extends BaseController {
   @Post("/:orgID/allEmployees")
   @EmpPermission(EmployeeRoleEnum.MANAGEMENT)
   async allEmployees(@Body(ValidationPipe) searchRequest: SearchRequest,
-                 @Param("orgID") orgID:string,
-                 ) {
+                     @Param("orgID") orgID: string
+  ) {
     return this.response({
       payload: await this.employeeService.findAllEmployees(searchRequest, orgID)
     });

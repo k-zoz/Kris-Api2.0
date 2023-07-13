@@ -62,6 +62,7 @@ export const AuthMsg = {
   USER_NOT_FOUND: "User not found",
   ROLE_NOT_UPDATED: "Error changing role",
   ROLE_UPDATED: "Role changed Successfully",
+  ROLE_REMOVED_SUCCESSFULLY:"Role removed successfully",
   ROLE_ADDED:"Role added successfully",
   CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE: "Cannot assign employee management role. Contact Administration",
   CANNOT_CHANGE_YOUR_ROLE: "You cannot change your role",

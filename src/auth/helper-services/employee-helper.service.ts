@@ -3,7 +3,7 @@ import { PrismaService } from "@prisma/prisma.service";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { AppConst } from "@core/const/app.const";
 import { prismaExclude } from "@prisma/prisma-utils";
-import { ChangeEmployeeRoleDto, Employee } from "@core/dto/global/employee.dto";
+import { RoleToEmployee, Employee } from "@core/dto/global/employee.dto";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { LocaleService } from "@locale/locale.service";
 
@@ -79,7 +79,7 @@ export class EmployeeHelperService {
     });
   }
 
-  async changeRole(request: ChangeEmployeeRoleDto, empID: string) {
+  async changeRole(request: RoleToEmployee, empID: string) {
     try {
       await this.prismaService.employee.update({
         where: { id: empID },
@@ -96,7 +96,6 @@ export class EmployeeHelperService {
   }
 
   async addRolesToEmployee(request, empID) {
-    console.log(request);
     try {
       await this.prismaService.$transaction(async (tx) => {
         const employee = await tx.employee.findUnique({
@@ -114,7 +113,8 @@ export class EmployeeHelperService {
           data: {
             role: {
               set: [...employee.role, request.employee_role]
-            }
+            },
+            modifiedBy: request.modifiedBy
           }
         });
       });
@@ -122,6 +122,35 @@ export class EmployeeHelperService {
     } catch (e) {
       this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: AuthMsg.ROLE_NOT_UPDATED });
+    }
+  }
+
+  async removeRole(request, empID) {
+    try {
+      const employee = await this.prismaService.employee.findUnique({
+        where: {
+          id: empID
+        },
+        select: {
+          role: true
+        }
+      });
+      const updatedRole = employee.role.filter(role => role !== request.employee_role);
+      const [updatedEmployee] = await this.prismaService.$transaction([
+        this.prismaService.employee.update({
+          where: {
+            id: empID
+          },
+          data: {
+            role: {
+              set: updatedRole
+            }
+          }
+        })
+      ]);
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException(AppConst.error);
     }
   }
 

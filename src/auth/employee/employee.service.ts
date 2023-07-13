@@ -4,7 +4,7 @@ import { PrismaService } from "@prisma/prisma.service";
 import * as argon from "argon2";
 import { prismaExclude } from "@prisma/prisma-utils";
 import { EmployeeHelperService } from "@auth/helper-services/employee-helper.service";
-import { AddRolesToEmployee, ChangeEmployeeRoleDto, CreateEmployeeDto } from "@core/dto/global/employee.dto";
+import { RoleToEmployee, CreateEmployeeDto } from "@core/dto/global/employee.dto";
 import { UtilService } from "@core/utils/util.service";
 import { OrganizationService } from "@back-office/orgnization/organization.service";
 import { AppConst } from "@core/const/app.const";
@@ -46,7 +46,7 @@ export class EmployeeService {
   }
 
 
-  async changeEmployeeRole(request: ChangeEmployeeRoleDto, orgID: string, empID: string, modifierEmail: any) {
+  async changeEmployeeRole(request: RoleToEmployee, orgID: string, empID: string, modifierEmail: any) {
     await this.organizationService.findOrgByID(orgID);
     const employee = await this.employeeHelperService.findEmpById(empID);
     await this.utilService.compareEmails(modifierEmail, employee.email);
@@ -56,7 +56,7 @@ export class EmployeeService {
   }
 
 
-  async addMoreRolesToEmployee(request: AddRolesToEmployee, orgID: string, empID: string, modifierEmail: string) {
+  async addMoreRolesToEmployee(request: RoleToEmployee, orgID: string, empID: string, modifierEmail: string) {
     await this.organizationService.findOrgByID(orgID);
     const employee = await this.employeeHelperService.findEmpById(empID);
     await this.utilService.compareEmails(modifierEmail, employee.email);
@@ -64,7 +64,14 @@ export class EmployeeService {
     await this.employeeHelperService.checkMaximumNumOfRoles(employee);
     request.modifiedBy = modifierEmail;
     return this.employeeHelperService.addRolesToEmployee(request, empID);
+  }
 
+  async removeRoleFrmEmp(request: RoleToEmployee, orgID: string, empID: string, modifierEmail) {
+    await this.organizationService.findOrgByID(orgID);
+    const employee = await this.employeeHelperService.findEmpById(empID);
+    await this.utilService.compareEmails(modifierEmail, employee.email);
+    request.modifiedBy = modifierEmail;
+    return this.employeeHelperService.removeRole(request, empID)
   }
 
   async validatePassword(emp, password: string): Promise<boolean> {
@@ -79,15 +86,17 @@ export class EmployeeService {
   };
 
   async findAllEmployees(request: SearchRequest, orgID) {
-    await this.organizationService.findOrgByID(orgID)
+    await this.organizationService.findOrgByID(orgID);
     const { skip, take } = request;
     try {
       const [employees, total] = await this.prismaService.$transaction([
           this.prismaService.organization.findFirst({
             where: { id: orgID },
-            select: { employees: {
-              select:prismaExclude("Employee", ["password", "refreshToken"])
-            } },
+            select: {
+              employees: {
+                select: prismaExclude("Employee", ["password", "refreshToken"])
+              }
+            },
             skip,
             take
           }),
