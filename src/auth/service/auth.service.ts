@@ -46,7 +46,7 @@ export class AuthService {
   }
 
   async refreshToken(refreshToken: string) {
-    const token = this.jwtService.verify(refreshToken, { secret: this.configService.get("REFRESH_TOKEN_SECRET") });
+    const token = this.jwtService.verify(refreshToken, { secret: this.configService.get("refreshTokenSecret") });
 
     /// token belongs to user
     const user = await this.userService.findByEmail(token.jwtid);

@@ -25,6 +25,7 @@ export class OrganizationService {
 
   async editOrganization(org: EditOrgDto, id, modifierMail: string) {
     await this.orgHelperService.validateDtoRequest(org);
+    await this.findOrgByID(id)
     org.modifiedBy = modifierMail;
     return this.orgHelperService.updateOrg(id, org);
   }

@@ -10,7 +10,7 @@ import {
 } from "@core/dto/auth/user.dto";
 import { RolesGuard } from "@core/guard/roles.guard";
 import { Permission } from "@core/decorator/roles.decorator";
-import { GetUser } from "@auth/model/get-user.decorator";
+import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { UserRoleEnum } from "@core/enum/user-role-enum";
 import { UserService } from "@auth/user/user.service";

@@ -3,17 +3,18 @@ import { AppNotFoundException } from "@core/exception/app-exception";
 import { PrismaService } from "@prisma/prisma.service";
 import * as argon from "argon2";
 import { prismaExclude } from "@prisma/prisma-utils";
+import { EmployeeHelperService } from "@auth/helper-services/employee-helper.service";
 
 @Injectable()
 export class EmployeeService {
 
   private readonly logger = new Logger(EmployeeService.name);
 
-  constructor(private prismaService: PrismaService) {
-  }
+  constructor(private readonly prismaService: PrismaService,
+              private readonly employeeHelperService:EmployeeHelperService) {}
 
   async findFirst(email: string) {
-    const user = await this.prismaService.employee.findFirst({ where: { empEmail: email } });
+    const user = await this.prismaService.employee.findFirst({ where: {  email } });
     if (!user) {
       const errMessage = `Invalid email or password`;
       this.logger.error(errMessage);
@@ -24,22 +25,21 @@ export class EmployeeService {
 
 
   async validatePassword(emp, password: string): Promise<boolean> {
-    return await argon.verify(emp.empPassword, password);
+    return await argon.verify(emp.password, password);
   }
 
   async setUserRefreshToken(email: string, refreshToken) {
     await this.prismaService.employee.update({
-      where: { empEmail: email },
-      data: {
-        refreshToken
-      }
+      where: {  email },
+      data: { refreshToken }
     });
-  }
+  };
+
 
   async findAndExcludeFields(employee) {
     return this.prismaService.employee.findUniqueOrThrow({
-      where: { empEmail: employee.empEmail },
-      select: prismaExclude("Employee", ["empPassword", "refreshToken"])
+      where: { email: employee.email },
+      select: prismaExclude("Employee", ["password", "refreshToken"]),
     });
   }
 }

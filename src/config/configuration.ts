@@ -6,5 +6,6 @@ export default () => ({
   accessTokenSecret: process.env.ACCESS_TOKEN_SECRET,
   accessTokenLifetime:process.env.ACCESS_TOKEN_LIFETIME,
   refreshTokenSecret:process.env.REFRESH_TOKEN_SECRET,
-  refreshTokenLifetime:process.env.REFRESH_TOKEN_LIFETIME
+  refreshTokenLifetime:process.env.REFRESH_TOKEN_LIFETIME,
+  privateKey: process.env.PRIVATE_KEY
 })

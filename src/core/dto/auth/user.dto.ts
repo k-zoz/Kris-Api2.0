@@ -33,15 +33,15 @@ export class CreateSuperUserDto extends BaseDto {
   @IsNotEmpty({ message: "Role is required" })
   @IsValidBackOfficeRole()
   role: string;
-
 }
+
 
 export class UpdateBackOfficeUserRole {
   @IsNotEmpty({ message: "Role is required" })
   @IsValidBackOfficeRole({ message: "Role must be a valid back office role" })
   role: string;
-
 }
+
 
 export class UpdateBackOfficeUserPassword {
   @IsNotEmpty({ message: "Password is required" })

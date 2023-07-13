@@ -20,7 +20,7 @@ export class TokenService {
     return this.jwtService.sign(payload, {
       secret: this.configService.get("REFRESH_TOKEN_SECRET"),
       expiresIn: this.configService.get("REFRESH_TOKEN_LIFETIME"),
-      // jwtid: payload.email
+      jwtid: payload.email
     });
   }
 

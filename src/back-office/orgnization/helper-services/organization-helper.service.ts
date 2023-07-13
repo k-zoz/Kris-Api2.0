@@ -15,13 +15,13 @@ export class OrganizationHelperService {
     try {
       return await this.prismaService.employee.create({
         data: {
-          empEmail: orgEmp.empEmail,
-          empFirstName: orgEmp.empFirstName,
-          empPassword: orgEmp.empPassword,
-          empLastName: orgEmp.empLastName,
-          empPhoneNumber: orgEmp.empPhoneNumber,
-          empIDNumber: orgEmp.empIDNumber,
-          emp_role: orgEmp.employee_role,
+          email: orgEmp.empEmail,
+          firstname: orgEmp.empFirstName,
+          password: orgEmp.empPassword,
+          lastname: orgEmp.empLastName,
+          phoneNumber: orgEmp.empPhoneNumber,
+          idNumber: orgEmp.empIDNumber,
+          role: orgEmp.employee_role,
           createdBy: orgEmp.createdBy,
           Organization: {
             connect: {
@@ -82,9 +82,9 @@ export class OrganizationHelperService {
   //All the properties to be checked here are unique properties, so it checks to see if these unique properties have already been taken.
   //Property name a.k.a first argument in the checkEmpPropertyExists function must tally with how the name is saved in the Employee model in prisma.
   async validateRequest(dto) {
-    await this.checkEmpPropertyExists("empEmail", dto.empEmail, "Email address");
-    await this.checkEmpPropertyExists("empIDNumber", dto.empIDNumber, "ID Number");
-    await this.checkEmpPropertyExists("empPhoneNumber", dto.empPhoneNumber, "Phone Number");
+    await this.checkEmpPropertyExists("email", dto.empEmail, "Email address");
+    await this.checkEmpPropertyExists("idNumber", dto.empIDNumber, "ID Number");
+    await this.checkEmpPropertyExists("phoneNumber", dto.empPhoneNumber, "Phone Number");
   }
 
   async checkEmpPropertyExists(propertyName, propertyValue, propertyDescription) {
@@ -127,8 +127,8 @@ export class OrganizationHelperService {
 
   async findAndExcludeFields(user) {
     return this.prismaService.employee.findUniqueOrThrow({
-      where: { empEmail: user.empEmail },
-      select: prismaExclude("Employee", ["empPassword"])
+      where: { email: user.email },
+      select: prismaExclude("Employee", ["password"])
     });
   }
 

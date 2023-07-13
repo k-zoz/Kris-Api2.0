@@ -3,7 +3,7 @@ import { PrismaService } from "@prisma/prisma.service";
 import { LoginRequest } from "@auth/model/login-request";
 import { EmployeeService } from "@auth/employee/employee.service";
 import { AppUnauthorizedException } from "@core/exception/app-exception";
-import { EmpJwtPayload, JwtPayload } from "@auth/model/jwt-payload";
+import {  JwtPayload } from "@auth/model/jwt-payload";
 import { TokenService } from "@auth/token/token.service";
 
 @Injectable()
@@ -26,11 +26,11 @@ export class EmployeeAuthService {
   }
 
   private async authenticateEmployee(employee) {
-    const { empEmail } = employee;
-    const payload: EmpJwtPayload = { empEmail };
+    const { email , role} = employee;
+    const payload: JwtPayload = { email , role};
     const token = await this.tokenService.generateAccessToken(payload);
     const refreshToken = await this.tokenService.generateRefreshToken(payload);
-    await this.employeeService.setUserRefreshToken(empEmail, token);
+    await this.employeeService.setUserRefreshToken(email, token);
     const orgEmployee = await this.employeeService.findAndExcludeFields(employee);
     return { token, refreshToken, orgEmployee };
   }

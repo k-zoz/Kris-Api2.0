@@ -11,6 +11,8 @@ export class AuthController extends BaseController {
     super();
   }
 
+
+
   @Post("login")
   async login(@Body() request: LoginRequest) {
     return super.response({

@@ -4,3 +4,9 @@ export class AuthPayload {
   phoneNumber?: string;
   role?: string;
 }
+
+
+export class EmpAuthPayload {
+  empEmail?:string;
+  emp_role?:string;
+}

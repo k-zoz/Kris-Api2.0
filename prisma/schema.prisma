@@ -66,16 +66,16 @@ enum Employee_Role {
 }
 
 model Employee {
-  id             String  @id @default(uuid())
-  empEmail       String  @unique
-  empPassword    String
-  empFirstName   String
-  empLastName    String
-  empIDNumber    String  @unique
-  empPhoneNumber String  @unique
-  refreshToken   String?
+  id           String  @id @default(uuid())
+  email        String  @unique
+  password     String
+  firstname    String
+  lastname     String
+  idNumber     String  @unique
+  phoneNumber  String  @unique
+  refreshToken String?
 
-  emp_role Employee_Role[]
+  role Employee_Role[]
 
   createdBy  String?
   modifiedBy String?
@@ -86,5 +86,5 @@ model Employee {
   createdDate  DateTime @default(now())
   modifiedDate DateTime @updatedAt
 
-  @@unique([empEmail, empIDNumber, empPhoneNumber])
+  @@unique([email, idNumber, phoneNumber])
 }

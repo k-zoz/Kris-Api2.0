@@ -65,8 +65,12 @@ import { BackOfficeModule } from "@back-office/back-office.module";
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(CurrentUserMiddleware)
-      .exclude({ path: "auth/login", method: RequestMethod.POST })
-      .exclude({ path: "employee/login", method: RequestMethod.POST })
+      .exclude(
+        { path: "auth/login", method: RequestMethod.POST },
+        { path: "employee/login", method: RequestMethod.POST }
+      )
       .forRoutes({ path: "*", method: RequestMethod.ALL });
   }
 }
+
+//
