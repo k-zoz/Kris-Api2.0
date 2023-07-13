@@ -3,9 +3,10 @@ import { PrismaService } from "@prisma/prisma.service";
 import { CreateOrgDto, EditOrgDto } from "@core/dto/global/organization.dto";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { SearchRequest } from "@core/model/search-request";
-import { EmployeeDto } from "@core/dto/global/employee.dto";
+import { CreateEmployeeDto } from "@core/dto/global/employee.dto";
 import { OrganizationHelperService } from "@back-office/orgnization/helper-services/organization-helper.service";
 import * as argon from "argon2";
+import { EmployeeHelperService } from "@auth/helper-services/employee-helper.service";
 
 @Injectable()
 export class OrganizationService {
@@ -13,6 +14,7 @@ export class OrganizationService {
 
   constructor(private readonly prismaService: PrismaService,
               private readonly orgHelperService:OrganizationHelperService,
+              private readonly employeeHelperService:EmployeeHelperService
               ) {
   }
 
@@ -30,13 +32,13 @@ export class OrganizationService {
     return this.orgHelperService.updateOrg(id, org);
   }
 
-  async createOrgEmployee(orgEmp: EmployeeDto, orgID, creatorMail) {
-    await this.orgHelperService.validateRequest(orgEmp);
+  async createOrgEmployee(orgEmp: CreateEmployeeDto, orgID, creatorMail) {
+    await this.employeeHelperService.validateRequest(orgEmp);
     await  this.findOrgByID(orgID)
     orgEmp.createdBy = creatorMail;
     orgEmp.empPassword = await argon.hash(orgEmp.empPassword)
-    const employee = await this.orgHelperService.createEmployee(orgEmp, orgID);
-    return this.orgHelperService.findAndExcludeFields(employee)
+    const employee = await this.employeeHelperService.createEmployee(orgEmp, orgID);
+    return this.employeeHelperService.findAndExcludeFields(employee)
   }
 
   async findOrgByID(id) {

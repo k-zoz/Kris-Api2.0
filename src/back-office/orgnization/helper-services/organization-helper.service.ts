@@ -11,33 +11,6 @@ export class OrganizationHelperService {
   constructor(private readonly prismaService: PrismaService) {
   }
 
-  async createEmployee(orgEmp, orgID) {
-    try {
-      return await this.prismaService.employee.create({
-        data: {
-          email: orgEmp.empEmail,
-          firstname: orgEmp.empFirstName,
-          password: orgEmp.empPassword,
-          lastname: orgEmp.empLastName,
-          phoneNumber: orgEmp.empPhoneNumber,
-          idNumber: orgEmp.empIDNumber,
-          role: orgEmp.employee_role,
-          createdBy: orgEmp.createdBy,
-          Organization: {
-            connect: {
-              id: orgID
-            }
-          }
-        }
-      });
-    } catch (e) {
-      const msg = `Error creating employee ${orgEmp.empEmail}`;
-      this.logger.error(msg);
-      throw new AppConflictException(AppConst.error, { context: msg });
-    }
-  }
-
-
   async saveOrganization(org) {
     try {
       const saved = await this.prismaService.organization.create({
@@ -78,27 +51,7 @@ export class OrganizationHelperService {
     }
   }
 
-  //For the Employee model in prisma.
-  //All the properties to be checked here are unique properties, so it checks to see if these unique properties have already been taken.
-  //Property name a.k.a first argument in the checkEmpPropertyExists function must tally with how the name is saved in the Employee model in prisma.
-  async validateRequest(dto) {
-    await this.checkEmpPropertyExists("email", dto.empEmail, "Email address");
-    await this.checkEmpPropertyExists("idNumber", dto.empIDNumber, "ID Number");
-    await this.checkEmpPropertyExists("phoneNumber", dto.empPhoneNumber, "Phone Number");
-  }
 
-  async checkEmpPropertyExists(propertyName, propertyValue, propertyDescription) {
-    if (propertyValue) {
-      const result = await this.prismaService.employee.findUnique({
-        where: { [propertyName]: propertyValue }
-      });
-      if (result) {
-        const errMsg = `${propertyDescription} ${result[propertyName]} already exists`;
-        this.logger.error(errMsg);
-        throw new AppConflictException(errMsg);
-      }
-    }
-  }
 
   //For the Organization model in prisma.
   //All the properties to be checked here are unique properties, so it checks to see if these unique properties have already been taken.
@@ -122,14 +75,6 @@ export class OrganizationHelperService {
         throw new AppConflictException(errMsg);
       }
     }
-  }
-
-
-  async findAndExcludeFields(user) {
-    return this.prismaService.employee.findUniqueOrThrow({
-      where: { email: user.email },
-      select: prismaExclude("Employee", ["password"])
-    });
   }
 
 

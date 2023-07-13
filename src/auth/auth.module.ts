@@ -16,6 +16,8 @@ import { EmployeeService } from "@auth/employee/employee.service";
 import { EmployeeHelperService } from "@auth/helper-services/employee-helper.service";
 import { UserHelperService } from "@auth/helper-services/user-helper.service";
 import { EmployeeController } from "@auth/employee/employee.controller";
+import { OrganizationService } from "@back-office/orgnization/organization.service";
+import { LocaleService } from "../locale/locale.service";
 
 @Module({
   imports: [JwtModule.registerAsync({
@@ -34,8 +36,8 @@ import { EmployeeController } from "@auth/employee/employee.controller";
   controllers: [AuthController, UserController, EmployeeAuthController,EmployeeController],
   providers: [UserService, AuthService, ConfigService, JwtStrategy,
     TokenService, UtilService, AppService, EmployeeAuthService,
-    EmployeeService, EmployeeHelperService, UserHelperService],
-  exports: [JwtStrategy, PassportModule, UserService]
+    EmployeeService, EmployeeHelperService, UserHelperService, LocaleService],
+  exports: [JwtStrategy, PassportModule,EmployeeHelperService, UserService]
 })
 export class AuthModule {
 }

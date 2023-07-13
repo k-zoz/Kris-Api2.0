@@ -9,7 +9,7 @@ import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { CreateOrgDto, EditOrgDto } from "@core/dto/global/organization.dto";
 import { OrganizationService } from "@back-office/orgnization/organization.service";
 import { SearchRequest } from "@core/model/search-request";
-import { EmployeeDto } from "@core/dto/global/employee.dto";
+import { CreateEmployeeDto } from "@core/dto/global/employee.dto";
 
 @Controller("organization")
 @UseGuards(AuthGuard())
@@ -36,7 +36,7 @@ export class OrganizationController extends BaseController {
   @Permission(UserRoleEnum.SUPPORT)
   async onboardOrgEmployee(@GetUser() payload: AuthPayload,
                            @Param("orgID") orgID: string,
-                           @Body(ValidationPipe) request: EmployeeDto
+                           @Body(ValidationPipe) request: CreateEmployeeDto
   ) {
     return this.response({
       message: "Created successfully",
@@ -70,6 +70,8 @@ export class OrganizationController extends BaseController {
       payload: await this.organizationService.editOrganization(request, orgID, payload.email)
     });
   }
+
+  //TODO get all employees in an organization
 
 
   //Testing

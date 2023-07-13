@@ -48,7 +48,6 @@ export const AuthMsg = {
   BRANCH_CREATED: "sec-0047",
   BRANCH_UPDATED: "sec-0048",
   ROLE_CREATED: "sec-0049",
-  ROLE_UPDATED: "sec-0050",
   ROLE_EXISTS: "sec-0051",
   BRANCH_EXISTS: "sec-0052",
   BRANCH_NOT_FOUND: "sec-0053",
@@ -57,5 +56,14 @@ export const AuthMsg = {
   ADDRESS_VERIFICATION_PROCESSING: "sec-0056",
   IDENTITY_VERIFICATION_PROCESSING: "sec-0057",
   BVN_ALREADY_EXISTS: "sec-0058",
-  USER_NOT_FOUND: "sec-0059",
+
+
+  INVALID_EMAIL_OR_PASSWORD: "Invalid Email or Password",
+  USER_NOT_FOUND: "User not found",
+  ROLE_NOT_UPDATED: "Error changing role",
+  ROLE_UPDATED: "Role changed Successfully",
+  ROLE_ADDED:"Role added successfully",
+  CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE: "Cannot assign employee management role. Contact Administration",
+  CANNOT_CHANGE_YOUR_ROLE: "You cannot change your role",
+  CANNOT_ASSIGN_MORE_THAN_TWO_ROLES_TO_ONE_EMPLOYEE:"Cannot assign more than two roles to one employee"
 };

@@ -1,5 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { AppConflictException } from "@core/exception/app-exception";
+import { LocaleService } from "../../locale/locale.service";
+import { AuthMsg } from "@core/const/security-msg-const";
 
 const phoneUtil = require("google-libphonenumber").PhoneNumberUtil.getInstance();
 
@@ -7,6 +9,9 @@ const phoneUtil = require("google-libphonenumber").PhoneNumberUtil.getInstance()
 @Injectable()
 export class UtilService {
   private readonly logger = new Logger(UtilService.name);
+
+  constructor(private readonly localeService: LocaleService) {
+  }
 
   sanitizePhoneNumber(phoneNumber: string): string {
     const naijaCode = phoneNumber.substring(0, 4);
@@ -27,7 +32,7 @@ export class UtilService {
 
   compareEmails(email1: string, email2: string) {
     if (email1 === email2) {
-      throw new AppConflictException("You cannot change your role");
+      throw new AppConflictException(this.localeService.resolveMessage(AuthMsg.CANNOT_CHANGE_YOUR_ROLE));
     }
   }
 }

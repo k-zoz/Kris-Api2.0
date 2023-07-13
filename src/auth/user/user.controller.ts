@@ -93,7 +93,6 @@ export class UserController extends BaseController {
     return this.response({
       payload: await this.userService.findAllUsers(searchRequest)
     });
-
   }
 
   @Get("userProfile")

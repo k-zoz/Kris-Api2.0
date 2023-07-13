@@ -30,7 +30,6 @@ export class EmployeeRoleGuard implements CanActivate {
     } else {
       throw new AppUnauthorizedException("You are not authorized to take this action");
     }
-    // // console.log(user.role);
-    // return true
+
   }
 }
