@@ -8,7 +8,7 @@ import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import {
-  CreateEmployeeDto,
+  CreateEmployeeDto, EditEmployeeDto,
   RoleToEmployee
 } from "@core/dto/global/employee.dto";
 import { LocaleService } from "@locale/locale.service";
@@ -64,7 +64,7 @@ export class EmployeeController extends BaseController {
       message: AuthMsg.ROLE_ADDED,
       payload: await this.employeeService.addMoreRolesToEmployee(request, orgID, empID, payload.email)
     });
-  }
+  };
 
   @Post("/:orgID/profile/:empID/deleteRole")
   @EmpPermission(EmployeeRoleEnum.MANAGEMENT)
@@ -77,13 +77,13 @@ export class EmployeeController extends BaseController {
       message: AuthMsg.ROLE_REMOVED_SUCCESSFULLY,
       payload: await this.employeeService.removeRoleFrmEmp(request, orgID, empID, payload.email)
     });
-  }
+  };
 
 
   @Get("profile")
   employeeProfile(@GetUser() payload: AuthPayload) {
     return this.response({ payload });
-  }
+  };
 
 
   @Post("/:orgID/allEmployees")
@@ -94,6 +94,17 @@ export class EmployeeController extends BaseController {
     return this.response({
       payload: await this.employeeService.findAllEmployees(searchRequest, orgID)
     });
+  };
+
+  @Post("/:orgID/editProfile")
+  async editProfile(
+                    @GetUser() payload:AuthPayload,
+                    @Param("orgID") orgID: string,
+                    @Body(ValidationPipe) request: EditEmployeeDto
+  ){
+    return this.response({
+      payload:await this.employeeService.editEmployeeProfile(request, orgID, payload)
+    })
   }
 
   //Testing

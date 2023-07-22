@@ -66,5 +66,12 @@ export const AuthMsg = {
   ROLE_ADDED:"Role added successfully",
   CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE: "Cannot assign employee management role. Contact Administration",
   CANNOT_CHANGE_YOUR_ROLE: "You cannot change your role",
-  CANNOT_ASSIGN_MORE_THAN_TWO_ROLES_TO_ONE_EMPLOYEE:"Cannot assign more than two roles to one employee"
+  CANNOT_ASSIGN_MORE_THAN_TWO_ROLES_TO_ONE_EMPLOYEE:"Cannot assign more than two roles to one employee",
+  ERROR_CREATING_EMPLOYEE:"Error creating employee",
+  ERROR_UPDATING_EMPLOYEE:"Error updating employee",
+  PROFILE_UPDATED:"Role successfully updated",
+  LEAVE_CREATED:"Leave plan created",
+  ERROR_CREATING_LEAVE:"Error creating leave plan",
+  EMPLOYEE_HAS_LESS_LEAVE_DAYS:"Employee does not have enough remaining leave days",
+  ERROR_APPLYING_LEAVE:"Error applying for leave"
 };

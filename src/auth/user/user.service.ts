@@ -52,6 +52,9 @@ export class UserService implements OnModuleInit {
   async editProfile(requesterMail: string, dto: UpdateBackOfficeProfile) {
     await this.userHelperService.validateRequest(dto);
     return this.userHelperService.editUser(requesterMail, dto);
+    //TODO make change password different
+    //TODO remove change email, make it different
+    //TODO change response
   }
 
 

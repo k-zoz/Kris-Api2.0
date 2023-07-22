@@ -1,15 +1,14 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
-import { AppConflictException, AppNotFoundException } from "@core/exception/app-exception";
+import { AppConflictException } from "@core/exception/app-exception";
 import { AppConst } from "@core/const/app.const";
-import { prismaExclude } from "@prisma/prisma-utils";
+
 
 @Injectable()
 export class OrganizationHelperService {
   private readonly logger = new Logger(OrganizationHelperService.name);
 
-  constructor(private readonly prismaService: PrismaService) {
-  }
+  constructor(private readonly prismaService: PrismaService) {}
 
   async saveOrganization(org) {
     try {
@@ -31,7 +30,7 @@ export class OrganizationHelperService {
       return saved;
     } catch (e) {
       const msg = `Error creating Organization ${org.orgName}`;
-      this.logger.error(msg);
+      this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: msg });
     }
   }
@@ -46,7 +45,7 @@ export class OrganizationHelperService {
       });
     } catch (e) {
       const msg = `Error updating Organization ${org.orgName}`;
-      this.logger.error(msg);
+      this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: msg });
     }
   }
@@ -76,6 +75,4 @@ export class OrganizationHelperService {
       }
     }
   }
-
-
 }

@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsStrongPassword } from "class-validator";
 import { BaseDto } from "@core/dto/global/base.dto";
 import { IsValidEmployeeRole } from "@core/validators/employee-role-validator";
 
@@ -7,6 +7,7 @@ export class CreateEmployeeDto extends BaseDto {
   @IsEmail()
   empEmail: string;
   @IsNotEmpty({ message: "Password is required" })
+  @IsStrongPassword({ minNumbers: 1, minSymbols: 1, minLowercase: 1, minUppercase: 1, minLength: 8 })
   empPassword: string;
   @IsString()
   @IsNotEmpty({ message: "Employee First name is required" })
@@ -48,4 +49,19 @@ export class RoleToEmployee {
   modifiedBy?: string;
 }
 
-
+export class EditEmployeeDto extends BaseDto {
+  @IsOptional()
+  @IsEmail()
+  empEmail: string;
+  @IsOptional()
+  empLastName: string;
+  @IsOptional()
+  empFirstName: string;
+  @IsOptional()
+  empPhoneNumber: string;
+  @IsOptional()
+  empIDNumber: string;
+  @IsOptional()
+  @IsStrongPassword({ minNumbers: 1, minSymbols: 1, minLowercase: 1, minUppercase: 1, minLength: 8 })
+  empPassword: string;
+}

@@ -4,13 +4,14 @@ import { PrismaService } from "@prisma/prisma.service";
 import * as argon from "argon2";
 import { prismaExclude } from "@prisma/prisma-utils";
 import { EmployeeHelperService } from "@auth/helper-services/employee-helper.service";
-import { RoleToEmployee, CreateEmployeeDto } from "@core/dto/global/employee.dto";
+import { RoleToEmployee, CreateEmployeeDto, EditEmployeeDto } from "@core/dto/global/employee.dto";
 import { UtilService } from "@core/utils/util.service";
-import { OrganizationService } from "@back-office/orgnization/organization.service";
-import { AppConst } from "@core/const/app.const";
+import { OrganizationService } from "@back-office/orgnization/services/organization.service";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { LocaleService } from "@locale/locale.service";
 import { SearchRequest } from "@core/model/search-request";
+import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
+
 
 @Injectable()
 export class EmployeeService {
@@ -66,12 +67,21 @@ export class EmployeeService {
     return this.employeeHelperService.addRolesToEmployee(request, empID);
   }
 
+  async editEmployeeProfile(request: EditEmployeeDto, orgID: string, payload: AuthPayload) {
+    await this.organizationService.findOrgByID(orgID);
+    await this.employeeHelperService.findEmpByEmail(payload.email);
+    await this.utilService.isEmpty(request)
+    await this.employeeHelperService.validateRequest(request)
+    request.empPassword = await argon.hash(request.empPassword)
+    await this.employeeHelperService.editEmployee(payload.email, request);
+  }
+
   async removeRoleFrmEmp(request: RoleToEmployee, orgID: string, empID: string, modifierEmail) {
     await this.organizationService.findOrgByID(orgID);
     const employee = await this.employeeHelperService.findEmpById(empID);
     await this.utilService.compareEmails(modifierEmail, employee.email);
     request.modifiedBy = modifierEmail;
-    return this.employeeHelperService.removeRole(request, empID)
+    return this.employeeHelperService.removeRole(request, empID);
   }
 
   async validatePassword(emp, password: string): Promise<boolean> {

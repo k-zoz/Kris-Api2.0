@@ -16,8 +16,8 @@ import { EmployeeService } from "@auth/employee/employee.service";
 import { EmployeeHelperService } from "@auth/helper-services/employee-helper.service";
 import { UserHelperService } from "@auth/helper-services/user-helper.service";
 import { EmployeeController } from "@auth/employee/employee.controller";
-import { OrganizationService } from "@back-office/orgnization/organization.service";
-import { LocaleService } from "../locale/locale.service";
+import { OrganizationService } from "@back-office/orgnization/services/organization.service";
+import { LocaleService } from "@locale/locale.service";
 
 @Module({
   imports: [JwtModule.registerAsync({

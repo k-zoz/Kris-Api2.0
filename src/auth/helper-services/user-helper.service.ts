@@ -48,7 +48,7 @@ export class UserHelperService {
       });
     } catch (e) {
       const msg = `Error updating profile`;
-      this.logger.error(msg);
+      this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: msg });
     }
   }
@@ -67,7 +67,7 @@ export class UserHelperService {
       return `User ${saved.email} role changed successfully`;
     } catch (e) {
       const msg = `Error changing  ${email} password`;
-      this.logger.error(msg);
+      this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: msg });
     }
   }
@@ -86,7 +86,7 @@ export class UserHelperService {
       return `User ${saved.email} password changed successfully`;
     } catch (e) {
       const msg = `Error changing  ${email} password`;
-      this.logger.error(msg);
+      this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: msg });
     }
   }
@@ -108,7 +108,7 @@ export class UserHelperService {
       return `User ${user.email} saved successfully`;
     } catch (e) {
       const msg = `Error creating user ${user.email}`;
-      this.logger.error(msg);
+      this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: msg });
     }
   }
@@ -131,7 +131,7 @@ export class UserHelperService {
       return saved;
     } catch (e) {
       const msg = `Error creating user ${user.email}`;
-      this.logger.error(msg);
+      this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: msg });
     }
   }

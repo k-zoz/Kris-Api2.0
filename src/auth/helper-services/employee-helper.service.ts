@@ -24,6 +24,36 @@ export class EmployeeHelperService {
     return found;
   }
 
+  async editEmployee(email, request) {
+    try {
+      await this.prismaService.employee.update({
+        where: { email },
+        data: {
+          firstname: request.empFirstName,
+          lastname: request.empLastName,
+          phoneNumber: request.empPhoneNumber,
+          idNumber: request.empIDNumber,
+          email: request.empEmail,
+          password: request.empPassword
+        }
+      });
+      return AuthMsg.PROFILE_UPDATED;
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException(AuthMsg.ERROR_UPDATING_EMPLOYEE);
+    }
+
+  }
+
+  async findEmpByEmail(email: string) {
+    const found = await this.prismaService.employee.findFirst({ where: { email } });
+    if (!found) {
+      this.logger.error(AuthMsg.USER_NOT_FOUND);
+      throw new AppNotFoundException(AuthMsg.USER_NOT_FOUND);
+    }
+    return found;
+  }
+
   //For the Employee model in prisma.
   //All the properties to be checked here are unique properties, so it checks to see if these unique properties have already been taken.
   //Property name a.k.a first argument in the checkEmpPropertyExists function must tally with how the name is saved in the Employee model in prisma.
@@ -66,11 +96,10 @@ export class EmployeeHelperService {
         }
       });
     } catch (e) {
-      this.logger.error(AuthMsg.ROLE_NOT_UPDATED);
-      throw new AppConflictException(AppConst.error, { context: AuthMsg.ROLE_NOT_UPDATED });
+      this.logger.error(AuthMsg.ERROR_CREATING_EMPLOYEE);
+      throw new AppConflictException(AppConst.error, { context: AuthMsg.ERROR_CREATING_EMPLOYEE });
     }
   }
-
 
   async findAndExcludeFields(user: Employee) {
     return this.prismaService.employee.findUniqueOrThrow({
@@ -78,6 +107,7 @@ export class EmployeeHelperService {
       select: prismaExclude("Employee", ["password", "refreshToken"])
     });
   }
+
 
   async changeRole(request: RoleToEmployee, empID: string) {
     try {

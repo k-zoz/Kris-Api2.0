@@ -9,8 +9,7 @@ import { UserRoleEnum } from "@core/enum/user-role-enum";
 @Injectable()
 export class RolesGuard implements CanActivate {
 
-  constructor(private reflector: Reflector) {
-  }
+  constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
 

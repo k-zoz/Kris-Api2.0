@@ -13,7 +13,7 @@ import { utilities as nestWinstonModuleUtilities, WinstonModule } from "nest-win
 import * as winston from "winston";
 import configuration from "@config/configuration";
 import { BackOfficeModule } from "@back-office/back-office.module";
-import { LocaleService } from "./locale/locale.service";
+import { OrganizationModule } from "@organization/organization.module";
 
 
 @Module({
@@ -45,7 +45,7 @@ import { LocaleService } from "./locale/locale.service";
     //   })
     // }),
 
-    BackOfficeModule, AuthModule, PrismaModule],
+    BackOfficeModule, AuthModule, PrismaModule, OrganizationModule],
   controllers: [AppController],
   providers: [
 

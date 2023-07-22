@@ -49,6 +49,7 @@ model Organization {
   orgIndustry String
 
   employees  Employee[]
+  leavePlan  Leave[]
   createdBy  String?
   modifiedBy String?
 
@@ -75,16 +76,43 @@ model Employee {
   phoneNumber  String  @unique
   refreshToken String?
 
-  role Employee_Role[]
-
-  createdBy  String?
-  modifiedBy String?
+  role          Employee_Role[]
+  employeeLeave EmployeeLeave[]
 
   organizationId String
   Organization   Organization @relation(fields: [organizationId], references: [id])
 
+  createdBy    String?
+  modifiedBy   String?
   createdDate  DateTime @default(now())
   modifiedDate DateTime @updatedAt
 
   @@unique([email, idNumber, phoneNumber])
+}
+
+model Leave {
+  id       String @id @default(uuid())
+  name     String
+  duration Int
+
+  employeeLeave EmployeeLeave[]
+
+  Organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
+
+  createdBy   String?
+  createdDate DateTime @default(now())
+}
+
+model EmployeeLeave {
+  id                String @id @default(uuid())
+  remainingDuration Int
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  leaveId String
+  leave   Leave  @relation(fields: [leaveId], references: [id])
+
+  @@unique([employeeId, leaveId])
 }
