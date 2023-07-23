@@ -11,7 +11,7 @@ import { OrganizationService } from "@back-office/orgnization/services/organizat
 import { SearchRequest } from "@core/model/search-request";
 import { CreateEmployeeDto } from "@core/dto/global/employee.dto";
 
-@Controller("organization")
+@Controller("backOffice/organization")
 @UseGuards(AuthGuard())
 @UseGuards(RolesGuard)
 export class OrganizationController extends BaseController {

@@ -20,7 +20,7 @@ import { OrganizationService } from "@back-office/orgnization/services/organizat
 import { LocaleService } from "@locale/locale.service";
 import { LeaveHelperService } from "@organization/helper-services/leave-helper.service";
 import { LeaveService } from "@organization/leave/leave.service";
-import { OrganizationModule } from "@organization/organization.module";
+import { EmployeeOrganizationModule } from "@organization/employeeOrganization.module";
 
 @Module({
   imports: [JwtModule.registerAsync({
@@ -34,7 +34,7 @@ import { OrganizationModule } from "@organization/organization.module";
       }
     })
   }),
-    PassportModule.register({ defaultStrategy: "jwt", session: false }),OrganizationModule
+    PassportModule.register({ defaultStrategy: "jwt", session: false }),EmployeeOrganizationModule
   ],
   controllers: [AuthController, UserController, EmployeeAuthController,EmployeeController],
   providers: [UserService, AuthService, ConfigService, JwtStrategy,

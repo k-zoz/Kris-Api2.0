@@ -56,11 +56,7 @@ export class LeaveService {
     return await this.leaveHelperService.leaveOnboarding(orgID, employee)
   }
 
-
 }
 
 
-
-
-//TODO adding a new employee will the employee have access to all the leave plans?
 

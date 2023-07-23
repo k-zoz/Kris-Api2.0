@@ -45,8 +45,8 @@ export class LeaveHelperService {
       return AuthMsg.LEAVE_CREATED;
     } catch (e) {
       this.logger.error(e);
-      // throw new AppException(AuthMsg.ERROR_CREATING_LEAVE);
-      throw new AppException(e);
+      throw new AppException(AuthMsg.ERROR_CREATING_LEAVE);
+
     }
   }
 
@@ -186,10 +186,6 @@ export class LeaveHelperService {
             organizationId: orgID
           }
         });
-
-        if (leavesForOrg.length === 0) {
-          throw new AppException("No leave for Organization");
-        }
 
         const employeeLeaveDate = leaves.map((leave) => ({
           employeeId: employee.id,

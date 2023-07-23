@@ -45,4 +45,9 @@ export class UtilService {
     const newDate = DateTime.fromFormat(date, "MM-dd-yyyy", { zone: "Africa/Lagos" });
     return newDate.toISO();
   }
+
+   toUpperCase(str: string): string {
+    return str.toUpperCase();
+  }
+
 }

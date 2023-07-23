@@ -13,7 +13,8 @@ import { utilities as nestWinstonModuleUtilities, WinstonModule } from "nest-win
 import * as winston from "winston";
 import configuration from "@config/configuration";
 import { BackOfficeModule } from "@back-office/back-office.module";
-import { OrganizationModule } from "@organization/organization.module";
+import { EmployeeOrganizationModule } from "@organization/employeeOrganization.module";
+import { EventEmitterModule } from "@nestjs/event-emitter";
 
 
 @Module({
@@ -44,8 +45,8 @@ import { OrganizationModule } from "@organization/organization.module";
     //     port: 6379,
     //   })
     // }),
-
-    BackOfficeModule, AuthModule, PrismaModule, OrganizationModule],
+    EventEmitterModule.forRoot(),
+    BackOfficeModule, AuthModule, PrismaModule, EmployeeOrganizationModule],
   controllers: [AppController],
   providers: [
 

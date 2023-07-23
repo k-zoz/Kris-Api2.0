@@ -52,3 +52,10 @@ export class EditOrgDto extends BaseDto {
   orgIndustry: string;
   modifiedBy:string
 }
+
+export class ModifyOrg {
+  @IsOptional()
+  deptName:string
+  @IsOptional()
+  teamName:string
+}

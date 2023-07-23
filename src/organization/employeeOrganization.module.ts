@@ -6,14 +6,18 @@ import { LeaveHelperService } from "@organization/helper-services/leave-helper.s
 import { EmployeeHelperService } from "@auth/helper-services/employee-helper.service";
 import { LocaleService } from "@locale/locale.service";
 import { UtilService } from "@core/utils/util.service";
+import { EmployeeOrganizationController } from './employeeOrganization.controller';
+import { EmployeeOrganizationService } from './employeeOrganization.service';
+import { EmployeeOrganizationHelperService } from "@organization/helper-services/employee-organization-helper.service";
 
 
 
 @Module({
   imports: [PassportModule.register({ defaultStrategy: "jwt", session: false })],
   exports: [LeaveService, LeaveHelperService],
-  controllers: [LeaveController],
-  providers: [LeaveService, LeaveHelperService, EmployeeHelperService, LocaleService, UtilService]
+  controllers: [LeaveController, EmployeeOrganizationController],
+  providers: [LeaveService, LeaveHelperService, EmployeeHelperService,
+    LocaleService, UtilService, EmployeeOrganizationService, EmployeeOrganizationHelperService]
 })
-export class OrganizationModule {
+export class EmployeeOrganizationModule {
 }

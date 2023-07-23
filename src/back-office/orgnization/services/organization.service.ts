@@ -13,9 +13,9 @@ export class OrganizationService {
   private readonly logger = new Logger(OrganizationService.name);
 
   constructor(private readonly prismaService: PrismaService,
-              private readonly orgHelperService:OrganizationHelperService,
-              private readonly employeeHelperService:EmployeeHelperService
-              ) {
+              private readonly orgHelperService: OrganizationHelperService,
+              private readonly employeeHelperService: EmployeeHelperService
+  ) {
   }
 
   async onboardOrganization(org: CreateOrgDto, creatorEmail: string) {
@@ -27,22 +27,29 @@ export class OrganizationService {
 
   async editOrganization(org: EditOrgDto, id, modifierMail: string) {
     await this.orgHelperService.validateDtoRequest(org);
-    await this.findOrgByID(id)
+    await this.findOrgByID(id);
     org.modifiedBy = modifierMail;
     return this.orgHelperService.updateOrg(id, org);
   }
 
   async createOrgEmployee(orgEmp: CreateEmployeeDto, orgID, creatorMail) {
     await this.employeeHelperService.validateRequest(orgEmp);
-    await  this.findOrgByID(orgID)
+    await this.findOrgByID(orgID);
     orgEmp.createdBy = creatorMail;
-    orgEmp.empPassword = await argon.hash(orgEmp.empPassword)
+    orgEmp.empPassword = await argon.hash(orgEmp.empPassword);
     const employee = await this.employeeHelperService.createEmployee(orgEmp, orgID);
-    return this.employeeHelperService.findAndExcludeFields(employee)
+    return this.employeeHelperService.findAndExcludeFields(employee);
   }
 
   async findOrgByID(id) {
-    const found = await this.prismaService.organization.findFirst({ where: { id } });
+    const found = await this.prismaService.organization.findFirst({
+      where: { id },
+      include: {
+        team: true,
+        department: true,
+        leavePlan: true
+      }
+    });
     if (!found) {
       const msg = `Organization with id ${id} does not exist`;
       this.logger.error(msg);

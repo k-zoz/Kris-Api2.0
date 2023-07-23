@@ -8,7 +8,7 @@ import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { ApplyForLeave, CreateLeaveDto, MockLeaveDto } from "@core/dto/global/leave.dto";
 import { LeaveService } from "@organization/leave/leave.service";
-import { DateTime } from "luxon";
+
 
 @Controller("leave")
 @UseGuards(AuthGuard())
@@ -43,10 +43,14 @@ export class LeaveController extends BaseController {
                       @Param("orgID") orgID: string,
                       @Body(new ValidationPipe({ whitelist: true })) dto: ApplyForLeave
   ) {
-    return this.response({ payload: await this.leaveService.leaveApplication(dto, orgID, payload), message:"Applied" });
+    return this.response({
+      payload: await this.leaveService.leaveApplication(dto, orgID, payload),
+      message: "Applied"
+    });
   }
 
   //TODO leave goes  for approval to someone higher
+  //TODO email notifs
 
   @Get("/:orgID/history")
   async myLeaveHistory(@GetUser() payload: AuthPayload,
@@ -55,23 +59,14 @@ export class LeaveController extends BaseController {
     return this.response({ payload: await this.leaveService.leaveHistory(orgID, payload) });
   }
 
+
   //Testing
   // @Get("onboarders")
   // async getOnboarders(@GetUser() payload: AuthPayload,
   //                     @Body(ValidationPipe) dto: MockLeaveDto
   // ) {
-  //
-  //   const startDate = dto.leaveStartDate;
-  //   const endDate = dto.leaveEndDate;
-  //   const start = DateTime.fromFormat(dto.leaveStartDate, "MM-dd-yyyy", { zone: "Africa/Lagos" });
-  //   const end = DateTime.fromFormat(dto.leaveEndDate, "MM-dd-yyyy", { zone: "Africa/Lagos" });
-  //   const duration = end.diff(start);
-  //   // console.log(this.convertLeaveDate(startDate));
-  //   // console.log(this.convertLeaveDate(endDate));
-  //   console.log(payload, dto, duration.as('days'));
-  //
+  //   console.log(payload, dto,);
   // }
-
 
 
 }
