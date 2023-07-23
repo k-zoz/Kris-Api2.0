@@ -139,8 +139,6 @@ export class LeaveHelperService {
         const leaveApplications = await tx.leaveApplication.findMany({
           where: {
             employeeId: employee.id
-          }, include: {
-            leave: true
           }
         });
         return { employeeLeave, leaveApplications };

@@ -133,6 +133,4 @@ model LeaveApplication {
 
   leaveId String
   leave   Leave  @relation(fields: [leaveId], references: [id])
-
-  @@unique([employeeId, leaveId])
 }
