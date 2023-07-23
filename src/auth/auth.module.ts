@@ -18,6 +18,9 @@ import { UserHelperService } from "@auth/helper-services/user-helper.service";
 import { EmployeeController } from "@auth/employee/employee.controller";
 import { OrganizationService } from "@back-office/orgnization/services/organization.service";
 import { LocaleService } from "@locale/locale.service";
+import { LeaveHelperService } from "@organization/helper-services/leave-helper.service";
+import { LeaveService } from "@organization/leave/leave.service";
+import { OrganizationModule } from "@organization/organization.module";
 
 @Module({
   imports: [JwtModule.registerAsync({
@@ -31,12 +34,12 @@ import { LocaleService } from "@locale/locale.service";
       }
     })
   }),
-    PassportModule.register({ defaultStrategy: "jwt", session: false })
+    PassportModule.register({ defaultStrategy: "jwt", session: false }),OrganizationModule
   ],
   controllers: [AuthController, UserController, EmployeeAuthController,EmployeeController],
   providers: [UserService, AuthService, ConfigService, JwtStrategy,
     TokenService, UtilService, AppService, EmployeeAuthService,
-    EmployeeService, EmployeeHelperService, UserHelperService, LocaleService],
+    EmployeeService, EmployeeHelperService, UserHelperService,LeaveService, LocaleService],
   exports: [JwtStrategy, PassportModule,EmployeeHelperService, UserService]
 })
 export class AuthModule {

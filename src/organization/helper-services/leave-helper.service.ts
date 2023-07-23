@@ -177,6 +177,37 @@ export class LeaveHelperService {
     return employeeLeave;
   }
 
+  async leaveOnboarding(orgID, employee) {
+    const leaves = await this.findAllLeavePlansForOrg(orgID);
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        const leavesForOrg = await tx.leave.findMany({
+          where: {
+            organizationId: orgID
+          }
+        });
+
+        if (leavesForOrg.length === 0) {
+          throw new AppException("No leave for Organization");
+        }
+
+        const employeeLeaveDate = leaves.map((leave) => ({
+          employeeId: employee.id,
+          leaveId: leave.id,
+          remainingDuration: leave.duration,
+          leaveName: leave.name
+        }));
+        await tx.employeeLeave.createMany({
+          data: employeeLeaveDate
+        });
+
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException();
+    }
+  }
+
   async findAllLeavePlansForOrg(orgID) {
     try {
       return await this.prismaService.leave.findMany({

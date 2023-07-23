@@ -56,23 +56,22 @@ export class LeaveController extends BaseController {
   }
 
   //Testing
-  @Get("onboarders")
-  async getOnboarders(@GetUser() payload: AuthPayload,
-                      @Body(ValidationPipe) dto: MockLeaveDto
-  ) {
+  // @Get("onboarders")
+  // async getOnboarders(@GetUser() payload: AuthPayload,
+  //                     @Body(ValidationPipe) dto: MockLeaveDto
+  // ) {
+  //
+  //   const startDate = dto.leaveStartDate;
+  //   const endDate = dto.leaveEndDate;
+  //   const start = DateTime.fromFormat(dto.leaveStartDate, "MM-dd-yyyy", { zone: "Africa/Lagos" });
+  //   const end = DateTime.fromFormat(dto.leaveEndDate, "MM-dd-yyyy", { zone: "Africa/Lagos" });
+  //   const duration = end.diff(start);
+  //   // console.log(this.convertLeaveDate(startDate));
+  //   // console.log(this.convertLeaveDate(endDate));
+  //   console.log(payload, dto, duration.as('days'));
+  //
+  // }
 
-    const startDate = dto.leaveStartDate;
-    const endDate = dto.leaveEndDate;
-    const start = DateTime.fromFormat(dto.leaveStartDate, "MM-dd-yyyy", { zone: "Africa/Lagos" });
-    const end = DateTime.fromFormat(dto.leaveEndDate, "MM-dd-yyyy", { zone: "Africa/Lagos" });
-    const duration = end.diff(start);
-    // console.log(this.convertLeaveDate(startDate));
-    // console.log(this.convertLeaveDate(endDate));
-    console.log(payload, dto, duration.as('days'));
 
-  }
-
-
-  //TODO review leave history to reflect all the times an employee took leave
 
 }

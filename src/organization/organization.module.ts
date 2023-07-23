@@ -11,7 +11,7 @@ import { UtilService } from "@core/utils/util.service";
 
 @Module({
   imports: [PassportModule.register({ defaultStrategy: "jwt", session: false })],
-  exports: [],
+  exports: [LeaveService, LeaveHelperService],
   controllers: [LeaveController],
   providers: [LeaveService, LeaveHelperService, EmployeeHelperService, LocaleService, UtilService]
 })

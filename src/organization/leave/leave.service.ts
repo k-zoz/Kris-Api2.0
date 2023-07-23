@@ -50,7 +50,16 @@ export class LeaveService {
     const employee = await this.employeeHelperService.findEmpByEmail(userPayLoad.email);
     return await this.leaveHelperService.getMyLeaveHistory(orgID, employee);
   }
+
+  async onboardLeaveForNewEmployee(orgID: string, employee){
+    await this.organizationService.findOrgByID(orgID);
+    return await this.leaveHelperService.leaveOnboarding(orgID, employee)
+  }
+
+
 }
+
+
 
 
 //TODO adding a new employee will the employee have access to all the leave plans?

@@ -11,6 +11,7 @@ import { AuthMsg } from "@core/const/security-msg-const";
 import { LocaleService } from "@locale/locale.service";
 import { SearchRequest } from "@core/model/search-request";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
+import { LeaveService } from "@organization/leave/leave.service";
 
 
 @Injectable()
@@ -22,7 +23,8 @@ export class EmployeeService {
               private readonly employeeHelperService: EmployeeHelperService,
               private readonly utilService: UtilService,
               private readonly organizationService: OrganizationService,
-              private readonly localeService: LocaleService
+              private readonly localeService: LocaleService,
+              private readonly leaveService:LeaveService
   ) {
   }
 
@@ -34,6 +36,8 @@ export class EmployeeService {
     request.empPassword = await argon.hash(request.empPassword);
     await this.employeeHelperService.checkIfRoleIsManagement(request.employee_role);
     const employee = await this.employeeHelperService.createEmployee(request, orgID);
+    //TODO leave onboarding for new employee
+    await this.leaveService.onboardLeaveForNewEmployee(orgID, employee)
     return this.employeeHelperService.findAndExcludeFields(employee);
   }
 
