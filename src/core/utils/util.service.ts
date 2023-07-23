@@ -1,7 +1,8 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { AppConflictException } from "@core/exception/app-exception";
-import { LocaleService } from "../../locale/locale.service";
+import { LocaleService } from "@locale/locale.service";
 import { AuthMsg } from "@core/const/security-msg-const";
+import { DateTime } from "luxon";
 
 const phoneUtil = require("google-libphonenumber").PhoneNumberUtil.getInstance();
 
@@ -13,22 +14,6 @@ export class UtilService {
   constructor(private readonly localeService: LocaleService) {
   }
 
-  // sanitizePhoneNumber(phoneNumber: string): string {
-  //   const naijaCode = phoneNumber.substring(0, 4);
-  //
-  //   if (naijaCode.includes("234") && !naijaCode.includes("+")) {
-  //     phoneNumber = `+${phoneNumber}`;
-  //   }
-  //
-  //   return phoneNumber;
-  // }
-
-  // getPhoneNumber(phoneNumber: string): string {
-  //   phoneNumber = this.sanitizePhoneNumber(phoneNumber);
-  //
-  //   const number = phoneUtil.parseAndKeepRawInput(phoneNumber, "NG");
-  //   return `0${number.getNationalNumber()}`;
-  // }
 
   compareEmails(email1: string, email2: string) {
     if (email1 === email2) {
@@ -36,16 +21,28 @@ export class UtilService {
     }
   }
 
-   isEmpty(param: any) {
-    if (param === null || param === undefined || param === '') {
-      throw new AppConflictException("Empty")
+  isEmpty(param: any) {
+    if (param === null || param === undefined || param === "") {
+      throw new AppConflictException("Empty");
     }
     if (Array.isArray(param) && param.length === 0) {
-      throw new AppConflictException("Empty")
+      throw new AppConflictException("Empty");
     }
-    if (typeof param === 'object' && Object.keys(param).length === 0) {
-      throw new AppConflictException("Empty")
+    if (typeof param === "object" && Object.keys(param).length === 0) {
+      throw new AppConflictException("Empty");
     }
 
+  }
+
+  calcLeaveDuration(startDate, endDate): number {
+    const start = DateTime.fromFormat(startDate, "MM-dd-yyyy", { zone: "Africa/Lagos" });
+    const end = DateTime.fromFormat(endDate, "MM-dd-yyyy", { zone: "Africa/Lagos" });
+    const duration = end.diff(start);
+    return duration.as("days");
+  }
+
+  convertLeaveDate(date: any) {
+    const newDate = DateTime.fromFormat(date, "MM-dd-yyyy", { zone: "Africa/Lagos" });
+    return newDate.toISO();
   }
 }

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsDate, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateLeaveDto {
   @IsNotEmpty()
@@ -14,6 +14,22 @@ export class ApplyForLeave{
   @IsString()
   leaveName: string;
   @IsNotEmpty()
-  @IsNumber()
+  leaveStartDate:any;
+  @IsNotEmpty()
+  leaveEndDate:any;
+  @IsOptional()
   leaveDuration: number;
+}
+
+
+export class MockLeaveDto{
+  @IsNotEmpty()
+  @IsString()
+  leaveName: string;
+  @IsOptional()
+  leaveDuration: number;
+  @IsNotEmpty()
+  leaveStartDate:any;
+  @IsNotEmpty()
+  leaveEndDate:any;
 }

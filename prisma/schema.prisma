@@ -76,8 +76,9 @@ model Employee {
   phoneNumber  String  @unique
   refreshToken String?
 
-  role          Employee_Role[]
-  employeeLeave EmployeeLeave[]
+  role             Employee_Role[]
+  employeeLeave    EmployeeLeave[]
+  leaveApplication LeaveApplication[]
 
   organizationId String
   Organization   Organization @relation(fields: [organizationId], references: [id])
@@ -95,7 +96,8 @@ model Leave {
   name     String
   duration Int
 
-  employeeLeave EmployeeLeave[]
+  employeeLeave    EmployeeLeave[]
+  leaveApplication LeaveApplication[]
 
   Organization   Organization @relation(fields: [organizationId], references: [id])
   organizationId String
@@ -107,6 +109,24 @@ model Leave {
 model EmployeeLeave {
   id                String @id @default(uuid())
   remainingDuration Int
+  leaveName         String
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  leaveId String
+  leave   Leave  @relation(fields: [leaveId], references: [id])
+
+  @@unique([employeeId, leaveId])
+}
+
+model LeaveApplication {
+  id String @id @default(uuid())
+
+  startDate DateTime
+  endDate   DateTime
+  duration  Int
+  leaveName String
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
