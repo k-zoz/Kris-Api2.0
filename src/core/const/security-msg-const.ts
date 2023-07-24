@@ -73,5 +73,6 @@ export const AuthMsg = {
   LEAVE_CREATED:"Leave plan created",
   ERROR_CREATING_LEAVE:"Error creating leave plan",
   EMPLOYEE_HAS_LESS_LEAVE_DAYS:"Employee does not have enough remaining leave days for this leave plan",
-  ERROR_APPLYING_LEAVE:"Error applying for leave"
+  ERROR_APPLYING_LEAVE:"Error applying for leave",
+
 };

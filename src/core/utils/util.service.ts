@@ -4,7 +4,6 @@ import { LocaleService } from "@locale/locale.service";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { DateTime } from "luxon";
 
-const phoneUtil = require("google-libphonenumber").PhoneNumberUtil.getInstance();
 
 
 @Injectable()

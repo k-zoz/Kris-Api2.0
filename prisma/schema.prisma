@@ -81,7 +81,8 @@ model Team {
   Organization   Organization @relation(fields: [organizationId], references: [id])
   teamMembers    Employee[]
   createdDate    DateTime     @default(now())
-  teamLead       TeamLead?
+  teamLeadId     String?
+  teamLead       TeamLead?    @relation
 
   @@unique([organizationId])
 }
