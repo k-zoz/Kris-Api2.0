@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Global, Module } from "@nestjs/common";
 import { PassportModule } from "@nestjs/passport";
 import { LeaveController } from "@organization/leave/leave.controller";
 import { LeaveService } from "@organization/leave/leave.service";
@@ -18,13 +18,18 @@ import { OrgTeamController } from "@organization/teams/org-team.controller";
 import { OrgEmployeeController } from "@organization/orgEmployee/org-employee.controller";
 import { OrgEmpPrismaHelperService } from "@organization/org-prisma-helper-services/org-emp-prisma-helper.service";
 import { OrgEmployeeService } from "@organization/orgEmployee/org-employee.service";
+import { BackOfficeModule } from "@back-office/back-office.module";
+import { AuthModule } from "@auth/auth.module";
 
-
+@Global()
 @Module({
-  imports: [PassportModule.register({ defaultStrategy: "jwt", session: false })],
-  exports: [LeaveService, LeavePrismaHelperService],
+  imports: [PassportModule.register({ defaultStrategy: "jwt", session: false }),],
+  exports: [LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService,
+    OrgDeptPrismaHelperService, OrgTeamPrismaHelperService, OrgTeamService,
+    OrgEmpPrismaHelperService, OrgEmployeeService, EmployeeOrganizationService, OrgPrismaHelperService],
   controllers: [LeaveController, EmployeeOrganizationController, EmployeeOrgDepartmentsController, OrgTeamController, OrgEmployeeController],
-  providers: [LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService, OrgDeptPrismaHelperService,
+  providers: [LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService,
+    OrgDeptPrismaHelperService,
     OrgTeamPrismaHelperService, OrgTeamService, OrgEmpPrismaHelperService, OrgEmployeeService,
     LocaleService, UtilService, EmployeeOrganizationService, OrgPrismaHelperService]
 })

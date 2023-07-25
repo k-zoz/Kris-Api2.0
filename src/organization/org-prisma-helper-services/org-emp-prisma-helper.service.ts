@@ -9,6 +9,28 @@ export class OrgEmpPrismaHelperService {
   constructor(private readonly prismaService:PrismaService) {
   }
 
+  //For the Employee model in prisma.
+  //All the properties to be checked here are unique properties, so it checks to see if these unique properties have already been taken.
+  //Property name a.k.a first argument in the checkEmpPropertyExists function must tally with how the name is saved in the Employee model in prisma.
+  async validateRequest(dto) {
+    await this.checkEmpPropertyExists("email", dto.empEmail, "Email address");
+    await this.checkEmpPropertyExists("idNumber", dto.empIDNumber, "ID Number");
+    await this.checkEmpPropertyExists("phoneNumber", dto.empPhoneNumber, "Phone Number");
+  }
+
+  async checkEmpPropertyExists(propertyName, propertyValue, propertyDescription) {
+    if (propertyValue) {
+      const result = await this.prismaService.employee.findUnique({
+        where: { [propertyName]: propertyValue }
+      });
+      if (result) {
+        const errMsg = `${propertyDescription} ${result[propertyName]} already exists`;
+        this.logger.error(errMsg);
+        throw new AppConflictException(errMsg);
+      }
+    }
+  }
+
   async findEmpTeam(teamID, empID) {
     const empTeam = await this.prismaService.employee.findFirst({
       where: {

@@ -20,7 +20,7 @@ export class EmployeeAuthService {
 
   async employeeLogin(request: LoginRequest) {
     const { email, password } = request;
-    const employee = await this.employeeService.findFirst(email);
+    const employee = await this.employeeHelperService.findFirst(email);
     if (!employee || !(await this.employeeService.validatePassword(employee, password))) {
       this.logger.error(`Login failed ${email}`);
       throw new AppUnauthorizedException("Invalid email or password");
@@ -33,7 +33,7 @@ export class EmployeeAuthService {
     const payload: JwtPayload = { email , role};
     const token = await this.tokenService.generateAccessToken(payload);
     const refreshToken = await this.tokenService.generateRefreshToken(payload);
-    await this.employeeService.setUserRefreshToken(email, token);
+    await this.employeeHelperService.setUserRefreshToken(email, token);
     const orgEmployee = await this.employeeHelperService.findAndExcludeFields(employee);
     return { token, refreshToken, orgEmployee };
   }

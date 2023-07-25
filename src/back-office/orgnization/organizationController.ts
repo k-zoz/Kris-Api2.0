@@ -10,12 +10,15 @@ import { CreateOrgDto, EditOrgDto } from "@core/dto/global/organization.dto";
 import { OrganizationService } from "@back-office/orgnization/organization.service";
 import { SearchRequest } from "@core/model/search-request";
 import { CreateEmployeeDto } from "@core/dto/global/employee.dto";
+import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
 
 @Controller("backOffice/organization")
 @UseGuards(AuthGuard())
 @UseGuards(RolesGuard)
 export class OrganizationController extends BaseController {
-  constructor(private readonly organizationService: OrganizationService) {
+  constructor(private readonly organizationService: OrganizationService,
+              private readonly orgHelperService: OrganizationPrismaHelperService,
+              ) {
     super();
   }
 
@@ -32,19 +35,6 @@ export class OrganizationController extends BaseController {
     });
   }
 
-  @Post("onboard/:orgID/employee")
-  @Permission(UserRoleEnum.SUPPORT)
-  async onboardOrgEmployee(@GetUser() payload: AuthPayload,
-                           @Param("orgID") orgID: string,
-                           @Body(ValidationPipe) request: CreateEmployeeDto
-  ) {
-    return this.response({
-      message: "Created successfully",
-      status: HttpStatus.CREATED,
-      payload: await  this.organizationService.createOrgEmployee(request, orgID, payload.email )
-    });
-  }
-
   @Post()
   @Permission(UserRoleEnum.SUPPORT)
   async allOrganizations(@Body(ValidationPipe) searchRequest: SearchRequest) {
@@ -55,7 +45,7 @@ export class OrganizationController extends BaseController {
   @Get("/:orgID")
   @Permission(UserRoleEnum.SUPPORT)
   async findOrgByID(@Param("orgID") orgID: string) {
-    return this.response({ payload: await this.organizationService.findOrgByID(orgID) });
+    return this.response({ payload: await this.orgHelperService.findOrgByID(orgID) });
   }
 
 

@@ -15,6 +15,15 @@ export class EmployeePrismaHelperService {
               private readonly localeService: LocaleService) {
   }
 
+  async findFirst(email: string) {
+    const user = await this.prismaService.employee.findFirst({ where: { email } });
+    if (!user) {
+      this.logger.error(AuthMsg.INVALID_EMAIL_OR_PASSWORD);
+      throw new AppNotFoundException(AuthMsg.INVALID_EMAIL_OR_PASSWORD);
+    }
+    return user;
+  }
+
   async findEmpById(id) {
     const found = await this.prismaService.employee.findFirst({ where: { id } });
     if (!found) {
@@ -191,20 +200,37 @@ export class EmployeePrismaHelperService {
     }
   }
 
-  async checkIfRoleIsManagement(role: string | string[]) {
-    if (typeof role === "string") {
-      if (role === "MANAGEMENT") {
-        this.logger.error(this.localeService.resolveMessage(AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE));
-        throw new AppException(this.localeService.resolveMessage(AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE));
-      }
-    }
-    if (Array.isArray(role)) {
-      if (role.some(r => r === "MANAGEMENT")) {
-        this.logger.error(this.localeService.resolveMessage(AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE));
-        throw new AppException(this.localeService.resolveMessage(AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE));
-      }
-    }
+  async setUserRefreshToken(email: string, refreshToken) {
+    await this.prismaService.employee.update({
+      where: { email },
+      data: { refreshToken }
+    });
+  };
 
+  async findAllEmployeesInOrg(request, orgID){
+    const { skip, take } = request;
+    try {
+      const [employees, total] = await this.prismaService.$transaction([
+          this.prismaService.organization.findFirst({
+            where: { id: orgID },
+            select: {
+              employees: {
+                select: prismaExclude("Employee", ["password", "refreshToken"])
+              }
+            },
+            skip,
+            take
+          }),
+          this.prismaService.organization.count({ where: { id: orgID } })
+        ]
+      );
+      const totalPage = Math.ceil(total / take) || 1;
+      return { total, totalPage, employees };
+    } catch (e) {
+      this.logger.error(AppException);
+      throw new AppException();
+    }
   }
+
 
 }

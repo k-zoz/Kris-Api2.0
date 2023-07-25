@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { AppConflictException } from "@core/exception/app-exception";
+import { AppConflictException, AppException } from "@core/exception/app-exception";
 import { LocaleService } from "@locale/locale.service";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { DateTime } from "luxon";
@@ -29,6 +29,22 @@ export class UtilService {
     }
     if (typeof param === "object" && Object.keys(param).length === 0) {
       throw new AppConflictException("Empty");
+    }
+
+  }
+
+  async checkIfRoleIsManagement(role: string | string[]) {
+    if (typeof role === "string") {
+      if (role === "MANAGEMENT") {
+        this.logger.error(this.localeService.resolveMessage(AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE));
+        throw new AppException(this.localeService.resolveMessage(AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE));
+      }
+    }
+    if (Array.isArray(role)) {
+      if (role.some(r => r === "MANAGEMENT")) {
+        this.logger.error(this.localeService.resolveMessage(AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE));
+        throw new AppException(this.localeService.resolveMessage(AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE));
+      }
     }
 
   }

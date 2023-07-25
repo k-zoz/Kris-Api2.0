@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
-import { AppConflictException } from "@core/exception/app-exception";
+import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { AppConst } from "@core/const/app.const";
 
 
@@ -9,6 +9,23 @@ export class OrganizationPrismaHelperService {
   private readonly logger = new Logger(OrganizationPrismaHelperService.name);
 
   constructor(private readonly prismaService: PrismaService) {}
+
+  async findOrgByID(id) {
+    const found = await this.prismaService.organization.findFirst({
+      where: { id },
+      include: {
+        team: true,
+        department: true,
+        leavePlan: true
+      }
+    });
+    if (!found) {
+      const msg = `Organization with id ${id} does not exist`;
+      this.logger.error(msg);
+      throw new AppNotFoundException(msg);
+    }
+    return found;
+  }
 
   async saveOrganization(org) {
     try {
@@ -73,6 +90,33 @@ export class OrganizationPrismaHelperService {
         this.logger.error(errMsg);
         throw new AppConflictException(errMsg);
       }
+    }
+  }
+
+  async findAllOrganizations(request){
+    const { skip, take } = request;
+    try {
+      const [users, total] = await this.prismaService.$transaction([
+          this.prismaService.organization.findMany({
+            select: {
+              id: true,
+              orgName: true,
+              orgEmail: true,
+              orgWebsite: true,
+              orgAddress: true,
+              orgRCnumber: true
+            },
+            skip,
+            take
+          }),
+          this.prismaService.organization.count()
+        ]
+      );
+      const totalPage = Math.ceil(total / take) || 1;
+      return { total, totalPage, users };
+    } catch (e) {
+      this.logger.error(AppException);
+      throw new AppException();
     }
   }
 }

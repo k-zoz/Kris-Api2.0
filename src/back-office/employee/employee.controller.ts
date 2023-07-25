@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Get, HttpStatus, Param, Post, UseGuards, ValidationPipe } from "@nestjs/common";
 import { BaseController } from "@core/utils/base-controller.controller";
 import { EmployeeService } from "@back-office/employee/employee.service";
 import { AuthGuard } from "@nestjs/passport";
@@ -11,37 +11,38 @@ import {
   CreateEmployeeDto, EditEmployeeDto,
   RoleToEmployee
 } from "@core/dto/global/employee.dto";
-import { LocaleService } from "@locale/locale.service";
 import { SearchRequest } from "@core/model/search-request";
 import { AuthMsg } from "@core/const/security-msg-const";
+import { Permission } from "@core/decorator/roles.decorator";
+import { UserRoleEnum } from "@core/enum/user-role-enum";
+import { OrganizationService } from "@back-office/orgnization/organization.service";
 
 
-@Controller("employee")
+@Controller("backoffice/employee")
 @UseGuards(AuthGuard())
 @UseGuards(EmployeeRoleGuard)
 export class EmployeeController extends BaseController {
-  constructor(private readonly employeeService: EmployeeService,
-              private readonly localeService: LocaleService
+  constructor(private readonly employeeService: EmployeeService
   ) {
     super();
   }
 
-
-  @Post("/:orgID/onboard")
-  @EmpPermission(EmployeeRoleEnum.MANAGEMENT, EmployeeRoleEnum.HUMAN_RESOURCE)
-  async onboard(@GetUser() payload: AuthPayload,
-                @Param("orgID") orgID: string,
-                @Body(ValidationPipe) request: CreateEmployeeDto
+  @Post("onboard/:orgID/employee")
+  @Permission(UserRoleEnum.SUPPORT)
+  async onboardOrgMgtEmployee(@GetUser() payload: AuthPayload,
+                              @Param("orgID") orgID: string,
+                              @Body(ValidationPipe) request: CreateEmployeeDto
   ) {
     return this.response({
-      message: "Created Successfully",
-      payload: await this.employeeService.onboardEmp(request, orgID, payload.email)
+      message: "Created successfully",
+      status: HttpStatus.CREATED,
+      payload: await this.employeeService.createOrgMgtEmployee(request, orgID, payload.email)
     });
   }
 
 
   @Post("/:orgID/profile/:empID/changeRole")
-  @EmpPermission(EmployeeRoleEnum.MANAGEMENT)
+  @Permission(UserRoleEnum.SUPPORT)
   async changeEmployeeRole(@GetUser() payload: AuthPayload,
                            @Param("orgID") orgID: string,
                            @Param("empID") empID: string,
@@ -54,7 +55,7 @@ export class EmployeeController extends BaseController {
   }
 
   @Post("/:orgID/profile/:empID/addRole")
-  @EmpPermission(EmployeeRoleEnum.MANAGEMENT)
+  @Permission(UserRoleEnum.SUPPORT)
   async addRoleToEmployee(@GetUser() payload: AuthPayload,
                           @Param("orgID") orgID: string,
                           @Param("empID") empID: string,
@@ -67,7 +68,7 @@ export class EmployeeController extends BaseController {
   };
 
   @Post("/:orgID/profile/:empID/deleteRole")
-  @EmpPermission(EmployeeRoleEnum.MANAGEMENT)
+  @Permission(UserRoleEnum.SUPPORT)
   async deleteRoleFromEmployee(@GetUser() payload: AuthPayload,
                                @Param("orgID") orgID: string,
                                @Param("empID") empID: string,
@@ -87,7 +88,7 @@ export class EmployeeController extends BaseController {
 
 
   @Post("/:orgID/allEmployees")
-  @EmpPermission(EmployeeRoleEnum.MANAGEMENT)
+  @Permission(UserRoleEnum.SUPPORT)
   async allEmployees(@Body(ValidationPipe) searchRequest: SearchRequest,
                      @Param("orgID") orgID: string
   ) {
@@ -98,13 +99,13 @@ export class EmployeeController extends BaseController {
 
   @Post("/:orgID/editProfile")
   async editProfile(
-                    @GetUser() payload:AuthPayload,
-                    @Param("orgID") orgID: string,
-                    @Body(ValidationPipe) request: EditEmployeeDto
-  ){
+    @GetUser() payload: AuthPayload,
+    @Param("orgID") orgID: string,
+    @Body(ValidationPipe) request: EditEmployeeDto
+  ) {
     return this.response({
-      payload:await this.employeeService.editEmployeeProfile(request, orgID, payload)
-    })
+      payload: await this.employeeService.editEmployeeProfile(request, orgID, payload)
+    });
   }
 
   //Testing
