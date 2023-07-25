@@ -25,11 +25,4 @@ export class EmployeeOrganizationController extends BaseController {
     return this.response({ payload: await this.employeeOrganizationService.findOrgInfo(orgID) });
   }
 
-
-
-
-  // TODO remove team
-  // TODO number of team and members
-  // TODO number of departments and teams in a department
-  // TODO delete employee leave
 }

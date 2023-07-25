@@ -51,6 +51,7 @@ export class LeaveController extends BaseController {
 
   //TODO leave goes  for approval to someone higher
   //TODO email notifs
+  // TODO delete employee leave
 
   @Get("/:orgID/history")
   async myLeaveHistory(@GetUser() payload: AuthPayload,

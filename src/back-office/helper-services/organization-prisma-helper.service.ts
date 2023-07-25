@@ -8,7 +8,8 @@ import { AppConst } from "@core/const/app.const";
 export class OrganizationPrismaHelperService {
   private readonly logger = new Logger(OrganizationPrismaHelperService.name);
 
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {
+  }
 
   async findOrgByID(id) {
     const found = await this.prismaService.organization.findFirst({
@@ -17,6 +18,7 @@ export class OrganizationPrismaHelperService {
         team: true,
         department: true,
         leavePlan: true
+
       }
     });
     if (!found) {
@@ -68,7 +70,6 @@ export class OrganizationPrismaHelperService {
   }
 
 
-
   //For the Organization model in prisma.
   //All the properties to be checked here are unique properties, so it checks to see if these unique properties have already been taken.
   //Property name a.k.a first argument in the checkEmpPropertyExists function must tally with how the name is saved in the Organization model in prisma.
@@ -93,7 +94,7 @@ export class OrganizationPrismaHelperService {
     }
   }
 
-  async findAllOrganizations(request){
+  async findAllOrganizations(request) {
     const { skip, take } = request;
     try {
       const [users, total] = await this.prismaService.$transaction([

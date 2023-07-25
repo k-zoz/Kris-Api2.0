@@ -8,14 +8,13 @@ import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { ModifyOrg } from "@core/dto/global/organization.dto";
 import { SearchRequest } from "@core/model/search-request";
 
-@Controller('organization/team')
+@Controller("organization/team")
 @UseGuards(AuthGuard())
 @UseGuards(EmployeeRoleGuard)
-export class OrgTeamController extends BaseController{
-  constructor(private readonly orgTeamService:OrgTeamService) {
+export class OrgTeamController extends BaseController {
+  constructor(private readonly orgTeamService: OrgTeamService) {
     super();
   }
-
 
 
   @Post("/:orgID/:deptID/addTeam")
@@ -31,7 +30,6 @@ export class OrgTeamController extends BaseController{
   }
 
 
-  // TODO get all teams
   @Post("/:orgID/allTeams")
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async getAllTeams(@Param("orgID") orgID: string,
@@ -41,7 +39,6 @@ export class OrgTeamController extends BaseController{
   }
 
 
-// TODO get all team leads
   @Post("/:orgID/allTeamLeads")
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async getAllTeamLeads(@Param("orgID") orgID: string,
@@ -49,5 +46,8 @@ export class OrgTeamController extends BaseController{
   ) {
     return this.response({ payload: await this.orgTeamService.allTeamLeads(orgID, searchRequest) });
   }
+
+  // TODO remove team
+  // TODO number of team and members
 
 }

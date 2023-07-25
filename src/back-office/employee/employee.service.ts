@@ -3,11 +3,8 @@ import * as argon from "argon2";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 import { RoleToEmployee, CreateEmployeeDto, EditEmployeeDto } from "@core/dto/global/employee.dto";
 import { UtilService } from "@core/utils/util.service";
-import { OrganizationService } from "@back-office/orgnization/organization.service";
-import { LocaleService } from "@locale/locale.service";
 import { SearchRequest } from "@core/model/search-request";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
-import { LeaveService } from "@organization/leave/leave.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
 
 
@@ -74,7 +71,7 @@ export class EmployeeService {
     return await argon.verify(emp.password, password);
   }
 
-  async findAllEmployees(request: SearchRequest, orgID) {
+  async findAllEmployees(request: SearchRequest, orgID:string) {
     await this.orgHelperService.findOrgByID(orgID);
     return  await this.employeeHelperService.findAllEmployeesInOrg(request, orgID)
 

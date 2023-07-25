@@ -41,9 +41,9 @@ export class EmployeeController extends BaseController {
   }
 
 
-  @Post("/:orgID/profile/:empID/changeRole")
+  @Post("/:orgID/roles/:empID/changeRole")
   @Permission(UserRoleEnum.SUPPORT)
-  async changeEmployeeRole(@GetUser() payload: AuthPayload,
+  async changeOrgMgtEmployeeRole(@GetUser() payload: AuthPayload,
                            @Param("orgID") orgID: string,
                            @Param("empID") empID: string,
                            @Body(ValidationPipe) request: RoleToEmployee
@@ -54,9 +54,9 @@ export class EmployeeController extends BaseController {
     });
   }
 
-  @Post("/:orgID/profile/:empID/addRole")
+  @Post("/:orgID/roles/:empID/addRole")
   @Permission(UserRoleEnum.SUPPORT)
-  async addRoleToEmployee(@GetUser() payload: AuthPayload,
+  async addRolesToOrgMgtEmployee(@GetUser() payload: AuthPayload,
                           @Param("orgID") orgID: string,
                           @Param("empID") empID: string,
                           @Body(ValidationPipe) request: RoleToEmployee
@@ -67,9 +67,9 @@ export class EmployeeController extends BaseController {
     });
   };
 
-  @Post("/:orgID/profile/:empID/deleteRole")
+  @Post("/:orgID/roles/:empID/deleteRole")
   @Permission(UserRoleEnum.SUPPORT)
-  async deleteRoleFromEmployee(@GetUser() payload: AuthPayload,
+  async deleteRoleFromOrgMgtEmployee(@GetUser() payload: AuthPayload,
                                @Param("orgID") orgID: string,
                                @Param("empID") empID: string,
                                @Body(ValidationPipe) request: RoleToEmployee
@@ -81,15 +81,10 @@ export class EmployeeController extends BaseController {
   };
 
 
-  @Get("profile")
-  employeeProfile(@GetUser() payload: AuthPayload) {
-    return this.response({ payload });
-  };
-
 
   @Post("/:orgID/allEmployees")
   @Permission(UserRoleEnum.SUPPORT)
-  async allEmployees(@Body(ValidationPipe) searchRequest: SearchRequest,
+  async allEmployeesInOrg(@Body(ValidationPipe) searchRequest: SearchRequest,
                      @Param("orgID") orgID: string
   ) {
     return this.response({
@@ -97,23 +92,13 @@ export class EmployeeController extends BaseController {
     });
   };
 
-  @Post("/:orgID/editProfile")
-  async editProfile(
-    @GetUser() payload: AuthPayload,
-    @Param("orgID") orgID: string,
-    @Body(ValidationPipe) request: EditEmployeeDto
-  ) {
-    return this.response({
-      payload: await this.employeeService.editEmployeeProfile(request, orgID, payload)
-    });
-  }
 
   //Testing
-  @Get("onboarders")
-  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE)
-  async getOnboarders(@GetUser() payload: any) {
-    console.log(payload);
-    // return this.response({ message: AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE });
-  }
+  // @Get("onboarders")
+  // @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE)
+  // async getOnboarders(@GetUser() payload: any) {
+  //   console.log(payload);
+  //   // return this.response({ message: AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE });
+  // }
 
 }

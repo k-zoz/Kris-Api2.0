@@ -53,7 +53,7 @@ export class EmployeeOrgDepartmentsController extends BaseController{
   }
 
 
-  // TODO get all departments
+
   @Post("/:orgID/allDept")
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async getAllDepartmentsInOrg(@Param("orgID") orgID: string,

@@ -4,9 +4,9 @@ import { PrismaService } from "@prisma/prisma.service";
 
 @Injectable()
 export class OrgDeptPrismaHelperService {
-  private readonly logger = new Logger(OrgDeptPrismaHelperService.name)
+  private readonly logger = new Logger(OrgDeptPrismaHelperService.name);
 
-  constructor(private readonly prismaService:PrismaService) {
+  constructor(private readonly prismaService: PrismaService) {
   }
 
   async findDeptDuplicates(dto, orgID) {
@@ -78,10 +78,10 @@ export class OrgDeptPrismaHelperService {
     try {
       await this.prismaService.department.update({
         where: {
-          id: deptID,
+          id: deptID
         },
-        data:{
-          organizationId:orgID
+        data: {
+          organizationId: orgID
         }
       });
       return "Action Successful";
@@ -98,6 +98,8 @@ export class OrgDeptPrismaHelperService {
         this.prismaService.department.findMany({
           where: {
             organizationId: orgID
+          }, include: {
+            teams: true
           },
           skip,
           take
