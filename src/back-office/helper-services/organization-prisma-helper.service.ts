@@ -5,8 +5,8 @@ import { AppConst } from "@core/const/app.const";
 
 
 @Injectable()
-export class OrganizationHelperService {
-  private readonly logger = new Logger(OrganizationHelperService.name);
+export class OrganizationPrismaHelperService {
+  private readonly logger = new Logger(OrganizationPrismaHelperService.name);
 
   constructor(private readonly prismaService: PrismaService) {}
 

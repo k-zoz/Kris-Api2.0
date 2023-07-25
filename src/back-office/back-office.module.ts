@@ -1,9 +1,9 @@
 import { Global, Module } from "@nestjs/common";
 import { OrganizationController } from "@back-office/orgnization/organizationController";
-import { OrganizationService } from "@back-office/orgnization/services/organization.service";
+import { OrganizationService } from "@back-office/orgnization/organization.service";
 import { PassportModule } from "@nestjs/passport";
-import { OrganizationHelperService } from "@back-office/orgnization/helper-services/organization-helper.service";
-import { EmployeeHelperService } from "@auth/helper-services/employee-helper.service";
+import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
+import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 import { LocaleService } from "../locale/locale.service";
 
 @Global()
@@ -11,7 +11,7 @@ import { LocaleService } from "../locale/locale.service";
   imports: [PassportModule.register({ defaultStrategy: "jwt", session: false })],
   exports: [OrganizationService],
   controllers: [OrganizationController],
-  providers: [OrganizationService,OrganizationHelperService,EmployeeHelperService,LocaleService]
+  providers: [OrganizationService,OrganizationPrismaHelperService,EmployeePrismaHelperService,LocaleService]
 })
 export class BackOfficeModule {
 

@@ -1,11 +1,11 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
 import { LoginRequest } from "@auth/model/login-request";
-import { EmployeeService } from "@auth/employee/employee.service";
+import { EmployeeService } from "@back-office/employee/employee.service";
 import { AppUnauthorizedException } from "@core/exception/app-exception";
 import {  JwtPayload } from "@auth/model/jwt-payload";
 import { TokenService } from "@auth/token/token.service";
-import { EmployeeHelperService } from "@auth/helper-services/employee-helper.service";
+import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 import { Employee } from "@core/dto/global/employee.dto";
 
 @Injectable()
@@ -13,7 +13,7 @@ export class EmployeeAuthService {
   private readonly logger = new Logger(EmployeeAuthService.name);
 
   constructor(private readonly employeeService: EmployeeService,
-              private readonly employeeHelperService:EmployeeHelperService,
+              private readonly employeeHelperService:EmployeePrismaHelperService,
               private readonly tokenService: TokenService
   ) {
   }

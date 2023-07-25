@@ -13,16 +13,18 @@ import { Permission } from "@core/decorator/roles.decorator";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { UserRoleEnum } from "@core/enum/user-role-enum";
-import { UserService } from "@auth/user/user.service";
+import { UserService } from "@back-office/user/user.service";
 import { SearchRequest } from "@core/model/search-request";
+import { UserPrismaHelperService } from "@back-office/helper-services/user-prisma-helper.service";
 
 
-@Controller("users")
+@Controller("backoffice/users")
 @UseGuards(AuthGuard())
 @UseGuards(RolesGuard)
 export class UserController extends BaseController {
   constructor(private readonly authService: AuthService,
               private readonly userService: UserService,
+              private readonly userHelperService:UserPrismaHelperService
   ) {
     super();
   }
@@ -38,41 +40,43 @@ export class UserController extends BaseController {
   async onboard(@GetUser() payload: AuthPayload,
                 @Body(ValidationPipe) request: CreateSuperUserDto) {
     return this.response({
-      payload: await this.authService.onboardBackOfficeUser(request, payload.email),
+      payload: await this.userService.onboardBackOfficeUser(request, payload.email),
       status: HttpStatus.CREATED,
       message: "Account created successfully"
     });
   };
 
 
-  @Post("changeRole/:ID")
+  @Post("changeRole/:userID")
   @Permission(UserRoleEnum.SUPER_ADMIN)
   async changeBackOfficeRole(@GetUser() payload: AuthPayload,
-                             @Param("ID") id: string,
+                             @Param("userID") userID: string,
                              @Body(ValidationPipe) request: UpdateBackOfficeUserRole) {
     return this.response({
-      payload: await this.userService.changeUserRole(payload.email, id, request.role),
+      payload: await this.userService.changeUserRole(payload.email, userID, request.role),
       status: HttpStatus.OK,
       message: "Role successfully changed"
     });
   }
 
-  @Post("changePassword/:ID")
+
+
+  @Post("changePassword/:userID")
   @Permission(UserRoleEnum.SUPER_ADMIN)
   async changeBackOfficePassword(@GetUser() payload: AuthPayload,
-                                 @Param("ID") id: string,
+                                 @Param("userID") userID: string,
                                  @Body(ValidationPipe) request: UpdateBackOfficeUserPassword
   ) {
     return this.response({
-      payload: await this.userService.changeUserPassword(payload.email, id, request.password),
+      payload: await this.userService.changeUserPassword(payload.email, userID, request.password),
       status: HttpStatus.OK,
       message: "Password Changed"
     });
   }
 
-  @Get("/:ID")
-  async findUserByID(@Param("ID") id: string) {
-    return this.response({ payload: await this.userService.findUserById(id) });
+  @Get("/:userID")
+  async findUserByID(@Param("userID") userID: string) {
+    return this.response({ payload: await this.userHelperService.findUserById(userID) });
   }
 
   @Post("editProfile")

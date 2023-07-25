@@ -1,11 +1,11 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ApplyForLeave, CreateLeaveDto } from "@core/dto/global/leave.dto";
 import { PrismaService } from "@prisma/prisma.service";
-import { OrganizationService } from "@back-office/orgnization/services/organization.service";
-import { LeaveHelperService } from "@organization/helper-services/leave-helper.service";
+import { OrganizationService } from "@back-office/orgnization/organization.service";
+import { LeavePrismaHelperService } from "@organization/org-prisma-helper-services/leave-prisma-helper.service";
 import { AppException } from "@core/exception/app-exception";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
-import { EmployeeHelperService } from "@auth/helper-services/employee-helper.service";
+import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 import { UtilService } from "@core/utils/util.service";
 
 @Injectable()
@@ -14,8 +14,8 @@ export class LeaveService {
 
   constructor(private readonly prismaService: PrismaService,
               private readonly organizationService: OrganizationService,
-              private readonly leaveHelperService: LeaveHelperService,
-              private readonly employeeHelperService: EmployeeHelperService,
+              private readonly leaveHelperService: LeavePrismaHelperService,
+              private readonly employeeHelperService: EmployeePrismaHelperService,
               private readonly utilService: UtilService
   ) {
   }

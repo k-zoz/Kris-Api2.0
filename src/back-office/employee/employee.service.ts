@@ -3,10 +3,10 @@ import { AppException, AppNotFoundException } from "@core/exception/app-exceptio
 import { PrismaService } from "@prisma/prisma.service";
 import * as argon from "argon2";
 import { prismaExclude } from "@prisma/prisma-utils";
-import { EmployeeHelperService } from "@auth/helper-services/employee-helper.service";
+import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 import { RoleToEmployee, CreateEmployeeDto, EditEmployeeDto } from "@core/dto/global/employee.dto";
 import { UtilService } from "@core/utils/util.service";
-import { OrganizationService } from "@back-office/orgnization/services/organization.service";
+import { OrganizationService } from "@back-office/orgnization/organization.service";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { LocaleService } from "@locale/locale.service";
 import { SearchRequest } from "@core/model/search-request";
@@ -20,7 +20,7 @@ export class EmployeeService {
   private readonly logger = new Logger(EmployeeService.name);
 
   constructor(private readonly prismaService: PrismaService,
-              private readonly employeeHelperService: EmployeeHelperService,
+              private readonly employeeHelperService: EmployeePrismaHelperService,
               private readonly utilService: UtilService,
               private readonly organizationService: OrganizationService,
               private readonly localeService: LocaleService,

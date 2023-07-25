@@ -4,17 +4,17 @@ import { CreateOrgDto, EditOrgDto } from "@core/dto/global/organization.dto";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { SearchRequest } from "@core/model/search-request";
 import { CreateEmployeeDto } from "@core/dto/global/employee.dto";
-import { OrganizationHelperService } from "@back-office/orgnization/helper-services/organization-helper.service";
+import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
 import * as argon from "argon2";
-import { EmployeeHelperService } from "@auth/helper-services/employee-helper.service";
+import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 
 @Injectable()
 export class OrganizationService {
   private readonly logger = new Logger(OrganizationService.name);
 
   constructor(private readonly prismaService: PrismaService,
-              private readonly orgHelperService: OrganizationHelperService,
-              private readonly employeeHelperService: EmployeeHelperService
+              private readonly orgHelperService: OrganizationPrismaHelperService,
+              private readonly employeeHelperService: EmployeePrismaHelperService
   ) {
   }
 

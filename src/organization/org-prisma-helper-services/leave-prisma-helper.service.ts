@@ -5,8 +5,8 @@ import { AppConflictException, AppException, AppNotFoundException } from "@core/
 import { CreateLeaveDto } from "@core/dto/global/leave.dto";
 
 @Injectable()
-export class LeaveHelperService {
-  private readonly logger = new Logger(LeaveHelperService.name);
+export class LeavePrismaHelperService {
+  private readonly logger = new Logger(LeavePrismaHelperService.name);
 
   constructor(private readonly prismaService: PrismaService) {
   }

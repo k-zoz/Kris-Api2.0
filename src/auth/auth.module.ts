@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { UserService } from "@auth/user/user.service";
+import { UserService } from "@back-office/user/user.service";
 import { AuthService } from "@auth/service/auth.service";
 import { ConfigService } from "@nestjs/config";
 import { JwtModule, JwtService } from "@nestjs/jwt";
@@ -8,17 +8,17 @@ import { JwtStrategy } from "@auth/strategies/jwt-strategy";
 import { TokenService } from "@auth/token/token.service";
 import { AuthController } from "@auth/controller/auth.controller";
 import { UtilService } from "@core/utils/util.service";
-import { UserController } from "@auth/user/user.controller";
+import { UserController } from "@back-office/user/user.controller";
 import { AppService } from "../app.service";
 import { EmployeeAuthController } from "@auth/controller/employee-auth.controller";
 import { EmployeeAuthService } from "@auth/service/employee-auth.service";
-import { EmployeeService } from "@auth/employee/employee.service";
-import { EmployeeHelperService } from "@auth/helper-services/employee-helper.service";
-import { UserHelperService } from "@auth/helper-services/user-helper.service";
-import { EmployeeController } from "@auth/employee/employee.controller";
-import { OrganizationService } from "@back-office/orgnization/services/organization.service";
+import { EmployeeService } from "@back-office/employee/employee.service";
+import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
+import { UserPrismaHelperService } from "@back-office/helper-services/user-prisma-helper.service";
+import { EmployeeController } from "@back-office/employee/employee.controller";
+import { OrganizationService } from "@back-office/orgnization/organization.service";
 import { LocaleService } from "@locale/locale.service";
-import { LeaveHelperService } from "@organization/helper-services/leave-helper.service";
+import { LeavePrismaHelperService } from "@organization/org-prisma-helper-services/leave-prisma-helper.service";
 import { LeaveService } from "@organization/leave/leave.service";
 import { EmployeeOrganizationModule } from "@organization/employeeOrganization.module";
 
@@ -39,8 +39,8 @@ import { EmployeeOrganizationModule } from "@organization/employeeOrganization.m
   controllers: [AuthController, UserController, EmployeeAuthController,EmployeeController],
   providers: [UserService, AuthService, ConfigService, JwtStrategy,
     TokenService, UtilService, AppService, EmployeeAuthService,
-    EmployeeService, EmployeeHelperService, UserHelperService,LeaveService, LocaleService],
-  exports: [JwtStrategy, PassportModule,EmployeeHelperService, UserService]
+    EmployeeService, EmployeePrismaHelperService, UserPrismaHelperService,LeaveService, LocaleService],
+  exports: [JwtStrategy, PassportModule,EmployeePrismaHelperService, UserService]
 })
 export class AuthModule {
 }

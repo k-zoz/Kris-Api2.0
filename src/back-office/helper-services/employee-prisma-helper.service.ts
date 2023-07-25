@@ -8,8 +8,8 @@ import { AuthMsg } from "@core/const/security-msg-const";
 import { LocaleService } from "@locale/locale.service";
 
 @Injectable()
-export class EmployeeHelperService {
-  private readonly logger = new Logger(EmployeeHelperService.name);
+export class EmployeePrismaHelperService {
+  private readonly logger = new Logger(EmployeePrismaHelperService.name);
 
   constructor(private readonly prismaService: PrismaService,
               private readonly localeService: LocaleService) {

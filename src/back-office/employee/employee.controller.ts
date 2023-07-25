@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, UseGuards, ValidationPipe } from "@nestjs/common";
 import { BaseController } from "@core/utils/base-controller.controller";
-import { EmployeeService } from "@auth/employee/employee.service";
+import { EmployeeService } from "@back-office/employee/employee.service";
 import { AuthGuard } from "@nestjs/passport";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { EmployeeRoleGuard } from "@core/guard/employee-role.guard";

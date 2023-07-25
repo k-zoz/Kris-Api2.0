@@ -49,6 +49,7 @@ model Organization {
   orgIndustry String
 
   team       Team[]
+  teamLead   TeamLead[]
   employees  Employee[]
   department Department[]
   leavePlan  Leave[]
@@ -88,11 +89,13 @@ model Team {
 }
 
 model TeamLead {
-  id         String   @id @default(uuid())
-  employeeId String
-  Employee   Employee @relation(fields: [employeeId], references: [id])
-  teamId     String   @unique
-  Team       Team     @relation(fields: [teamId], references: [id])
+  id             String       @id @default(uuid())
+  employeeId     String
+  Employee       Employee     @relation(fields: [employeeId], references: [id])
+  teamId         String       @unique
+  Team           Team         @relation(fields: [teamId], references: [id])
+  organizationId String
+  Organization   Organization @relation(fields: [organizationId], references: [id])
 }
 
 enum Employee_Role {

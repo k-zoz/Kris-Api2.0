@@ -5,7 +5,7 @@ import { PrismaService } from "@prisma/prisma.service";
 import { ConfigService } from "@nestjs/config";
 import { JwtPayload } from "@auth/model/jwt-payload";
 import { Request } from "express";
-import { UserService } from "@auth/user/user.service";
+import { UserService } from "@back-office/user/user.service";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { AppTokenExpiredException } from "@core/exception/app-exception";
 

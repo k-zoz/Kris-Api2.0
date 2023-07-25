@@ -7,7 +7,7 @@ import { UserRoleEnum } from "@core/enum/user-role-enum";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { CreateOrgDto, EditOrgDto } from "@core/dto/global/organization.dto";
-import { OrganizationService } from "@back-office/orgnization/services/organization.service";
+import { OrganizationService } from "@back-office/orgnization/organization.service";
 import { SearchRequest } from "@core/model/search-request";
 import { CreateEmployeeDto } from "@core/dto/global/employee.dto";
 
@@ -74,10 +74,10 @@ export class OrganizationController extends BaseController {
   //TODO get all employees in an organization
 
 
-  //Testing
-  @Get("onboarders")
-  @Permission(UserRoleEnum.SUPPORT)
-  async getOnboarders(@GetUser() payload: AuthPayload) {
-    console.log(payload);
-  }
+  // //Testing
+  // @Get("onboarders")
+  // @Permission(UserRoleEnum.SUPPORT)
+  // async getOnboarders(@GetUser() payload: AuthPayload) {
+  //   console.log(payload);
+  // }
 }
