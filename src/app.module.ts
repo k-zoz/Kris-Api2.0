@@ -3,9 +3,9 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "@auth/auth.module";
 import { PrismaModule } from "@prisma/prisma.module";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import moment from "moment";
-import { APP_FILTER } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { AppExceptionFilter } from "@core/filter/app-exception.filter";
 import { CurrentUserMiddleware } from "@core/middleware/current-user.middleware";
 import { JwtService } from "@nestjs/jwt";
@@ -15,6 +15,7 @@ import configuration from "@config/configuration";
 import { BackOfficeModule } from "@back-office/back-office.module";
 import { EmployeeOrganizationModule } from "@organization/employeeOrganization.module";
 import { EventEmitterModule } from "@nestjs/event-emitter";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 
 @Module({
@@ -45,6 +46,14 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
     //     port: 6379,
     //   })
     // }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        ttl: config.get("rateLimitThrottleTtl"),
+        limit: config.get("rateLimitThrottleLimit")
+      })
+    }),
     EventEmitterModule.forRoot(),
     BackOfficeModule, AuthModule, PrismaModule, EmployeeOrganizationModule],
   controllers: [AppController],
@@ -55,6 +64,10 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
     //   useClass: AppInterceptor
     // },
     {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard
+    },
+    {
       provide: APP_FILTER,
       useClass: AppExceptionFilter
     },
@@ -64,6 +77,7 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
     },
     AppService, CurrentUserMiddleware, JwtService]
 })
+
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(CurrentUserMiddleware)

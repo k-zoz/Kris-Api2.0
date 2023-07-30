@@ -13,9 +13,9 @@ export class CurrentUserMiddleware implements NestMiddleware {
   }
 
   //This middleware was created, for authorization.
-  // To  access the incoming request, the req header needs the user(payload property)
+  //To access the incoming request, the req header needs the user(payload property)
   //It also need the Authorization and Bearer from the raw headers of the incoming request
-  // It splits the Bearer from the signed token
+  //It splits the Bearer from the signed token
   //Verifies the token
   //then set the token as payload for the jwt strategy to use
   async use(req: Request, res: Response, next: NextFunction) {
@@ -33,7 +33,8 @@ export class CurrentUserMiddleware implements NestMiddleware {
     }
 
     if (!bearerString) {
-      throw new AppTokenExpiredException("Token not provided. Kindly sign in.");
+      payload.authPayload = authPayload
+      throw new AppTokenExpiredException("Token not provided!. Kindly sign in.");
     } else {
       try {
         const bearerStringSplit = bearerString.split(" ");
