@@ -2,8 +2,8 @@
   "name": "kris-api",
   "version": "0.0.1",
   "engines": {
-    "node": "16.13.0",
-    "npm": "8.1.0"
+    "node": "18.12.0",
+    "npm": "9.4.0"
   },
   "description": "",
   "author": "",
