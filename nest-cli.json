@@ -12,6 +12,7 @@
           "introspectComments": true
         }
       }
-    ]
+    ],
+    "assets": ["templates/**/*"]
   }
 }

@@ -44,9 +44,9 @@ export class EmployeeController extends BaseController {
   @Post("/:orgID/roles/:empID/changeRole")
   @Permission(UserRoleEnum.SUPPORT)
   async changeOrgMgtEmployeeRole(@GetUser() payload: AuthPayload,
-                           @Param("orgID") orgID: string,
-                           @Param("empID") empID: string,
-                           @Body(ValidationPipe) request: RoleToEmployee
+                                 @Param("orgID") orgID: string,
+                                 @Param("empID") empID: string,
+                                 @Body(ValidationPipe) request: RoleToEmployee
   ) {
     return this.response({
       message: "Changes saved successfully",
@@ -57,9 +57,9 @@ export class EmployeeController extends BaseController {
   @Post("/:orgID/roles/:empID/addRole")
   @Permission(UserRoleEnum.SUPPORT)
   async addRolesToOrgMgtEmployee(@GetUser() payload: AuthPayload,
-                          @Param("orgID") orgID: string,
-                          @Param("empID") empID: string,
-                          @Body(ValidationPipe) request: RoleToEmployee
+                                 @Param("orgID") orgID: string,
+                                 @Param("empID") empID: string,
+                                 @Body(ValidationPipe) request: RoleToEmployee
   ) {
     return this.response({
       message: AuthMsg.ROLE_ADDED,
@@ -70,9 +70,9 @@ export class EmployeeController extends BaseController {
   @Post("/:orgID/roles/:empID/deleteRole")
   @Permission(UserRoleEnum.SUPPORT)
   async deleteRoleFromOrgMgtEmployee(@GetUser() payload: AuthPayload,
-                               @Param("orgID") orgID: string,
-                               @Param("empID") empID: string,
-                               @Body(ValidationPipe) request: RoleToEmployee
+                                     @Param("orgID") orgID: string,
+                                     @Param("empID") empID: string,
+                                     @Body(ValidationPipe) request: RoleToEmployee
   ) {
     return this.response({
       message: AuthMsg.ROLE_REMOVED_SUCCESSFULLY,
@@ -81,11 +81,10 @@ export class EmployeeController extends BaseController {
   };
 
 
-
   @Post("/:orgID/allEmployees")
   @Permission(UserRoleEnum.SUPPORT)
   async allEmployeesInOrg(@Body(ValidationPipe) searchRequest: SearchRequest,
-                     @Param("orgID") orgID: string
+                          @Param("orgID") orgID: string
   ) {
     return this.response({
       payload: await this.employeeService.findAllEmployees(searchRequest, orgID)

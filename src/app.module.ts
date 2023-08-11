@@ -16,6 +16,11 @@ import { BackOfficeModule } from "@back-office/back-office.module";
 import { EmployeeOrganizationModule } from "@organization/employeeOrganization.module";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { AlertModule } from "./alert/alert.module";
+import { MailerModule } from "@nestjs-modules/mailer";
+import mailConfig from "@config/mail.config";
+import { join } from "path";
+import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 
 
 @Module({
@@ -54,8 +59,23 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
         limit: config.get("rateLimitThrottleLimit")
       })
     }),
+
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (config: ConfigService) => ({
+        ...mailConfig(config),
+        template: {
+          dir: join(__dirname, "./templates"),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true
+          }
+        }
+      }),
+      inject: [ConfigService]
+    }),
     EventEmitterModule.forRoot(),
-    BackOfficeModule, AuthModule, PrismaModule, EmployeeOrganizationModule],
+    BackOfficeModule, AuthModule, PrismaModule, EmployeeOrganizationModule, AlertModule],
   controllers: [AppController],
   providers: [
 
@@ -89,4 +109,3 @@ export class AppModule {
   }
 }
 
-//

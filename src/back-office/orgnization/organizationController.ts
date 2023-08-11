@@ -9,10 +9,9 @@ import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { CreateOrgDto, EditOrgDto } from "@core/dto/global/organization.dto";
 import { OrganizationService } from "@back-office/orgnization/organization.service";
 import { SearchRequest } from "@core/model/search-request";
-import { CreateEmployeeDto } from "@core/dto/global/employee.dto";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
 
-@Controller("backOffice/organization")
+@Controller("backoffice/organization")
 @UseGuards(AuthGuard())
 @UseGuards(RolesGuard)
 export class OrganizationController extends BaseController {
@@ -61,7 +60,6 @@ export class OrganizationController extends BaseController {
     });
   }
 
-  //TODO get all employees in an organization
 
 
   // //Testing

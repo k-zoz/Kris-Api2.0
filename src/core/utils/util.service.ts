@@ -3,6 +3,7 @@ import { AppConflictException, AppException } from "@core/exception/app-exceptio
 import { LocaleService } from "@locale/locale.service";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { DateTime } from "luxon";
+import { randomBytes } from 'crypto';
 
 
 
@@ -64,5 +65,39 @@ export class UtilService {
    toUpperCase(str: string): string {
     return str.toUpperCase();
   }
+
+
+  generateRandomPassword(): string {
+    const length = 10;
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=';
+    let password = '';
+    let hasUpper = false;
+    let hasLower = false;
+    let hasNumber = false;
+    let hasSymbol = false;
+
+    while (!hasUpper || !hasLower || !hasNumber || !hasSymbol) {
+      password = '';
+      for (let i = 0; i < length; i++) {
+        const index = randomBytes(1)[0] % charset.length;
+        const char = charset[index];
+        password += char;
+
+        if (char >= 'A' && char <= 'Z') {
+          hasUpper = true;
+        } else if (char >= 'a' && char <= 'z') {
+          hasLower = true;
+        } else if (char >= '0' && char <= '9') {
+          hasNumber = true;
+        } else {
+          hasSymbol = true;
+        }
+      }
+    }
+
+    return password;
+  }
+
+
 
 }

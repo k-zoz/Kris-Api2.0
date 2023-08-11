@@ -25,9 +25,7 @@ export class UserController extends BaseController {
   constructor(private readonly authService: AuthService,
               private readonly userService: UserService,
               private readonly userHelperService:UserPrismaHelperService
-  ) {
-    super();
-  }
+  ) {super();}
 
   @Get("roles")
   @Permission(UserRoleEnum.SUPER_ADMIN)
@@ -99,7 +97,7 @@ export class UserController extends BaseController {
     });
   }
 
-  @Get("userProfile")
+  @Post("userProfile")
   userProfile(@GetUser() payload: AuthPayload) {
     return this.response({ payload });
   }

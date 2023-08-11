@@ -41,8 +41,12 @@ export class UserService implements OnModuleInit {
   async onboardBackOfficeUser(dto: CreateSuperUserDto, creatorEmail?: string) {
     await this.userHelperService.validateRequest(dto);
     dto.createdBy = creatorEmail;
-    return this.userHelperService.saveNewUser(dto);
+    dto.password =this.utilService.generateRandomPassword()
+    return this.userHelperService.saveNewUserndSendEmail(dto);
   }
+
+  //TODO generate random password
+  //TODO get the email from the created profile and the generated password and send as mail
 
   async editProfile(requesterMail: string, dto: UpdateBackOfficeProfile) {
     await this.userHelperService.validateRequest(dto);

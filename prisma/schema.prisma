@@ -84,8 +84,6 @@ model Team {
   createdDate    DateTime     @default(now())
   teamLeadId     String?
   teamLead       TeamLead?    @relation
-
-  @@unique([organizationId])
 }
 
 model TeamLead {

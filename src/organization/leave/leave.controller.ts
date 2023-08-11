@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, UseGuards, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, UseGuards, ValidationPipe } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { EmployeeRoleGuard } from "@core/guard/employee-role.guard";
 import { BaseController } from "@core/utils/base-controller.controller";
@@ -10,7 +10,7 @@ import { ApplyForLeave, CreateLeaveDto, MockLeaveDto } from "@core/dto/global/le
 import { LeaveService } from "@organization/leave/leave.service";
 
 
-@Controller("leave")
+@Controller("organization/leave")
 @UseGuards(AuthGuard())
 @UseGuards(EmployeeRoleGuard)
 export class LeaveController extends BaseController {
@@ -49,9 +49,30 @@ export class LeaveController extends BaseController {
     });
   }
 
-  //TODO leave goes  for approval to someone higher
-  //TODO email notifs
+  // TODO leave goes  for approval to someone higher
+  // TODO email notifs
+
+
   // TODO delete employee leave
+  @Delete("/:orgID/deleteLeave/:empID")
+  async deleteEmployeeLeavePlan(@Param("orgID") orgID: string,
+                                @Param("empID") empID: string,
+                                @GetUser() payload: AuthPayload
+  ) {
+    return this.response({
+      payload: await this.leaveService.deleteEmployeeLeavePlan(orgID, empID, payload.email),
+      message: "Successful",
+
+    });
+  }
+
+//TODO create leave for only one employee
+  // TODO all the leave history for all employees
+
+  // @Get("/:orgID/history/allEmployees")
+  // async allEmployeesLeaveHistory(@Param("orgID") orgID: string){
+  //   return this.response({payload:await this.leaveService.allEmployeesLeave(orgID)})
+  // }
 
   @Get("/:orgID/history")
   async myLeaveHistory(@GetUser() payload: AuthPayload,

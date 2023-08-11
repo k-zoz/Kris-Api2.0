@@ -150,5 +150,6 @@ export class OrgEmployeeController extends BaseController {
     });
   };
 
+  // TODO delete employee, delete from team, department, leave plans, e.t.c
 
 }

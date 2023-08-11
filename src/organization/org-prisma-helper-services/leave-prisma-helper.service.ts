@@ -214,5 +214,34 @@ export class LeavePrismaHelperService {
       throw new AppNotFoundException();
     }
   }
+
+  async deleteEmpLeavePlans(orgID: string, empID: string) {
+    try {
+      const [leaveApplications, employeeLeave] = await this.prismaService.$transaction([
+        this.prismaService.leaveApplication.deleteMany({
+          where:{
+            employeeId:empID
+          }
+        }),
+
+        this.prismaService.employeeLeave.deleteMany({where:{
+          employeeId:empID
+          }})
+      ])
+    }catch (e) {
+      this.logger.error(e);
+      throw new AppException()
+    }
+  }
+
+  // async findAllEmpLeaveHistory(orgID: string) {
+  //   try {
+  //     const [leaveApplications]= await this.prismaService.organization.findMany({
+  //       where:{ }
+  //     })
+  //   }catch (e) {
+  //
+  //   }
+  // }
 }
 

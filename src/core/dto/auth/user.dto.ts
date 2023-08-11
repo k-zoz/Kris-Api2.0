@@ -25,8 +25,6 @@ export class CreateSuperUserDto extends BaseDto {
   firstname: string;
   @IsNotEmpty({ message: "Surname is required" })
   surname: string;
-  @IsNotEmpty({ message: "Password is required" })
-  @IsStrongPassword({ minNumbers: 1, minSymbols: 1, minLowercase: 1, minUppercase: 1, minLength: 8 })
   password: string;
   @IsOptional()
   createdBy: string;

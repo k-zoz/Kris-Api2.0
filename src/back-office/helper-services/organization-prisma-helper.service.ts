@@ -17,7 +17,18 @@ export class OrganizationPrismaHelperService {
       include: {
         team: true,
         department: true,
-        leavePlan: true
+        leavePlan: true,
+        employees:{
+          select: {
+            firstname:true,
+            role:true,
+            email:true,
+            Department:true,
+            phoneNumber:true,
+            id:true,
+            Team:true
+          }
+        }
 
       }
     });

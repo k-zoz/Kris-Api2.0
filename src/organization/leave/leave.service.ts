@@ -40,7 +40,7 @@ export class LeaveService {
     dto.leaveDuration = this.utilService.calcLeaveDuration(dto.leaveStartDate, dto.leaveEndDate);
     dto.leaveEndDate = this.utilService.convertLeaveDate(dto.leaveEndDate);
     dto.leaveStartDate = this.utilService.convertLeaveDate(dto.leaveStartDate);
-    await this.leaveHelperService.leaveDurationRequest(employee, dto)
+    await this.leaveHelperService.leaveDurationRequest(employee, dto);
     return await this.leaveHelperService.applyLeave(dto, orgID, employee);
   }
 
@@ -50,11 +50,22 @@ export class LeaveService {
     return await this.leaveHelperService.getMyLeaveHistory(orgID, employee);
   }
 
-  async onboardLeaveForNewEmployee(orgID: string, employee){
+  async onboardLeaveForNewEmployee(orgID: string, employee) {
     await this.orgHelperService.findOrgByID(orgID);
-    return await this.leaveHelperService.leaveOnboarding(orgID, employee)
+    return await this.leaveHelperService.leaveOnboarding(orgID, employee);
   }
 
+  async deleteEmployeeLeavePlan(orgID: string, empID: string, payloadEmail: string) {
+    await this.orgHelperService.findOrgByID(orgID);
+    const employee = await this.employeeHelperService.findEmpById(empID);
+    this.utilService.compareEmails(employee.email, payloadEmail);
+    return await this.leaveHelperService.deleteEmpLeavePlans(orgID, empID);
+  }
+
+  // async allEmployeesLeave(orgID: string) {
+  //   await this.orgHelperService.findOrgByID(orgID)
+  //   return await this.leaveHelperService.findAllEmpLeaveHistory(orgID);
+  // }
 }
 
 

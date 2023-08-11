@@ -1,6 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { UtilService } from "@core/utils/util.service";
-import { OrganizationService } from "@back-office/orgnization/organization.service";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 import { OrgEmpPrismaHelperService } from "@organization/org-prisma-helper-services/org-emp-prisma-helper.service";
 import { OrgTeamPrismaHelperService } from "@organization/org-prisma-helper-services/org-team-prisma-helper.service";

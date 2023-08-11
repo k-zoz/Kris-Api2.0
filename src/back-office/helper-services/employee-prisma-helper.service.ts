@@ -215,13 +215,24 @@ export class EmployeePrismaHelperService {
             where: { id: orgID },
             select: {
               employees: {
-                select: prismaExclude("Employee", ["password", "refreshToken"])
+                select:{
+                  firstname:true,
+                  lastname:true,
+                  email:true,
+                  role:true,
+                  id:true,
+                  phoneNumber:true,
+                  idNumber:true,
+                  Team:true,
+                  Department:true,
+                  TeamLead:true
+                },
               }
             },
             skip,
             take
           }),
-          this.prismaService.organization.count({ where: { id: orgID } })
+          this.prismaService.employee.count({ where: { organizationId:orgID } })
         ]
       );
       const totalPage = Math.ceil(total / take) || 1;
