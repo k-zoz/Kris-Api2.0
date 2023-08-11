@@ -2,13 +2,14 @@
   "name": "kris-api",
   "version": "0.0.1",
   "engines": {
-    "node": "16.13.0",
-    "npm": "8.1.0"
+    "node": "18.x",
+    "npm": "9.x"
   },
   "description": "",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "type": "module",
   "scripts": {
     "prebuild": "rimraf dist",
     "postinstall": "npx prisma generate && npm run build",
