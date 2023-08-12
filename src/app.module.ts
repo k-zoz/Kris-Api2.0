@@ -78,7 +78,6 @@ import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handleba
     BackOfficeModule, AuthModule, PrismaModule, EmployeeOrganizationModule, AlertModule],
   controllers: [AppController],
   providers: [
-
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: AppInterceptor
