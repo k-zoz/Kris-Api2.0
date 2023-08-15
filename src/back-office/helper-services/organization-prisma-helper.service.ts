@@ -21,8 +21,9 @@ export class OrganizationPrismaHelperService {
               private readonly configService: ConfigService
 
   ) {
+    // const resendKey = this.configService.get("resendApiKey")
     const resendKey = this.configService.get("resendApiKey")
-    this.resend = new Resend(process.env.RESEND_API_KEY);
+    this.resend = new Resend(resendKey);
   }
 
   async findOrgByID(id) {

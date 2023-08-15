@@ -26,8 +26,8 @@ export class UserPrismaHelperService {
               private readonly configService: ConfigService
 
   ) {
-  const resendKey = this.configService.get("resendApiKey")
-    this.resend = new Resend(process.env.RESEND_API_KEY);
+    const resendKey = this.configService.get("resendApiKey")
+    this.resend = new Resend(resendKey);
   }
 
 
