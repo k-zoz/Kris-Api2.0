@@ -16,14 +16,16 @@ import { NewEmployeeEvent } from "@core/event/back-office-event";
 @Injectable()
 export class EmployeePrismaHelperService {
   private readonly logger = new Logger(EmployeePrismaHelperService.name);
-  private readonly resendKey = this.configService.get("resendApiKey")
-  private readonly resend = new Resend(this.resendKey);
+  // private readonly resendKey = this.configService.get("resendApiKey")
+  // private readonly resend = new Resend(this.resendKey);
   private readonly mailSource = this.configService.get("mailSender");
-
+  private resend: Resend;
   constructor(private readonly prismaService: PrismaService,
               private readonly configService: ConfigService,
               private readonly emailService: EmailService,
               private readonly localeService: LocaleService) {
+    const resendKey = this.configService.get("resendApiKey")
+    this.resend = new Resend(resendKey);
   }
 
   async findFirst(email: string) {

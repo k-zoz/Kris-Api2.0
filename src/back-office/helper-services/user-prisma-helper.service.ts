@@ -17,14 +17,17 @@ import { Resend } from "resend";
 export class UserPrismaHelperService {
   private readonly logger = new Logger(UserPrismaHelperService.name);
   private readonly mailSource = this.configService.get("mailSender");
-  private readonly resendKey = this.configService.get("resendApiKey")
-  private readonly resend = new Resend(this.resendKey);
-
+   // private readonly resendKey = this.configService.get("resendApiKey")
+   // private readonly resend = new Resend(this.resendKey);
+  private resend: Resend;
   constructor(private readonly prismaService: PrismaService,
               private readonly eventEmitter: EventEmitter2,
               private readonly emailService: EmailService,
               private readonly configService: ConfigService
+
   ) {
+  const resendKey = this.configService.get("resendApiKey")
+    this.resend = new Resend(resendKey);
   }
 
 
