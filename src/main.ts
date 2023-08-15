@@ -1,6 +1,6 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { ValidationPipe } from "@nestjs/common";
+import { ValidationPipe, VersioningType } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import helmet from "helmet";
 import { json, urlencoded } from "express";
@@ -23,7 +23,7 @@ async function bootstrap() {
     credentials: true
   });
 
-
+  // app.enableVersioning({ type: VersioningType.URI, defaultVersion: "1" });
   app.set("trust proxy", 1);
   app.use(json({ limit: "100mb" }));
   app.use(urlencoded({ limit: "100mb", extended: true, parameterLimit: 100000000 }));

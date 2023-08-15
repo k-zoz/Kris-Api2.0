@@ -33,8 +33,8 @@ export class OrgTeamService {
     return await this.orgTeamHelperService.findAllTeams(orgID, searchRequest);
   }
 
-  async allTeamLeads(orgID, searchRequest) {
-    await this.orgHelperService.findOrgByID(orgID);
-    return await this.orgTeamHelperService.findAllTeamLeads(orgID, searchRequest);
-  }
+  // async allTeamLeads(orgID, searchRequest) {
+  //   await this.orgHelperService.findOrgByID(orgID);
+  //   return await this.orgTeamHelperService.findAllTeamLeads(orgID, searchRequest);
+  // }
 }

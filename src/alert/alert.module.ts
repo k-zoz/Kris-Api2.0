@@ -8,11 +8,9 @@ import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handleba
 
 @Global()
 @Module({
-  imports: [
-
-  ],
+  imports: [],
   controllers: [],
-  providers: [EmailService, ConfigService],
+  providers: [EmailService],
   exports: [EmailService]
 })
 export class AlertModule {

@@ -3,6 +3,7 @@ import { BaseController } from "@core/utils/base-controller.controller";
 import { AuthService } from "@auth/service/auth.service";
 import { AuthGuard } from "@nestjs/passport";
 import {
+  ConfirmInputPasswordDto,
   CreateSuperUserDto,
   UpdateBackOfficeProfile,
   UpdateBackOfficeUserPassword,
@@ -24,13 +25,20 @@ import { UserPrismaHelperService } from "@back-office/helper-services/user-prism
 export class UserController extends BaseController {
   constructor(private readonly authService: AuthService,
               private readonly userService: UserService,
-              private readonly userHelperService:UserPrismaHelperService
-  ) {super();}
+              private readonly userHelperService: UserPrismaHelperService
+  ) {
+    super();
+  }
 
   @Get("roles")
-  @Permission(UserRoleEnum.SUPER_ADMIN)
   allRoles() {
     return this.response({ payload: this.userService.roles() });
+  }
+
+  @Get("status")
+  @Permission(UserRoleEnum.SUPER_ADMIN)
+  allBoStatus() {
+    return this.response({ payload: this.userService.boStatus() });
   }
 
   @Post("onboard")
@@ -57,10 +65,14 @@ export class UserController extends BaseController {
     });
   }
 
-
+  @Post("confirmPassword/:userID")
+  async confirmInputPassword(@Body(ValidationPipe) dto:ConfirmInputPasswordDto,
+                             @Param("userID") userID: string,
+  ){
+    return this.response({payload: await this.userService.checkUserPassword(dto, userID)})
+  }
 
   @Post("changePassword/:userID")
-  @Permission(UserRoleEnum.SUPER_ADMIN)
   async changeBackOfficePassword(@GetUser() payload: AuthPayload,
                                  @Param("userID") userID: string,
                                  @Body(ValidationPipe) request: UpdateBackOfficeUserPassword
@@ -72,18 +84,30 @@ export class UserController extends BaseController {
     });
   }
 
+  @Get("resetPassword/:userID")
+  @Permission(UserRoleEnum.SUPER_ADMIN)
+  async resetBackOfficePassword(@GetUser() payload: AuthPayload,
+                                @Param("userID") userID: string
+  ) {
+    return this.response({
+      payload: await this.userService.resetUserPassword(payload.email, userID),
+      message: "Changes saved successfully"
+    });
+  }
+
   @Get("/:userID")
   async findUserByID(@Param("userID") userID: string) {
     return this.response({ payload: await this.userHelperService.findUserById(userID) });
   }
 
-  @Post("editProfile")
+  @Post("/:userID/editProfile")
   // @Permission(UserRoleEnum.SUPER_ADMIN, UserRoleEnum.ADMIN, UserRoleEnum.STAFF, UserRoleEnum.SUPPORT)
   async updateProfile(@GetUser() payload: AuthPayload,
-                      @Body(ValidationPipe) request: UpdateBackOfficeProfile
+                      @Body(ValidationPipe) request: UpdateBackOfficeProfile,
+                      @Param("userID") userID: string
   ) {
     return this.response({
-      payload: await this.userService.editProfile(payload.email, request),
+      payload: await this.userService.editProfile(userID, request),
       status: HttpStatus.OK,
       message: "Changes saved successfully"
     });

@@ -2,13 +2,23 @@ import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { AppConst } from "@core/const/app.const";
+import { CreateOrgDto } from "@core/dto/global/organization.dto";
+import { EmailService } from "../../alert/email/email.service";
+import { ConfigService } from "@nestjs/config";
+import { Resend } from "resend";
+import { NewOrganizationEvent } from "@core/event/back-office-event";
 
 
 @Injectable()
 export class OrganizationPrismaHelperService {
   private readonly logger = new Logger(OrganizationPrismaHelperService.name);
+  private readonly mailSource = this.configService.get("mailSender");
+  private readonly resend = new Resend(this.configService.get("resendApiKey"));
 
-  constructor(private readonly prismaService: PrismaService) {
+  constructor(private readonly prismaService: PrismaService,
+              private readonly emailService: EmailService,
+              private readonly configService: ConfigService
+  ) {
   }
 
   async findOrgByID(id) {
@@ -18,15 +28,15 @@ export class OrganizationPrismaHelperService {
         team: true,
         department: true,
         leavePlan: true,
-        employees:{
+        employees: {
           select: {
-            firstname:true,
-            role:true,
-            email:true,
-            Department:true,
-            phoneNumber:true,
-            id:true,
-            Team:true
+            firstname: true,
+            role: true,
+            email: true,
+            Department: true,
+            phoneNumber: true,
+            id: true,
+            Team: true
           }
         }
 
@@ -40,30 +50,83 @@ export class OrganizationPrismaHelperService {
     return found;
   }
 
-  async saveOrganization(org) {
+  // async saveOrganizationAndSendWelcomeEmail(org:CreateOrgDto, creatorEmail:string) {
+  //   try {
+  //     const saved = await this.prismaService.organization.create({
+  //       data: {
+  //         orgName: org.orgName,
+  //         orgEmail: org.orgEmail,
+  //         orgNumber: org.orgNumber,
+  //         orgWebsite: org.orgWebsite,
+  //         orgRCnumber: org.orgRCnumber,
+  //         orgAddress: org.orgAddress,
+  //         orgAddress2: org.orgAddress2,
+  //         orgZipCode:org.orgZipCode,
+  //         orgCity:org.orgCity,
+  //         orgDateFounded:org.orgDateFounded,
+  //         orgType:org.orgType,
+  //         orgState: org.orgState,
+  //         orgCountry: org.orgCountry,
+  //         orgIndustry: org.orgIndustry,
+  //         createdBy: creatorEmail
+  //       }
+  //     });
+  //     this.logger.log(`Organization ${saved.orgName} saved successfully`);
+  //     return saved;
+  //   } catch (e) {
+  //     const msg = `Error creating Organization ${org.orgName}`;
+  //     this.logger.error(e);
+  //     throw new AppConflictException(AppConst.error, { context: msg });
+  //   }
+  // }
+
+  async saveOrganizationAndSendWelcomeEmail(org: CreateOrgDto, creatorEmail: string) {
     try {
-      const saved = await this.prismaService.organization.create({
-        data: {
-          orgName: org.orgName,
-          orgEmail: org.orgEmail,
-          orgNumber: org.orgNumber,
-          orgWebsite: org.orgWebsite,
-          orgRCnumber: org.orgRCnumber,
-          orgAddress: org.orgAddress,
-          orgState: org.orgState,
-          orgCountry: org.orgCountry,
-          orgIndustry: org.orgIndustry,
-          createdBy: org.createdBy
+      await this.prismaService.$transaction(async (tx) => {
+        const saved = await tx.organization.create({
+          data: {
+            orgName: org.orgName,
+            orgEmail: org.orgEmail,
+            orgNumber: org.orgNumber,
+            orgWebsite: org.orgWebsite,
+            orgRCnumber: org.orgRCnumber,
+            orgAddress: org.orgAddress,
+            orgAddress2: org.orgAddress2,
+            orgZipCode: org.orgZipCode,
+            orgCity: org.orgCity,
+            orgKrisId: org.orgKrisId,
+            orgDateFounded: org.orgDateFounded,
+            orgType: org.orgType,
+            orgState: org.orgState,
+            orgCountry: org.orgCountry,
+            orgIndustry: org.orgIndustry,
+            createdBy: creatorEmail
+          }
+        });
+        try {
+          const html = await this.emailService.sendWelcomeOrganizationDetailsMail({ organizationName: saved.orgName } as NewOrganizationEvent);
+          await this.resend.emails.send({
+            from: `${this.mailSource}`,
+            to: `${saved.orgEmail}`,
+            subject: "Welcome to KRIS",
+            html: `${html}`
+          });
+          this.logger.log(`Organization ${saved.orgName}  Welcome Email successfully sent`)
+          return `Organization ${saved.orgName}  Welcome Email successfully sent`;
+        } catch (e) {
+          this.logger.error("Error sending email");
+          throw new AppException(e);
         }
       });
-      this.logger.log(`Organization ${saved.orgName} saved successfully`);
-      return saved;
+      this.logger.log("Organization created successfully");
+      return "Organization created successfully";
     } catch (e) {
       const msg = `Error creating Organization ${org.orgName}`;
       this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: msg });
     }
   }
+
 
   async updateOrg(id, org) {
     try {
@@ -108,7 +171,7 @@ export class OrganizationPrismaHelperService {
   async findAllOrganizations(request) {
     const { skip, take } = request;
     try {
-      const [users, total] = await this.prismaService.$transaction([
+      const [organizations, total] = await this.prismaService.$transaction([
           this.prismaService.organization.findMany({
             select: {
               id: true,
@@ -125,7 +188,7 @@ export class OrganizationPrismaHelperService {
         ]
       );
       const totalPage = Math.ceil(total / take) || 1;
-      return { total, totalPage, users };
+      return { total, totalPage, organizations };
     } catch (e) {
       this.logger.error(AppException);
       throw new AppException();

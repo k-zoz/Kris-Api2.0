@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { CreateOrgDto, EditOrgDto } from "@core/dto/global/organization.dto";
 import { SearchRequest } from "@core/model/search-request";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
+import { UtilService } from "@core/utils/util.service";
 
 
 @Injectable()
@@ -9,13 +10,16 @@ export class OrganizationService {
   private readonly logger = new Logger(OrganizationService.name);
 
   constructor(private readonly orgHelperService: OrganizationPrismaHelperService,
+              private readonly utilService:UtilService
   ) {
   }
 
   async onboardOrganization(org: CreateOrgDto, creatorEmail: string) {
     await this.orgHelperService.validateDtoRequest(org);
     org.createdBy = creatorEmail;
-    return this.orgHelperService.saveOrganization(org);
+    org.orgDateFounded = this.utilService.convertLeaveDate(org.orgDateFounded)
+    org.orgKrisId = this.utilService.generateUUID(org.orgName);
+    return this.orgHelperService.saveOrganizationAndSendWelcomeEmail(org, creatorEmail);
   }
 
 

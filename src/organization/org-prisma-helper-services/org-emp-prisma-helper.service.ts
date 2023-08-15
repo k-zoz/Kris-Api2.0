@@ -44,45 +44,45 @@ export class OrgEmpPrismaHelperService {
     return empTeam;
   }
 
-  async isEmployeeTeamLeadVerification(empID, teamID) {
-    const teamLead = await this.prismaService.teamLead.findFirst({
-      where: {
-        employeeId: empID,
-        teamId: teamID
-      }
-    });
-    if (!teamLead) {
-      throw  new AppNotFoundException(`Can't find team lead ${empID} for team  ${teamID} `);
-    }
-    return teamLead;
-  }
+  // async isEmployeeTeamLeadVerification(empID, teamID) {
+  //   const teamLead = await this.prismaService.teamLead.findFirst({
+  //     where: {
+  //       employeeId: empID,
+  //       teamId: teamID
+  //     }
+  //   });
+  //   if (!teamLead) {
+  //     throw  new AppNotFoundException(`Can't find team lead ${empID} for team  ${teamID} `);
+  //   }
+  //   return teamLead;
+  // }
 
 
-  async removeEmpTeamLead(empID, teamID, orgID) {
-    try {
-      await this.prismaService.$transaction(async (tx) => {
-        await tx.teamLead.deleteMany({
-          where: {
-            employeeId: empID,
-            teamId: teamID
-          }
-        });
-
-        await tx.team.update({
-          where: {
-            id: teamID
-          },
-          data: {
-            teamLeadId: null
-          }
-        });
-      });
-      return "Action Successful";
-    } catch (e) {
-      this.logger.error(e);
-      throw new AppException();
-    }
-  }
+  // async removeEmpTeamLead(empID, teamID, orgID) {
+  //   try {
+  //     await this.prismaService.$transaction(async (tx) => {
+  //       await tx.teamLead.deleteMany({
+  //         where: {
+  //           employeeId: empID,
+  //           teamId: teamID
+  //         }
+  //       });
+  //
+  //       await tx.team.update({
+  //         where: {
+  //           id: teamID
+  //         },
+  //         data: {
+  //           teamLeadId: null
+  //         }
+  //       });
+  //     });
+  //     return "Action Successful";
+  //   } catch (e) {
+  //     this.logger.error(e);
+  //     throw new AppException();
+  //   }
+  // }
   async findEmpDept(empID, deptID) {
     const empDept = await this.prismaService.employee.findFirst({
       where: {
@@ -96,18 +96,18 @@ export class OrgEmpPrismaHelperService {
     return empDept;
   }
 
-  async isEmployeeTeamLeadValidation(empID, teamID) {
-    const teamLead = await this.prismaService.teamLead.findFirst({
-      where: {
-        employeeId: empID,
-        teamId: teamID
-      }
-    });
-
-    if (teamLead) {
-      throw new Error("Employee is already a team lead for this team");
-    }
-  }
+  // async isEmployeeTeamLeadValidation(empID, teamID) {
+  //   const teamLead = await this.prismaService.teamLead.findFirst({
+  //     where: {
+  //       employeeId: empID,
+  //       teamId: teamID
+  //     }
+  //   });
+  //
+  //   if (teamLead) {
+  //     throw new Error("Employee is already a team lead for this team");
+  //   }
+  // }
 
   async addEmpToDept(empID, deptID) {
     try {
@@ -169,31 +169,31 @@ export class OrgEmpPrismaHelperService {
     }
   }
 
-  async makeEmpTeamLead(empID, teamID, orgID) {
-    try {
-      await this.prismaService.$transaction(async (tx) => {
-        const teamLead = await tx.teamLead.create({
-          data: {
-            teamId: teamID,
-            employeeId: empID,
-            organizationId: orgID
-          }
-        });
-
-
-        await tx.team.update({
-          where: {
-            id: teamID
-          },
-          data: {
-            teamLeadId: teamLead.id
-          }
-        });
-      });
-      return "Action Successful";
-    } catch (e) {
-      this.logger.error(e);
-      throw new AppException();
-    }
-  }
+  // async makeEmpTeamLead(empID, teamID, orgID) {
+  //   try {
+  //     await this.prismaService.$transaction(async (tx) => {
+  //       const teamLead = await tx.teamLead.create({
+  //         data: {
+  //           teamId: teamID,
+  //           employeeId: empID,
+  //           organizationId: orgID
+  //         }
+  //       });
+  //
+  //
+  //       await tx.team.update({
+  //         where: {
+  //           id: teamID
+  //         },
+  //         data: {
+  //           teamLeadId: teamLead.id
+  //         }
+  //       });
+  //     });
+  //     return "Action Successful";
+  //   } catch (e) {
+  //     this.logger.error(e);
+  //     throw new AppException();
+  //   }
+  // }
 }

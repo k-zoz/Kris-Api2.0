@@ -8,7 +8,7 @@ import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import {
-  CreateEmployeeDto, EditEmployeeDto,
+  CreateEmployeeDto, CreateMgtEmpDto, EditEmployeeDto,
   RoleToEmployee
 } from "@core/dto/global/employee.dto";
 import { SearchRequest } from "@core/model/search-request";
@@ -27,11 +27,16 @@ export class EmployeeController extends BaseController {
     super();
   }
 
+  @Get("roles")
+  allEmpRoles(){
+    return this.response({payload: this.employeeService.roles()})
+  }
+
   @Post("onboard/:orgID/employee")
   @Permission(UserRoleEnum.SUPPORT)
   async onboardOrgMgtEmployee(@GetUser() payload: AuthPayload,
                               @Param("orgID") orgID: string,
-                              @Body(ValidationPipe) request: CreateEmployeeDto
+                              @Body(ValidationPipe) request: CreateMgtEmpDto
   ) {
     return this.response({
       message: "Created successfully",
@@ -90,6 +95,8 @@ export class EmployeeController extends BaseController {
       payload: await this.employeeService.findAllEmployees(searchRequest, orgID)
     });
   };
+
+
 
 
   //Testing

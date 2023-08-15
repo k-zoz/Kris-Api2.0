@@ -16,6 +16,6 @@ export default () => ({
   privateKey: process.env.PRIVATE_KEY,
   rateLimitThrottleTtl: parseInt(process.env.RATE_LIMIT_THROTTLE_TTL, 10),
   rateLimitThrottleLimit: parseInt(process.env.RATE_LIMIT_THROTTLE_LIMIT, 10),
-  resendMailApiKey:process.env.RESEND_MAIL_API_KEY,
+  resendApiKey:process.env.RESEND_API_KEY,
   mailSender:process.env.MAIL_SENDER
 })

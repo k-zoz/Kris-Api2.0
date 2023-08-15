@@ -22,7 +22,7 @@ export class OrganizationController extends BaseController {
   }
 
   @Post("onboard")
-  @Permission(UserRoleEnum.SUPPORT)
+  @Permission(UserRoleEnum.SUPPORT, UserRoleEnum.SUPER_ADMIN)
   async onboardOrganization(@GetUser() payload: AuthPayload,
                             @Body(ValidationPipe) request: CreateOrgDto
   ) {
@@ -35,21 +35,21 @@ export class OrganizationController extends BaseController {
   }
 
   @Post()
-  @Permission(UserRoleEnum.SUPPORT)
+  @Permission(UserRoleEnum.SUPPORT, UserRoleEnum.SUPER_ADMIN)
   async allOrganizations(@Body(ValidationPipe) searchRequest: SearchRequest) {
     return this.response({ payload: await this.organizationService.findAllOrg(searchRequest) });
   }
 
 
   @Get("/:orgID")
-  @Permission(UserRoleEnum.SUPPORT)
+  @Permission(UserRoleEnum.SUPPORT, UserRoleEnum.SUPER_ADMIN)
   async findOrgByID(@Param("orgID") orgID: string) {
     return this.response({ payload: await this.orgHelperService.findOrgByID(orgID) });
   }
 
 
   @Post("edit/:orgID")
-  @Permission(UserRoleEnum.SUPPORT)
+  @Permission(UserRoleEnum.SUPPORT, UserRoleEnum.SUPER_ADMIN)
   async updateOrg(@GetUser() payload: AuthPayload,
                   @Param("orgID") orgID: string,
                   @Body(ValidationPipe) request: EditOrgDto
@@ -64,7 +64,7 @@ export class OrganizationController extends BaseController {
 
   // //Testing
   // @Get("onboarders")
-  // @Permission(UserRoleEnum.SUPPORT)
+  // @Permission(UserRoleEnum.SUPPORT, UserRoleEnum.SUPER_ADMIN)
   // async getOnboarders(@GetUser() payload: AuthPayload) {
   //   console.log(payload);
   // }

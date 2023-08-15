@@ -8,7 +8,7 @@ import { LocaleService } from "@locale/locale.service";
 import { UtilService } from "@core/utils/util.service";
 import { EmployeeOrganizationController } from "./employeeOrganization.controller";
 import { EmployeeOrganizationService } from "./employeeOrganization.service";
-import { OrgPrismaHelperService } from "@organization/org-prisma-helper-services/org-prisma-helper.service";
+import { OrgBranchPrismaHelperService } from "@organization/org-prisma-helper-services/org-branch-prisma-helper.service";
 import { EmployeeOrgDepartmentsController } from "@organization/department/employee-org-departments.controller";
 import { EmployeeOrgDepartmentsService } from "@organization/department/employee-org-departments.service";
 import { OrgDeptPrismaHelperService } from "@organization/org-prisma-helper-services/org-dept-prisma-helper.service";
@@ -18,20 +18,21 @@ import { OrgTeamController } from "@organization/teams/org-team.controller";
 import { OrgEmployeeController } from "@organization/orgEmployee/org-employee.controller";
 import { OrgEmpPrismaHelperService } from "@organization/org-prisma-helper-services/org-emp-prisma-helper.service";
 import { OrgEmployeeService } from "@organization/orgEmployee/org-employee.service";
-import { BackOfficeModule } from "@back-office/back-office.module";
-import { AuthModule } from "@auth/auth.module";
+import { EmpOrgBranchController } from "@organization/branch/emp-org-branch.controller";
+import { EmpOrgBranchService } from "@organization/branch/emp-org-branch.service";
 
 @Global()
 @Module({
   imports: [PassportModule.register({ defaultStrategy: "jwt", session: false }),],
   exports: [LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService,
     OrgDeptPrismaHelperService, OrgTeamPrismaHelperService, OrgTeamService,
-    OrgEmpPrismaHelperService, OrgEmployeeService, EmployeeOrganizationService, OrgPrismaHelperService],
-  controllers: [LeaveController, EmployeeOrganizationController, EmployeeOrgDepartmentsController, OrgTeamController, OrgEmployeeController],
+    OrgEmpPrismaHelperService, OrgEmployeeService, EmployeeOrganizationService, OrgBranchPrismaHelperService],
+  controllers: [LeaveController, EmployeeOrganizationController,
+    EmployeeOrgDepartmentsController, OrgTeamController, OrgEmployeeController, EmpOrgBranchController],
   providers: [LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService,
-    OrgDeptPrismaHelperService,
+    OrgDeptPrismaHelperService, EmpOrgBranchService,
     OrgTeamPrismaHelperService, OrgTeamService, OrgEmpPrismaHelperService, OrgEmployeeService,
-    LocaleService, UtilService, EmployeeOrganizationService, OrgPrismaHelperService]
+    LocaleService, UtilService, EmployeeOrganizationService, OrgBranchPrismaHelperService]
 })
 export class EmployeeOrganizationModule {
 }

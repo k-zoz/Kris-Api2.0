@@ -59,29 +59,10 @@ import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handleba
         limit: config.get("rateLimitThrottleLimit")
       })
     }),
-
-    MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (config: ConfigService) => ({
-        ...mailConfig(config),
-        template: {
-          dir: join(__dirname, "./templates"),
-          adapter: new HandlebarsAdapter(),
-          options: {
-            strict: true
-          }
-        }
-      }),
-      inject: [ConfigService]
-    }),
     EventEmitterModule.forRoot(),
     BackOfficeModule, AuthModule, PrismaModule, EmployeeOrganizationModule, AlertModule],
   controllers: [AppController],
   providers: [
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: AppInterceptor
-    // },
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard

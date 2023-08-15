@@ -1,6 +1,6 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, IsStrongPassword } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsStrongPassword, MinLength } from "class-validator";
 import { BaseDto } from "@core/dto/global/base.dto";
-import { IsValidEmployeeRole } from "@core/validators/employee-role-validator";
+import { IsValidEmployeeRole } from "@core/validators/role/employee-role-validator";
 
 export class CreateEmployeeDto extends BaseDto {
   @IsNotEmpty({ message: "Employee email address is required" })
@@ -11,8 +11,10 @@ export class CreateEmployeeDto extends BaseDto {
   empPassword: string;
   @IsString()
   @IsNotEmpty({ message: "Employee First name is required" })
+  @MinLength(3)
   empFirstName: string;
   @IsString()
+  @MinLength(3)
   @IsNotEmpty({ message: "Employee Last name is required" })
   empLastName: string;
   @IsNotEmpty({ message: "Employee ID Number is required" })
@@ -22,8 +24,32 @@ export class CreateEmployeeDto extends BaseDto {
   @IsNotEmpty({ message: "Employee role is required" })
   @IsValidEmployeeRole({ message: "Role must be a valid employee role!" })
   employee_role: any;
-  createdBy: string;
-  modifiedBy: string;
+}
+
+
+export class CreateMgtEmpDto extends BaseDto {
+  @IsNotEmpty({ message: "Employee email address is required" })
+  @IsEmail()
+  empEmail: string;
+  @IsString()
+  @IsNotEmpty({ message: "Employee First name is required" })
+  @MinLength(3)
+  empFirstName: string;
+  @IsString()
+  @IsNotEmpty({ message: "Employee Last name is required" })
+  @MinLength(3)
+  empLastName: string;
+  @IsNotEmpty({ message: "Employee ID Number is required" })
+  empIDNumber: string;
+  @IsNotEmpty({ message: "Employee Phone Number is required" })
+  @MinLength(11, {message:"Digits must be 11"})
+  empPhoneNumber: string;
+  @IsNotEmpty({ message: "Employee role is required" })
+  @IsValidEmployeeRole({ message: "Role must be a valid employee role!" })
+  employee_role: any;
+  empPassword: string;
+  orgKrisId:string
+
 }
 
 export class Employee {

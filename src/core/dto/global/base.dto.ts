@@ -5,4 +5,7 @@ export abstract class BaseDto {
   createdDate?: string;
   modifiedDate?: string;
   authPayload?: AuthPayload;
+  createdBy?:string
+  modifiedBy?:string
+
 }

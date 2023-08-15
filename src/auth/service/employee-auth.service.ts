@@ -28,14 +28,14 @@ export class EmployeeAuthService {
     return this.authenticateEmployee(employee);
   }
 
-  private async authenticateEmployee(employee:Employee) {
-    const { email , role} = employee;
+  private async authenticateEmployee(employeeOrg:Employee) {
+    const { email , role} = employeeOrg;
     const payload: JwtPayload = { email , role};
     const token = await this.tokenService.generateAccessToken(payload);
     const refreshToken = await this.tokenService.generateRefreshToken(payload);
     await this.employeeHelperService.setUserRefreshToken(email, token);
-    const orgEmployee = await this.employeeHelperService.findAndExcludeFields(employee);
-    return { token, refreshToken, orgEmployee };
+    const employee = await this.employeeHelperService.findAndExcludeFields(employeeOrg);
+    return { token, employee };
   }
 
 }

@@ -120,25 +120,25 @@ export class OrgEmployeeController extends BaseController {
   }
 
 
-  @Post("/:orgID/:deptID/addTeamLead/:empID/:teamID")
-  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
-  async addTeamLead(@Param("orgID") orgID: string,
-                    @Param("teamID") teamID: string,
-                    @Param("empID") empID: string,
-                    @Param("deptID") deptID: string
-  ) {
-    return this.response({ payload: await this.orgEmployeeService.addEmployeeAsTeamLead(orgID, teamID, empID, deptID) });
-  }
+  // @Post("/:orgID/:deptID/addTeamLead/:empID/:teamID")
+  // @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  // async addTeamLead(@Param("orgID") orgID: string,
+  //                   @Param("teamID") teamID: string,
+  //                   @Param("empID") empID: string,
+  //                   @Param("deptID") deptID: string
+  // ) {
+  //   return this.response({ payload: await this.orgEmployeeService.addEmployeeAsTeamLead(orgID, teamID, empID, deptID) });
+  // }
 
-  @Post("/:orgID/:deptID/removeTeamLead/:empID/:teamID")
-  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
-  async removeTeamLead(@Param("orgID") orgID: string,
-                       @Param("teamID") teamID: string,
-                       @Param("empID") empID: string,
-                       @Param("deptID") deptID: string
-  ) {
-    return this.response({ payload: await this.orgEmployeeService.removeEmployeeAsTeamLead(orgID, teamID, empID, deptID) });
-  }
+  // @Post("/:orgID/:deptID/removeTeamLead/:empID/:teamID")
+  // @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  // async removeTeamLead(@Param("orgID") orgID: string,
+  //                      @Param("teamID") teamID: string,
+  //                      @Param("empID") empID: string,
+  //                      @Param("deptID") deptID: string
+  // ) {
+  //   return this.response({ payload: await this.orgEmployeeService.removeEmployeeAsTeamLead(orgID, teamID, empID, deptID) });
+  // }
 
   @Post("/:orgID/allEmployees")
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)

@@ -1,11 +1,15 @@
 import { Injectable, Logger } from "@nestjs/common";
 import * as argon from "argon2";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
-import { RoleToEmployee, CreateEmployeeDto, EditEmployeeDto } from "@core/dto/global/employee.dto";
+import { RoleToEmployee, CreateEmployeeDto, EditEmployeeDto, CreateMgtEmpDto } from "@core/dto/global/employee.dto";
 import { UtilService } from "@core/utils/util.service";
 import { SearchRequest } from "@core/model/search-request";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
+import { CodeValue } from "@core/dto/global/code-value";
+import { EnumValues } from "enum-values";
+import { UserRoleEnum } from "@core/enum/user-role-enum";
+import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 
 
 @Injectable()
@@ -15,17 +19,21 @@ export class EmployeeService {
 
   constructor(private readonly employeeHelperService: EmployeePrismaHelperService,
               private readonly utilService: UtilService,
-              private readonly orgHelperService: OrganizationPrismaHelperService,
-  ) {}
+              private readonly orgHelperService: OrganizationPrismaHelperService
+  ) {
+  }
 
 
-  async createOrgMgtEmployee(orgEmp: CreateEmployeeDto, orgID, creatorMail) {
+  async createOrgMgtEmployee(orgEmp: CreateMgtEmpDto, orgID, creatorMail) {
     await this.employeeHelperService.validateRequest(orgEmp);
-    await this.orgHelperService.findOrgByID(orgID);
+    const org = await this.orgHelperService.findOrgByID(orgID);
+    orgEmp.empFirstName = this.utilService.toUpperCase(orgEmp.empFirstName);
+    orgEmp.empLastName = this.utilService.toUpperCase(orgEmp.empLastName);
     orgEmp.createdBy = creatorMail;
-    orgEmp.empPassword = await argon.hash(orgEmp.empPassword);
-    const employee = await this.employeeHelperService.createEmployee(orgEmp, orgID);
-    return this.employeeHelperService.findAndExcludeFields(employee);
+    orgEmp.empPassword = this.utilService.generateRandomPassword();
+    orgEmp.orgKrisId =  this.utilService.generateUUID(orgEmp.empFirstName)
+    return await this.employeeHelperService.createEmployeeAndSendWelcomeEmail(orgEmp, orgID, org.orgName);
+
   }
 
 
@@ -52,9 +60,9 @@ export class EmployeeService {
   async editEmployeeProfile(request: EditEmployeeDto, orgID: string, payload: AuthPayload) {
     await this.orgHelperService.findOrgByID(orgID);
     await this.employeeHelperService.findEmpByEmail(payload.email);
-    await this.utilService.isEmpty(request)
-    await this.employeeHelperService.validateRequest(request)
-    request.empPassword = await argon.hash(request.empPassword)
+    await this.utilService.isEmpty(request);
+    await this.employeeHelperService.validateRequest(request);
+    request.empPassword = await argon.hash(request.empPassword);
     await this.employeeHelperService.editEmployee(payload.email, request);
   }
 
@@ -71,9 +79,13 @@ export class EmployeeService {
     return await argon.verify(emp.password, password);
   }
 
-  async findAllEmployees(request: SearchRequest, orgID:string) {
+  async findAllEmployees(request: SearchRequest, orgID: string) {
     await this.orgHelperService.findOrgByID(orgID);
-    return  await this.employeeHelperService.findAllEmployeesInOrg(request, orgID)
+    return await this.employeeHelperService.findAllEmployeesInOrg(request, orgID);
 
+  }
+
+  roles(): Array<CodeValue> {
+    return EnumValues.getNamesAndValues(EmployeeRoleEnum).map(value => CodeValue.of(value.name, value.value as string));
   }
 }

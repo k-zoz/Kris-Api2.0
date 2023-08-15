@@ -7,3 +7,20 @@ export class NewBackOfficerEvent {
   lastname?:string
   template?:MsgTemplate
 }
+
+
+export class NewOrganizationEvent {
+  organizationName:string
+}
+
+export class NewEmployeeEvent {
+  firstname:string
+  email:string
+  password:string
+  organizationName?:string
+}
+
+
+export class PasswordChangeEvent {
+  firstName:string
+}

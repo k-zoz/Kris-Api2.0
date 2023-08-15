@@ -1,25 +1,27 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
-import { UpdateBackOfficeProfile, UserDto } from "@core/dto/auth/user.dto";
+import { CreateSuperUserDto, UpdateBackOfficeProfile, UserDto } from "@core/dto/auth/user.dto";
 import * as argon from "argon2";
 import { AppConst } from "@core/const/app.const";
 import { prismaExclude } from "@prisma/prisma-utils";
 import { EventEmitter2 } from "@nestjs/event-emitter";
-import { NewBackOfficerEvent } from "@core/event/back-office-event";
+import { NewBackOfficerEvent, PasswordChangeEvent } from "@core/event/back-office-event";
 import { KrisEventConst } from "@core/event/kris-event.const";
 import { EmailService } from "../../alert/email/email.service";
 import { MailerService } from "@nestjs-modules/mailer";
 import { ConfigService } from "@nestjs/config";
+import { Resend } from "resend";
 
 @Injectable()
 export class UserPrismaHelperService {
   private readonly logger = new Logger(UserPrismaHelperService.name);
   private readonly mailSource = this.configService.get("mailSender");
+  private readonly resend = new Resend(this.configService.get("resendApiKey"));
 
   constructor(private readonly prismaService: PrismaService,
               private readonly eventEmitter: EventEmitter2,
-              private readonly mailerService: MailerService,
+              private readonly emailService: EmailService,
               private readonly configService: ConfigService
   ) {
   }
@@ -94,19 +96,21 @@ export class UserPrismaHelperService {
     }
   }
 
-  async editUser(email, profile: UpdateBackOfficeProfile) {
-    const { authPayload, ...restProfile } = profile;
+  async editUser(userID, profile: UpdateBackOfficeProfile) {
     try {
-      return await this.prismaService.user.update({
-        where: { email },
+      await this.prismaService.user.update({
+        where: { id: userID },
         data: {
           email: profile.email,
           firstname: profile.firstname,
           surname: profile.surname,
           phoneNumber: profile.phoneNumber,
-          password: await argon.hash(profile.password)
+          middlename: profile.middlename,
+          status: profile.status
         }
       });
+      this.logger.log("Successfully updated profile");
+      return "Successfully updated profile";
     } catch (e) {
       const msg = `Error updating profile`;
       this.logger.error(e);
@@ -133,18 +137,34 @@ export class UserPrismaHelperService {
     }
   }
 
-  async changePassword(email: string, modifiedBy: string, newPassword: string) {
+  async changePasswordAndSendPasswordChangeEmail(email: string, modifiedBy: string, newPassword: string, user?: any) {
     try {
-      const saved = await this.prismaService.user.update({
-        where: { email },
-        data: {
-          password: await argon.hash(newPassword),
-          modifiedBy,
-          version: { increment: 1 }
+      await this.prismaService.$transaction(async (tx) => {
+        const saved = await tx.user.update({
+          where: { email },
+          data: {
+            password: await argon.hash(newPassword),
+            modifiedBy,
+            version: { increment: 1 }
+          }
+        });
+
+        try {
+          const html = await this.emailService.sendPasswordChangeSuccessfulEmail({ firstName: user.firstname } as PasswordChangeEvent);
+          await this.resend.emails.send({
+            from: `${this.mailSource}`,
+            to: `${saved.email}`,
+            subject: "Password Change Successful",
+            html: `${html}`
+          });
+          this.logger.log(`Email Successfully sent to ${saved.email}`);
+        } catch (e) {
+          this.logger.error("Error sending email");
+          throw new AppException(e);
         }
       });
-      this.logger.log(`User ${saved.email} password changed successfully`);
-      return `User ${saved.email} password changed successfully`;
+      this.logger.log(`User ${email} password changed successfully`);
+      return `Password changed successfully`;
     } catch (e) {
       const msg = `Error changing  ${email} password`;
       this.logger.error(e);
@@ -152,36 +172,44 @@ export class UserPrismaHelperService {
     }
   }
 
-  // async saveNewUser(user: UserDto): Promise<any> {
-  //   try {
-  //     const saved = await this.prismaService.user.create({
-  //       data: {
-  //         email: user.email,
-  //         firstname: user.firstname,
-  //         surname: user.surname,
-  //         phoneNumber: user.phoneNumber,
-  //         role: user.role,
-  //         password: await argon.hash(user.password),
-  //         createdBy: user.createdBy
-  //       }
-  //     });
-  //
-  //     this.newBackOfficerEvent({
-  //       email: saved.email,
-  //       password: user.password,
-  //       firstname: saved.firstname,
-  //       template:"welcomeBo"
-  //     } as NewBackOfficerEvent);
-  //     this.logger.log(`User ${user.email} saved successfully`);
-  //     return `User ${user.email} saved successfully`;
-  //   } catch (e) {
-  //     const msg = `Error creating user ${user.email}`;
-  //     this.logger.error(e);
-  //     throw new AppConflictException(AppConst.error, { context: msg });
-  //   }
-  // }
+  async resetBOPasswordAndSendResetMail(userID, reseterEmail, newPassword) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        const saved = await tx.user.update({
+          where: { id: userID },
+          data: {
+            password: await argon.hash(newPassword),
+            modifiedBy: reseterEmail
+          }
+        });
+        try {
+          const html = await this.emailService.sendResetPasswordDetailsMail({
+            firstname: saved.firstname,
+            password: newPassword
+          } as NewBackOfficerEvent);
+          await this.resend.emails.send({
+            from: `${this.mailSource}`,
+            to: `${saved.email}`,
+            subject: "Password Reset",
+            html: `${html}`
+          });
+          this.logger.log(`New Password Email Successfully sent to ${saved.email}`);
+          this.logger.log(`User ${saved.email} password changed successfully`);
+          return `User ${saved.email} password changed successfully`;
+        } catch (e) {
+          this.logger.error("Error sending email");
+          throw new AppException(e);
+        }
+      });
+      return `New Password Email Successfully sent`;
+    } catch (e) {
+      const msg = `Error resetting password`;
+      this.logger.error(e);
+      throw new AppConflictException(AppConst.error, { context: msg });
+    }
+  }
 
-  async saveNewUserndSendEmail(user: UserDto): Promise<any> {
+  async saveNewUserndSendEmail(user: CreateSuperUserDto): Promise<any> {
     try {
       await this.prismaService.$transaction(async (tx) => {
         const saved = await tx.user.create({
@@ -189,27 +217,31 @@ export class UserPrismaHelperService {
             email: user.email,
             firstname: user.firstname,
             surname: user.surname,
+            middlename: user.middleName,
             phoneNumber: user.phoneNumber,
             role: user.role,
+            status: user.status,
             password: await argon.hash(user.password),
             createdBy: user.createdBy
           }
         });
-
-        await this.mailerService.sendMail({
-          from: this.mailSource,
-          to: saved.email,
-          subject: "Welcome to KRIS",
-          template: "welcomeBo",
-          context: {
-            event: {
-              email: saved.email,
-              password: user.password,
-              firstname: saved.firstname
-            }
-          }
-        });
-        return `Email Successfully sent to ${saved.email}`
+        try {
+          const html = await this.emailService.sendLoginDetailsMail({
+            email: saved.email,
+            password: user.password,
+            firstname: saved.firstname
+          } as NewBackOfficerEvent);
+          await this.resend.emails.send({
+            from: `${this.mailSource}`,
+            to: `${saved.email}`,
+            subject: "Welcome KRIS Administrator",
+            html: `${html}`
+          });
+          this.logger.log(`Email Successfully sent to ${saved.email}`);
+        } catch (e) {
+          this.logger.error("Error sending email");
+          throw new AppException(e);
+        }
       });
       this.logger.log(`User ${user.email} saved successfully`);
       return `User ${user.email} saved successfully`;
@@ -221,7 +253,7 @@ export class UserPrismaHelperService {
   }
 
 
-  async saveSuperUser(user: UserDto): Promise<any> {
+  async saveSuperUser(user: CreateSuperUserDto): Promise<any> {
     try {
       const saved = await this.prismaService.user.create({
         data: {
@@ -230,6 +262,8 @@ export class UserPrismaHelperService {
           surname: user.surname,
           phoneNumber: user.phoneNumber,
           role: user.role,
+          status: user.status,
+          krisID: user.krisID,
           password: await argon.hash(user.password),
           createdBy: user.createdBy
         }
@@ -264,7 +298,11 @@ export class UserPrismaHelperService {
               firstname: true,
               phoneNumber: true,
               email: true,
-              role: true
+              role: true,
+              krisID:true,
+              createdBy:true,
+              middlename:true,
+              createdDate:true
             },
             skip,
             take
@@ -280,8 +318,8 @@ export class UserPrismaHelperService {
     }
   }
 
-  private newBackOfficerEvent(event: NewBackOfficerEvent) {
-    this.eventEmitter.emit(KrisEventConst.createEvents.boUser, event);
-  }
+  // private newBackOfficerEvent(event: NewBackOfficerEvent) {
+  //   this.eventEmitter.emit(KrisEventConst.createEvents.boUser, event);
+  // }
 
 }

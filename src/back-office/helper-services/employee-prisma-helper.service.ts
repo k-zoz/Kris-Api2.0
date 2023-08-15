@@ -6,12 +6,22 @@ import { prismaExclude } from "@prisma/prisma-utils";
 import { RoleToEmployee, Employee } from "@core/dto/global/employee.dto";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { LocaleService } from "@locale/locale.service";
+import * as argon from "argon2";
+import { Resend } from "resend";
+import { ConfigService } from "@nestjs/config";
+import { EmailService } from "../../alert/email/email.service";
+import { NewEmployeeEvent } from "@core/event/back-office-event";
+
 
 @Injectable()
 export class EmployeePrismaHelperService {
   private readonly logger = new Logger(EmployeePrismaHelperService.name);
+  private readonly resend = new Resend(this.configService.get("resendApiKey"));
+  private readonly mailSource = this.configService.get("mailSender");
 
   constructor(private readonly prismaService: PrismaService,
+              private readonly configService: ConfigService,
+              private readonly emailService: EmailService,
               private readonly localeService: LocaleService) {
   }
 
@@ -85,25 +95,74 @@ export class EmployeePrismaHelperService {
     }
   }
 
-  async createEmployee(orgEmp, orgID) {
+  // async createEmployee(orgEmp, orgID) {
+  //   try {
+  //     return await this.prismaService.employee.create({
+  //       data: {
+  //         email: orgEmp.empEmail,
+  //         firstname: orgEmp.empFirstName,
+  //         password:await argon.hash(orgEmp.empPassword),
+  //         lastname: orgEmp.empLastName,
+  //         phoneNumber: orgEmp.empPhoneNumber,
+  //         idNumber: orgEmp.empIDNumber,
+  //         role: orgEmp.employee_role,
+  //         createdBy: orgEmp.createdBy,
+  //         Organization: {
+  //           connect: {
+  //             id: orgID
+  //           }
+  //         }
+  //       }
+  //     });
+  //   } catch (e) {
+  //     this.logger.error(AuthMsg.ERROR_CREATING_EMPLOYEE);
+  //     throw new AppConflictException(AppConst.error, { context: AuthMsg.ERROR_CREATING_EMPLOYEE });
+  //   }
+  // }
+
+
+  async createEmployeeAndSendWelcomeEmail(orgEmp, orgID, orgName) {
     try {
-      return await this.prismaService.employee.create({
-        data: {
-          email: orgEmp.empEmail,
-          firstname: orgEmp.empFirstName,
-          password: orgEmp.empPassword,
-          lastname: orgEmp.empLastName,
-          phoneNumber: orgEmp.empPhoneNumber,
-          idNumber: orgEmp.empIDNumber,
-          role: orgEmp.employee_role,
-          createdBy: orgEmp.createdBy,
-          Organization: {
-            connect: {
-              id: orgID
+      await this.prismaService.$transaction(async (tx) => {
+        const saved = await tx.employee.create({
+          data: {
+            email: orgEmp.empEmail,
+            firstname: orgEmp.empFirstName,
+            password: await argon.hash(orgEmp.empPassword),
+            lastname: orgEmp.empLastName,
+            phoneNumber: orgEmp.empPhoneNumber,
+            idNumber: orgEmp.empIDNumber,
+            role: orgEmp.employee_role,
+            krisID: orgID.krisID,
+            createdBy: orgEmp.createdBy,
+            Organization: {
+              connect: {
+                id: orgID
+              }
             }
           }
+        });
+        try {
+          const html = await this.emailService.sendWelcomeEmployeeDetailMail({
+            email: saved.email,
+            password: orgEmp.empPassword,
+            firstname: saved.firstname,
+            organizationName: orgName
+          } as NewEmployeeEvent);
+          await this.resend.emails.send({
+            from: `${this.mailSource}`,
+            to: `${saved.email}`,
+            subject: `Welcome to ${orgName}`,
+            html: `${html}`
+          });
+          this.logger.log(`Employee ${saved.firstname} Saved. Welcome Email successfully sent`);
+          return `Employee ${saved.firstname}  Welcome Email successfully sent`;
+        } catch (e) {
+          this.logger.error(e, "Error sending email");
+          throw new AppException(e);
         }
       });
+      return `Employee created successfully`;
     } catch (e) {
       this.logger.error(AuthMsg.ERROR_CREATING_EMPLOYEE);
       throw new AppConflictException(AppConst.error, { context: AuthMsg.ERROR_CREATING_EMPLOYEE });
@@ -113,7 +172,8 @@ export class EmployeePrismaHelperService {
   async findAndExcludeFields(user: Employee) {
     return this.prismaService.employee.findUniqueOrThrow({
       where: { email: user.email },
-      select: prismaExclude("Employee", ["password", "refreshToken"])
+      select: prismaExclude("Employee", ["password", "refreshToken", "email", "krisID", "idNumber", "phoneNumber",
+        "status", "org_ClienteleId", "org_BranchId", "createdBy", "modifiedBy", "createdDate", "modifiedDate", "departmentId", "teamId", "role"])
     });
   }
 
@@ -207,7 +267,7 @@ export class EmployeePrismaHelperService {
     });
   };
 
-  async findAllEmployeesInOrg(request, orgID){
+  async findAllEmployeesInOrg(request, orgID) {
     const { skip, take } = request;
     try {
       const [employees, total] = await this.prismaService.$transaction([
@@ -215,24 +275,23 @@ export class EmployeePrismaHelperService {
             where: { id: orgID },
             select: {
               employees: {
-                select:{
-                  firstname:true,
-                  lastname:true,
-                  email:true,
-                  role:true,
-                  id:true,
-                  phoneNumber:true,
-                  idNumber:true,
-                  Team:true,
-                  Department:true,
-                  TeamLead:true
-                },
+                select: {
+                  firstname: true,
+                  lastname: true,
+                  email: true,
+                  role: true,
+                  id: true,
+                  phoneNumber: true,
+                  idNumber: true,
+                  Team: true,
+                  Department: true
+                }
               }
             },
             skip,
             take
           }),
-          this.prismaService.employee.count({ where: { organizationId:orgID } })
+          this.prismaService.employee.count({ where: { organizationId: orgID } })
         ]
       );
       const totalPage = Math.ceil(total / take) || 1;

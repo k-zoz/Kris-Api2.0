@@ -39,13 +39,13 @@ export class OrgTeamController extends BaseController {
   }
 
 
-  @Post("/:orgID/allTeamLeads")
-  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
-  async getAllTeamLeads(@Param("orgID") orgID: string,
-                        @Body() searchRequest: SearchRequest
-  ) {
-    return this.response({ payload: await this.orgTeamService.allTeamLeads(orgID, searchRequest) });
-  }
+  // @Post("/:orgID/allTeamLeads")
+  // @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  // async getAllTeamLeads(@Param("orgID") orgID: string,
+  //                       @Body() searchRequest: SearchRequest
+  // ) {
+  //   return this.response({ payload: await this.orgTeamService.allTeamLeads(orgID, searchRequest) });
+  // }
 
   // TODO remove team
   // TODO number of team and members

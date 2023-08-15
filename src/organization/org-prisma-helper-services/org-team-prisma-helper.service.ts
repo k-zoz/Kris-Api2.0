@@ -104,31 +104,31 @@ export class OrgTeamPrismaHelperService {
     return teamDept;
   }
 
-  async findAllTeamLeads(orgID, request) {
-    const { skip, take } = request;
-
-    try {
-      const [teamLeads, total] = await this.prismaService.$transaction([
-        this.prismaService.teamLead.findMany({
-          where: {
-            organizationId: orgID
-          },
-          skip,
-          take
-
-        }),
-        this.prismaService.teamLead.count({
-          where: {
-            organizationId: orgID
-          }
-        })
-      ]);
-      const totalPage = Math.ceil(total / take) || 1;
-      return { total, totalPage, teamLeads };
-    } catch (e) {
-      this.logger.error(e);
-      throw new AppException();
-    }
-  }
+  // async findAllTeamLeads(orgID, request) {
+  //   const { skip, take } = request;
+  //
+  //   try {
+  //     const [teamLeads, total] = await this.prismaService.$transaction([
+  //       this.prismaService.teamLead.findMany({
+  //         where: {
+  //           organizationId: orgID
+  //         },
+  //         skip,
+  //         take
+  //
+  //       }),
+  //       this.prismaService.teamLead.count({
+  //         where: {
+  //           organizationId: orgID
+  //         }
+  //       })
+  //     ]);
+  //     const totalPage = Math.ceil(total / take) || 1;
+  //     return { total, totalPage, teamLeads };
+  //   } catch (e) {
+  //     this.logger.error(e);
+  //     throw new AppException();
+  //   }
+  // }
 
 }

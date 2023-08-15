@@ -1,27 +1,29 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import * as argon from "argon2";
-import { CreateSuperUserDto, UpdateBackOfficeProfile} from "@core/dto/auth/user.dto";
+import { ConfirmInputPasswordDto, CreateSuperUserDto, UpdateBackOfficeProfile } from "@core/dto/auth/user.dto";
 import { UtilService } from "@core/utils/util.service";
-import { UserRoleEnum } from "@core/enum/user-role-enum";
+import { BoStatusEnum, UserRoleEnum } from "@core/enum/user-role-enum";
 import { SearchRequest } from "@core/model/search-request";
 import { CodeValue } from "@core/dto/global/code-value";
 import { EnumValues } from "enum-values";
 import { UserPrismaHelperService } from "@back-office/helper-services/user-prisma-helper.service";
+import { AppConflictException, AppUnauthorizedException } from "@core/exception/app-exception";
 
 @Injectable()
 export class UserService implements OnModuleInit {
   private readonly logger = new Logger(UserService.name);
 
   constructor(private readonly utilService: UtilService,
-              private readonly userHelperService:UserPrismaHelperService
-  ) {}
+              private readonly userHelperService: UserPrismaHelperService
+  ) {
+  }
 
   async onModuleInit(): Promise<void> {
     await this.createSuperUser();
   }
 
   async createSuperUser() {
-    const superUserExists = await this.userHelperService.findSuperUserUser("rootadmin@kris.io")
+    const superUserExists = await this.userHelperService.findSuperUserUser("rootadmin@kris.io");
     if (!superUserExists) {
       const superUserDTO = {
         email: "rootadmin@kris.io",
@@ -30,6 +32,8 @@ export class UserService implements OnModuleInit {
         phoneNumber: "01001111111",
         password: "root.admin@2023",
         role: "SUPER_ADMIN",
+        krisID: "KR-0001",
+        status: "ACTIVE",
         createdBy: "rootadmin@kris.io",
         authPayload: { email: "rootadmin@kris.io", role: "SUPER_ADMIN" }
       } as CreateSuperUserDto;
@@ -41,16 +45,19 @@ export class UserService implements OnModuleInit {
   async onboardBackOfficeUser(dto: CreateSuperUserDto, creatorEmail?: string) {
     await this.userHelperService.validateRequest(dto);
     dto.createdBy = creatorEmail;
-    dto.password =this.utilService.generateRandomPassword()
+    dto.firstname = this.utilService.toUpperCase(dto.firstname)
+    dto.surname = this.utilService.toUpperCase(dto.surname)
+    dto.krisID = this.utilService.generateUUID(dto.firstname)
+    dto.password = this.utilService.generateRandomPassword();
     return this.userHelperService.saveNewUserndSendEmail(dto);
   }
 
   //TODO generate random password
   //TODO get the email from the created profile and the generated password and send as mail
 
-  async editProfile(requesterMail: string, dto: UpdateBackOfficeProfile) {
+  async editProfile(userID: string, dto: UpdateBackOfficeProfile) {
     await this.userHelperService.validateRequest(dto);
-    return this.userHelperService.editUser(requesterMail, dto);
+    return this.userHelperService.editUser(userID, dto);
     //TODO make change password different
     //TODO remove change email, make it different
     //TODO change response
@@ -64,21 +71,42 @@ export class UserService implements OnModuleInit {
     return `User ${user.email} role is updated successfully`;
   }
 
+  async checkUserPassword(dto: ConfirmInputPasswordDto, userId: string) {
+    const user = await this.userHelperService.findUserById(userId);
+    const user1 = await this.userHelperService.findByEmail(user.email);
+    if(!await this.validatePassword(user1, dto.current)){
+      throw new AppConflictException("current password incorrect!")
+    }
+    return this.userHelperService.changePasswordAndSendPasswordChangeEmail(user1.email, user1.email, dto.newPassword, user1)
+  }
+
   async changeUserPassword(modifierMail: string, id: string, newPassword: string) {
     const user = await this.userHelperService.findUserById(id);
     const modifier = await this.userHelperService.findByEmail(modifierMail);
-    return await this.userHelperService.changePassword(user.email, modifier.email, newPassword);
+    return await this.userHelperService.changePasswordAndSendPasswordChangeEmail(user.email, modifier.email, newPassword);
+  }
+
+  async resetUserPassword(reseterEmail, userID) {
+    const user = await this.userHelperService.findUserById(userID);
+    await this.utilService.compareEmails(reseterEmail, user.email);
+    const newPassword = this.utilService.generateRandomPassword();
+    return await this.userHelperService.resetBOPasswordAndSendResetMail(userID, reseterEmail, newPassword);
   }
 
   async validatePassword(user, password: string): Promise<boolean> {
     return await argon.verify(user.password, password);
   }
 
+
   async findAllUsers(request: SearchRequest) {
-    return  await this.userHelperService.findAllBackOfficeUsers(request)
+    return await this.userHelperService.findAllBackOfficeUsers(request);
   }
 
   roles(): Array<CodeValue> {
     return EnumValues.getNamesAndValues(UserRoleEnum).map(value => CodeValue.of(value.name, value.value as string));
+  }
+
+  boStatus() {
+    return EnumValues.getNamesAndValues(BoStatusEnum).map(value => CodeValue.of(value.name, value.value as string));
   }
 }

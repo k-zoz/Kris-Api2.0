@@ -4,7 +4,7 @@ import { LocaleService } from "@locale/locale.service";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { DateTime } from "luxon";
 import { randomBytes } from 'crypto';
-
+import { v4 as uuidV4 } from 'uuid';
 
 
 @Injectable()
@@ -98,6 +98,11 @@ export class UtilService {
     return password;
   }
 
+  generateUUID(name:string){
+    const namePart = name.slice(0, 3).toUpperCase()
+    const uuid = uuidV4()
+    return `${namePart}-${uuid}`
+  }
 
 
 }

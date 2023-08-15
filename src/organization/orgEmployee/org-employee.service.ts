@@ -11,29 +11,32 @@ import { OrganizationPrismaHelperService } from "@back-office/helper-services/or
 
 @Injectable()
 export class OrgEmployeeService {
-  private readonly logger = new Logger(OrgEmployeeService.name)
+  private readonly logger = new Logger(OrgEmployeeService.name);
 
   constructor(private readonly utilService: UtilService,
               private readonly orgHelperService: OrganizationPrismaHelperService,
               private readonly employeeService: EmployeePrismaHelperService,
-              private readonly employeeHelperService:EmployeePrismaHelperService,
-              private readonly orgEmployeeHelperService:OrgEmpPrismaHelperService,
-              private readonly orgTeamHelperService:OrgTeamPrismaHelperService,
-              private readonly orgDeptHelperService:OrgDeptPrismaHelperService,
-              private readonly leaveService:LeaveService
-              ) {}
+              private readonly employeeHelperService: EmployeePrismaHelperService,
+              private readonly orgEmployeeHelperService: OrgEmpPrismaHelperService,
+              private readonly orgTeamHelperService: OrgTeamPrismaHelperService,
+              private readonly orgDeptHelperService: OrgDeptPrismaHelperService,
+              private readonly leaveService: LeaveService
+  ) {
+  }
 
 
   async onboardEmpToMyOrg(request: CreateEmployeeDto, orgID, creatorMail) {
     await this.orgEmployeeHelperService.validateRequest(request);
-    await this.orgHelperService.findOrgByID(orgID);
+    const orgName = await this.orgHelperService.findOrgByID(orgID);
     request.createdBy = creatorMail;
-    request.empPassword = await argon.hash(request.empPassword);
+    request.empPassword = this.utilService.generateRandomPassword();
+    request.empFirstName = this.utilService.toUpperCase(request.empFirstName);
+    request.empLastName = this.utilService.toUpperCase(request.empLastName);
     await this.utilService.checkIfRoleIsManagement(request.employee_role);
-    const employee = await this.employeeHelperService.createEmployee(request, orgID);
+    const employee = await this.employeeHelperService.createEmployeeAndSendWelcomeEmail(request, orgID, orgName);
     //TODO leave onboarding for new employee
-    await this.leaveService.onboardLeaveForNewEmployee(orgID, employee)
-    return this.employeeHelperService.findAndExcludeFields(employee);
+    await this.leaveService.onboardLeaveForNewEmployee(orgID, employee);
+    // return this.employeeHelperService.findAndExcludeFields(employee);
   }
 
 
@@ -53,25 +56,25 @@ export class OrgEmployeeService {
     return await this.orgEmployeeHelperService.addEmpToDept(empID, deptID);
   }
 
-  async addEmployeeAsTeamLead(orgID, teamID, empID, deptID) {
-    await this.employeeService.findEmpById(empID);
-    await this.orgHelperService.findOrgByID(orgID);
-    await this.orgTeamHelperService.findTeamDept(teamID, deptID);
-    await this.orgEmployeeHelperService.findEmpDept(empID, deptID);
-    await this.orgTeamHelperService.findTeam(deptID, orgID, teamID);
-    await this.orgEmployeeHelperService.findEmpTeam(teamID, empID);
-    await this.orgEmployeeHelperService.isEmployeeTeamLeadValidation(empID, teamID);
-    return await this.orgEmployeeHelperService.makeEmpTeamLead(empID, teamID, orgID);
-  }
+  // async addEmployeeAsTeamLead(orgID, teamID, empID, deptID) {
+  //   await this.employeeService.findEmpById(empID);
+  //   await this.orgHelperService.findOrgByID(orgID);
+  //   await this.orgTeamHelperService.findTeamDept(teamID, deptID);
+  //   await this.orgEmployeeHelperService.findEmpDept(empID, deptID);
+  //   await this.orgTeamHelperService.findTeam(deptID, orgID, teamID);
+  //   await this.orgEmployeeHelperService.findEmpTeam(teamID, empID);
+  //   await this.orgEmployeeHelperService.isEmployeeTeamLeadValidation(empID, teamID);
+  //   return await this.orgEmployeeHelperService.makeEmpTeamLead(empID, teamID, orgID);
+  // }
 
-  async removeEmployeeAsTeamLead(orgID, teamID, empID, deptID){
-    await this.orgHelperService.findOrgByID(orgID);
-    await this.employeeService.findEmpById(empID);
-    await this.orgEmployeeHelperService.findEmpDept(empID, deptID);
-    await this.orgTeamHelperService.findTeam(deptID, orgID, teamID);
-    await this.orgEmployeeHelperService.findEmpTeam(teamID, empID);
-    await this.orgTeamHelperService.findTeamDept(teamID, deptID);
-    await this.orgEmployeeHelperService.isEmployeeTeamLeadVerification(empID, teamID);
-    return await this.orgEmployeeHelperService.removeEmpTeamLead(empID, teamID, orgID);
-  }
+  // async removeEmployeeAsTeamLead(orgID, teamID, empID, deptID){
+  //   await this.orgHelperService.findOrgByID(orgID);
+  //   await this.employeeService.findEmpById(empID);
+  //   await this.orgEmployeeHelperService.findEmpDept(empID, deptID);
+  //   await this.orgTeamHelperService.findTeam(deptID, orgID, teamID);
+  //   await this.orgEmployeeHelperService.findEmpTeam(teamID, empID);
+  //   await this.orgTeamHelperService.findTeamDept(teamID, deptID);
+  //   await this.orgEmployeeHelperService.isEmployeeTeamLeadVerification(empID, teamID);
+  //   return await this.orgEmployeeHelperService.removeEmpTeamLead(empID, teamID, orgID);
+  // }
 }

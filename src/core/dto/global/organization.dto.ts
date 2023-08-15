@@ -1,30 +1,40 @@
 import { BaseDto } from "@core/dto/global/base.dto";
-import { IsEmail, IsNotEmpty, IsOptional } from "class-validator";
+import { IsDate, IsEmail, IsISO8601, IsNotEmpty, IsOptional, MinLength } from "class-validator";
 
 export class CreateOrgDto extends BaseDto {
-  @IsNotEmpty({message: "Organization name is required!"})
+  @IsNotEmpty({ message: "Organization name is required!" })
+  @MinLength(3)
   orgName: string;
-  @IsNotEmpty({message: "Organization Website is required!"})
+  @IsNotEmpty({ message: "Organization Website is required!" })
   orgWebsite: string;
-  @IsNotEmpty({message: "Organization Email Address is required!"})
+  @IsNotEmpty({ message: "Email Address is required!" })
   @IsEmail()
   orgEmail: string;
-  @IsNotEmpty({message: "Organization Address is required!"})
+  @IsNotEmpty({ message: "Address is required!" })
   orgAddress: string;
-  @IsNotEmpty({message: "Organization Number is required!"})
-  orgNumber:string;
+  @IsNotEmpty({ message: " Contact Number is required!" })
+  orgNumber: string;
   @IsOptional()
   orgAddress2 ?: string;
-  @IsNotEmpty({message: "Organization State is required!"})
+  @IsNotEmpty({ message: "State is required!" })
   orgState: string;
-  @IsNotEmpty({message: "Organization Country is required!"})
+  @IsNotEmpty({ message: "City is required!" })
+  orgCity: string;
+  @IsNotEmpty({ message: "Country is required!" })
   orgCountry: string;
-  @IsNotEmpty({message: "Organization RC number is required!"})
+  @IsNotEmpty({ message: "Type is required!" })
+  orgType: string;
+  @IsNotEmpty({ message: "Zip Code is required!" })
+  orgZipCode: string;
+  @IsNotEmpty({ message: "RC number is required!" })
   orgRCnumber: string;
-  @IsNotEmpty({message: "Organization industry is required!"})
+  @IsNotEmpty()
+  orgDateFounded: any;
+  @IsNotEmpty({ message: "Industry is required!" })
   orgIndustry: string;
-  createdBy:string;
-  modifiedBy:string
+  createdBy: string;
+  modifiedBy: string;
+  orgKrisId:string
 }
 
 
@@ -39,7 +49,7 @@ export class EditOrgDto extends BaseDto {
   @IsOptional()
   orgAddress: string;
   @IsOptional()
-  orgNumber:string;
+  orgNumber: string;
   @IsOptional()
   orgAddress2 ?: string;
   @IsOptional()
@@ -50,12 +60,12 @@ export class EditOrgDto extends BaseDto {
   orgRCnumber: string;
   @IsOptional()
   orgIndustry: string;
-  modifiedBy:string
+  modifiedBy: string;
 }
 
 export class ModifyOrg {
   @IsOptional()
-  deptName:string
+  deptName: string;
   @IsOptional()
-  teamName:string
+  teamName: string;
 }
