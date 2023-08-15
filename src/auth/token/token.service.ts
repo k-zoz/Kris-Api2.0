@@ -12,21 +12,23 @@ export class TokenService {
   ) {
   }
 
+  // async generateAccessToken(payload) {
+  //   return this.jwtService.sign(payload);
+  // }
+
   async generateAccessToken(payload) {
-    return this.jwtService.sign(payload);
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get<string>("accessTokenSecret"),
+      expiresIn: this.configService.get("accessTokenLifetime")
+    });
   }
 
-//   async generateAccessToken(payload: any) {
-//     return this.jwtService.sign({
-//   expiresIn: Math.floor(Date.now() / 1000) + (60 * 60),
-//   data: {email: payload.email, role:payload.role}
-// }, this.configService.get("accessTokenSecret"));
-//   }
+
   
   async generateRefreshToken(payload: any) {
     return this.jwtService.sign(payload, {
-      secret: this.configService.get("REFRESH_TOKEN_SECRET"),
-      expiresIn: this.configService.get("REFRESH_TOKEN_LIFETIME"),
+      secret: this.configService.get("refreshTokenSecret"),
+      expiresIn: this.configService.get("refreshTokenLifetime"),
       jwtid: payload.email
     });
   }

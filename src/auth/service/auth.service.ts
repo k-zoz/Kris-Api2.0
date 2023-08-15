@@ -39,8 +39,8 @@ export class AuthService {
     const { email, role } = user;
     const payload: JwtPayload = { email:email, role:role };
     const token = await this.tokenService.generateAccessToken(payload);
-    const refreshToken = await this.tokenService.generateRefreshToken(payload);
-    await this.userHelperService.setUserRefreshToken(email, refreshToken);
+    // const refreshToken = await this.tokenService.generateRefreshToken(payload);
+    // await this.userHelperService.setUserRefreshToken(email, refreshToken);
     const backOfficeUser = await this.userHelperService.findAndExcludeFieldDuringSignUp(user);
     return { token, backOfficeUser };
   }
