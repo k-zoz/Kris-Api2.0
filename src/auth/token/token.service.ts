@@ -13,13 +13,15 @@ export class TokenService {
   }
 
   async generateAccessToken(payload: any) {
-    return this.jwtService.sign(payload);
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get("ACCESS_TOKEN_SECRET"),
+    });
   }
 
 //   async generateAccessToken(payload: any) {
 //     return this.jwtService.sign({
 //   expiresIn: Math.floor(Date.now() / 1000) + (60 * 60),
-//   data: {email: payload.emai, role:payload.role}
+//   data: {email: payload.email, role:payload.role}
 // }, this.configService.get("accessTokenSecret"));
 //   }
   

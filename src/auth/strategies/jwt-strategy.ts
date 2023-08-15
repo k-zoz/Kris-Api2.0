@@ -23,10 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload) {
     const jwtPayload: JwtPayload = payload.authPayload;
     const { email, role, exp } = jwtPayload;
-    const expiry = exp * 1000;
-    if (Date.now() > expiry) {
-      throw new AppTokenExpiredException();
-    }
+
     return { email, role };
   }
 

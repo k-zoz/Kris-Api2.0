@@ -22,7 +22,7 @@ export class OrganizationPrismaHelperService {
 
   ) {
     const resendKey = this.configService.get("resendApiKey")
-    this.resend = new Resend("re_fDGEEX19_ApMHyit8rirENaRa6R4c7htQ");
+    this.resend = new Resend(process.env.RESEND_API_KEY);
   }
 
   async findOrgByID(id) {

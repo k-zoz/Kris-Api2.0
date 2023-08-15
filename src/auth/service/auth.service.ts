@@ -30,6 +30,7 @@ export class AuthService {
       this.logger.error(`Login failed ${email}`);
       throw new AppUnauthorizedException("Invalid Email or Password");
     }
+
     return this.authenticateBackOfficeUser(user);
   }
 

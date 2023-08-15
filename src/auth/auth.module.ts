@@ -11,18 +11,19 @@ import { EmployeeAuthController } from "@auth/controller/employee-auth.controlle
 import { EmployeeAuthService } from "@auth/service/employee-auth.service";
 import { LocaleService } from "@locale/locale.service";
 
+console.log(process.env.ACCESS_TOKEN_LIFETIME);
 
 @Global()
 @Module({
   imports: [JwtModule.register({
-            secret: process.env.ACCESS_TOKEN_SECRET,
-    signOptions: { expiresIn: process.env.ACCESS_TOKEN_SECRET }
-        }),
-    PassportModule.register({ defaultStrategy: "jwt", session: false }),
+    secret: process.env.ACCESS_TOKEN_SECRET,
+    signOptions: { expiresIn: process.env.ACCESS_TOKEN_LIFETIME }
+  }),
+    PassportModule.register({ defaultStrategy: "jwt", session: false })
   ],
   controllers: [AuthController, EmployeeAuthController],
   providers: [AuthService, ConfigService, JwtStrategy, TokenService, UtilService, EmployeeAuthService, LocaleService],
-  exports: [JwtStrategy, PassportModule,AuthService,EmployeeAuthService]
+  exports: [JwtStrategy, PassportModule, AuthService, EmployeeAuthService]
 })
 export class AuthModule {
 }
