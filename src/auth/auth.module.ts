@@ -18,10 +18,8 @@ import { LocaleService } from "@locale/locale.service";
     inject: [ConfigService],
     useFactory: (config: ConfigService) => ({
       secret: config.get("accessTokenSecret"),
-      // privateKey: config.get("privateKey"),
       signOptions: {
-        // algorithm:"RS256",
-        expiresIn: config.get("accessTokenLifetime")
+        expiresIn: "1d"
       }
     })
   }),
