@@ -13,7 +13,7 @@ export class TokenService {
   }
 
   async generateAccessToken(payload: any) {
-    return this.jwtService.signAsync(payload, {
+    return this.jwtService.signAsync({email:payload.email, role:payload.role}, {
       secret: this.configService.get("accessTokenSecret"),
       expiresIn: this.configService.get("accessTokenLifetime")
     });
