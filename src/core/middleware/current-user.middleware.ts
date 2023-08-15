@@ -39,7 +39,8 @@ export class CurrentUserMiddleware implements NestMiddleware {
       try {
         const bearerStringSplit = bearerString.split(" ");
         const token = bearerStringSplit[1];
-        payload.authPayload = await this.jwtService.verify(token, { secret: this.configService.get("accessTokenSecret") });
+        payload.authPayload = await this.jwtService.verify(token, { secret: this.configService.get("accessTokenSecret"), 
+                                                                   expiresIn: this.this.configService.get("accessTokenLifetime") });
       } catch (err) {
         throw new AppTokenExpiredException("Invalid or Expired token! Kindly sign in.");
       }
