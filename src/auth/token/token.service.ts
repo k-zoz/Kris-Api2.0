@@ -12,13 +12,19 @@ export class TokenService {
   ) {
   }
 
-  async generateAccessToken(payload: any) {
-    return this.jwtService.sign({email:payload.email, role:payload.role}, {
-      secret: this.configService.get("accessTokenSecret"),
-      expiresIn: "1d"
-    });
-  }
+  // async generateAccessToken(payload: any) {
+  //   return this.jwtService.sign({email:payload.email, role:payload.role}, {
+  //     secret: this.configService.get("accessTokenSecret"),
+  //     expiresIn: "1d"
+  //   });
+  // }
 
+  async generateAccessToken(payload: any) {
+    return this.jwtService.sign({ email: `${payload.email}`,role: `${payload.role}`}, 
+                                this.configService.get("accessTokenSecret"),
+                                { expiresIn: '1h' });
+  }
+  
   async generateRefreshToken(payload: any) {
     return this.jwtService.sign(payload, {
       secret: this.configService.get("REFRESH_TOKEN_SECRET"),
