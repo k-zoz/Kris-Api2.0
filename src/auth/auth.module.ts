@@ -1,6 +1,6 @@
 import { Global, Module } from "@nestjs/common";
 import { AuthService } from "@auth/service/auth.service";
-import { ConfigService } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule, JwtService } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import { JwtStrategy } from "@auth/strategies/jwt-strategy";
@@ -11,13 +11,18 @@ import { EmployeeAuthController } from "@auth/controller/employee-auth.controlle
 import { EmployeeAuthService } from "@auth/service/employee-auth.service";
 import { LocaleService } from "@locale/locale.service";
 
-console.log(process.env.ACCESS_TOKEN_LIFETIME);
 
 @Global()
 @Module({
-  imports: [JwtModule.register({
-    secret: process.env.ACCESS_TOKEN_SECRET,
-    signOptions: { expiresIn: process.env.ACCESS_TOKEN_LIFETIME }
+  imports: [JwtModule.registerAsync({
+    imports: [ConfigModule],
+    inject: [ConfigService],
+    useFactory: (config: ConfigService) => ({
+      secret: config.get<string>("accessTokenSecret"),
+      signOptions: {
+        expiresIn: config.get<string>("accessTokenLifetime")
+      }
+    })
   }),
     PassportModule.register({ defaultStrategy: "jwt", session: false })
   ],
