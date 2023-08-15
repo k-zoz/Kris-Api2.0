@@ -17,7 +17,8 @@ import { Resend } from "resend";
 export class UserPrismaHelperService {
   private readonly logger = new Logger(UserPrismaHelperService.name);
   private readonly mailSource = this.configService.get("mailSender");
-  private readonly resend = new Resend(this.configService.get("resendApiKey"));
+  private readonly resendKey = this.configService.get("resendApiKey")
+  private readonly resend = new Resend(this.resendKey);
 
   constructor(private readonly prismaService: PrismaService,
               private readonly eventEmitter: EventEmitter2,

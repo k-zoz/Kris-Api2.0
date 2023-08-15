@@ -13,7 +13,8 @@ import { NewOrganizationEvent } from "@core/event/back-office-event";
 export class OrganizationPrismaHelperService {
   private readonly logger = new Logger(OrganizationPrismaHelperService.name);
   private readonly mailSource = this.configService.get("mailSender");
-  private readonly resend = new Resend(this.configService.get("resendApiKey"));
+  private readonly resendKey = this.configService.get("resendApiKey")
+  private readonly resend = new Resend(this.resendKey);
 
   constructor(private readonly prismaService: PrismaService,
               private readonly emailService: EmailService,

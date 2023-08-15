@@ -16,7 +16,8 @@ import { NewEmployeeEvent } from "@core/event/back-office-event";
 @Injectable()
 export class EmployeePrismaHelperService {
   private readonly logger = new Logger(EmployeePrismaHelperService.name);
-  private readonly resend = new Resend(this.configService.get("resendApiKey"));
+  private readonly resendKey = this.configService.get("resendApiKey")
+  private readonly resend = new Resend(this.resendKey);
   private readonly mailSource = this.configService.get("mailSender");
 
   constructor(private readonly prismaService: PrismaService,
