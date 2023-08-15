@@ -36,7 +36,7 @@ export class AuthService {
 
   private async authenticateBackOfficeUser(user) {
     const { email, role } = user;
-    const payload: JwtPayload = { email, role };
+    const payload: JwtPayload = { email:email, role:role };
     const token = await this.tokenService.generateAccessToken(payload);
     const refreshToken = await this.tokenService.generateRefreshToken(payload);
     await this.userHelperService.setUserRefreshToken(email, refreshToken);
