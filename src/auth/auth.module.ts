@@ -14,17 +14,10 @@ import { LocaleService } from "@locale/locale.service";
 
 @Global()
 @Module({
-  imports: [JwtModule.registerAsync({
-    inject: [ConfigService],
-    useFactory: (config: ConfigService) => ({
-      secret: config.get("accessTokenSecret"),
-      // privateKey: config.get("privateKey"),
-      signOptions: {
-        // algorithm:"RS256",
-        expiresIn: config.get("accessTokenLifetime")
-      }
-    })
-  }),
+  imports: [JwtModule.register({
+            secret: process.env.ACCESS_TOKEN_SECRET,
+    signOptions: { expiresIn: process.env.ACCESS_TOKEN_SECRET }
+        }),
     PassportModule.register({ defaultStrategy: "jwt", session: false }),
   ],
   controllers: [AuthController, EmployeeAuthController],

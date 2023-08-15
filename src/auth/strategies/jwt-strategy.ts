@@ -14,10 +14,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly config: ConfigService, private readonly userService: UserService) {
     super({
       usernameField: "email",
+      ignoreExpiration: true,
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
-      passReqToCallback: true,
-      secretOrKey: config.get("accessTokenSecret")
+      secretOrKey: process.env.ACCESS_TOKEN_SECRET
     });
   }
 
