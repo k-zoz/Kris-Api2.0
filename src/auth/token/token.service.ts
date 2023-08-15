@@ -12,9 +12,8 @@ export class TokenService {
   ) {
   }
 
-  async generateAccessToken(payload: Object) {
-    return this.jwtService.sign(payload as Object, {expiresIn:this.configService.get("accessTokenLifetime") ,
-      secret: this.configService.get("accessTokenSecret")} );
+  async generateAccessToken(payload) {
+    return this.jwtService.sign(payload);
   }
 
 //   async generateAccessToken(payload: any) {
