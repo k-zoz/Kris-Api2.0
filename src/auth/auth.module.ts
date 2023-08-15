@@ -19,7 +19,7 @@ import { LocaleService } from "@locale/locale.service";
     useFactory: (config: ConfigService) => ({
       secret: config.get("accessTokenSecret"),
       signOptions: {
-        expiresIn: "1d"
+        expiresIn: config.get("accessTokenLifetime")
       }
     })
   }),
