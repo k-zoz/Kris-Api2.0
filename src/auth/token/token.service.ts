@@ -21,7 +21,7 @@ export class TokenService {
 
   async generateAccessToken(payload: any) {
     return this.jwtService.sign({
-  exp: Math.floor(Date.now() / 1000) + (60 * 60),
+  expiresIn: Math.floor(Date.now() / 1000) + (60 * 60),
   data: {email: payload.emai, role:payload.role}
 }, this.configService.get("accessTokenSecret"));
   }
