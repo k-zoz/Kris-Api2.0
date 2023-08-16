@@ -9,6 +9,8 @@ import { EnumValues } from "enum-values";
 import { UserPrismaHelperService } from "@back-office/helper-services/user-prisma-helper.service";
 import { AppConflictException, AppUnauthorizedException } from "@core/exception/app-exception";
 
+
+
 @Injectable()
 export class UserService implements OnModuleInit {
   private readonly logger = new Logger(UserService.name);

@@ -63,57 +63,57 @@ export class LeavePrismaHelperService {
     }
   }
 
-  async applyLeave(dto, orgID, employee) {
-    try {
-      await this.prismaService.$transaction(async (tx) => {
-        const leave = await tx.leave.findFirst(
-          {
-            where: {
-              name: { contains: dto.leaveName },
-              organizationId: orgID
-            }
-          }
-        );
-
-        //Employee's instance of his own leave
-        const employeeLeave = await tx.employeeLeave.findFirst({
-          where: {
-            employeeId: employee.id,
-            leaveId: leave.id
-          }
-        });
-
-        const leaveApplication = await tx.leaveApplication.create({
-          data: {
-            leaveName: dto.leaveName,
-            duration: dto.leaveDuration,
-            startDate: dto.leaveStartDate,
-            endDate: dto.leaveEndDate,
-            employeeId: employee.id,
-            leaveId: leave.id
-          }
-        });
-
-        const updatedEmployeeLeave = await tx.employeeLeave.update({
-          where: {
-            employeeId_leaveId: {
-              employeeId: employee.id,
-              leaveId: leave.id
-            }
-          },
-          data: {
-            remainingDuration: {
-              decrement: dto.leaveDuration
-            }
-          }
-        });
-      });
-      return "Applied Successfullly";
-    } catch (e) {
-      this.logger.error(e);
-      throw new AppException(AuthMsg.ERROR_APPLYING_LEAVE);
-    }
-  }
+  // async applyLeave(dto, orgID, employee) {
+  //   try {
+  //     await this.prismaService.$transaction(async (tx) => {
+  //       const leave = await tx.leave.findFirst(
+  //         {
+  //           where: {
+  //             name: { contains: dto.leaveName },
+  //             organizationId: orgID
+  //           }
+  //         }
+  //       );
+  //
+  //       //Employee's instance of his own leave
+  //       const employeeLeave = await tx.employeeLeave.findFirst({
+  //         where: {
+  //           employeeId: employee.id,
+  //           leaveId: leave.id
+  //         }
+  //       });
+  //
+  //       const leaveApplication = await tx.leaveApplication.create({
+  //         data: {
+  //           leaveName: dto.leaveName,
+  //           duration: dto.leaveDuration,
+  //           startDate: dto.leaveStartDate,
+  //           endDate: dto.leaveEndDate,
+  //           employeeId: employee.id,
+  //           leaveId: leave.id
+  //         }
+  //       });
+  //
+  //       const updatedEmployeeLeave = await tx.employeeLeave.update({
+  //         where: {
+  //           employeeId_leaveId: {
+  //             employeeId: employee.id,
+  //             leaveId: leave.id
+  //           }
+  //         },
+  //         data: {
+  //           remainingDuration: {
+  //             decrement: dto.leaveDuration
+  //           }
+  //         }
+  //       });
+  //     });
+  //     return "Applied Successfullly";
+  //   } catch (e) {
+  //     this.logger.error(e);
+  //     throw new AppException(AuthMsg.ERROR_APPLYING_LEAVE);
+  //   }
+  // }
 
   async leaveDurationRequest(employee, dto) {
     const employeeLeave = await this.findEmpLeaveByName(dto.leaveName, employee);

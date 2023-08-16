@@ -7,7 +7,7 @@ import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
-import { ModifyOrg } from "@core/dto/global/organization.dto";
+import { CreateDepartmentInBranchDto, ModifyOrg } from "@core/dto/global/organization.dto";
 import { SearchRequest } from "@core/model/search-request";
 
 @Controller('organization/department')
@@ -20,13 +20,14 @@ export class EmployeeOrgDepartmentsController extends BaseController{
 
   @Post("/:orgID/addDepartment")
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
-  async addDeptToOrganization(@Param("orgID") orgID: string,
+  async addDeptToBranch(@Param("branchID") branchID: string,
+                              @Param("orgID") orgID:string,
                               @GetUser() payload: AuthPayload,
-                              @Body(ValidationPipe) dto: ModifyOrg
+                              @Body(ValidationPipe) dto: CreateDepartmentInBranchDto
   ) {
     return this.response({
       message: "Added Successfully",
-      payload: await this.departmentService.addDepartment(dto, orgID)
+      payload: await this.departmentService.addDepartment(dto, orgID, payload.email)
     });
   }
 

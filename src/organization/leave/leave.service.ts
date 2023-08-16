@@ -41,7 +41,7 @@ export class LeaveService {
     dto.leaveEndDate = this.utilService.convertLeaveDate(dto.leaveEndDate);
     dto.leaveStartDate = this.utilService.convertLeaveDate(dto.leaveStartDate);
     await this.leaveHelperService.leaveDurationRequest(employee, dto);
-    return await this.leaveHelperService.applyLeave(dto, orgID, employee);
+    // return await this.leaveHelperService.applyLeave(dto, orgID, employee);
   }
 
   async leaveHistory(orgID: string, userPayLoad: AuthPayload) {

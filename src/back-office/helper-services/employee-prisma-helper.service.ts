@@ -176,7 +176,7 @@ export class EmployeePrismaHelperService {
     return this.prismaService.employee.findUniqueOrThrow({
       where: { email: user.email },
       select: prismaExclude("Employee", ["password", "refreshToken", "email", "krisID", "idNumber", "phoneNumber",
-        "status", "org_ClienteleId", "org_BranchId", "createdBy", "modifiedBy", "createdDate", "modifiedDate", "departmentId", "teamId", "role"])
+        "status", "org_ClienteleId", "org_BranchId", "createdBy", "modifiedBy", "createdDate", "modifiedDate", "departmentId", "teamId", ])
     });
   }
 

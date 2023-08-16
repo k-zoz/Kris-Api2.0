@@ -3,21 +3,21 @@ import { BaseDto } from "@core/dto/global/base.dto";
 
 export class CreateBranchDto extends BaseDto {
   @IsNotEmpty({ message: "Branch Name is required!" })
-  orgBranchName: string;
+  name: string;
   @IsNotEmpty({ message: "Branch Location is required!" })
-  orgBranchAddress: string;
-  @IsNotEmpty({ message: "Branch Location is required!" })
-  orgBranchState: string;
-  @IsNotEmpty({ message: "Branch Location is required!" })
-  orgBranchCity: string;
-  @IsNotEmpty({ message: "Branch Location is required!" })
-  orgBranchCountry: string;
+  location: string;
+  @IsNotEmpty({ message: "State is required!" })
+  state: string;
+  @IsNotEmpty({ message: "City is required!" })
+  city: string;
+  @IsNotEmpty({ message: "Country is required!" })
+  country: string;
   @IsOptional()
   @IsString()
   orgBranchMailAlias: string;
   @IsString()
   @IsOptional()
   branchManager: string;
-  @IsOptional()
+  @IsNotEmpty({ message:"Branch code is required" })
   branch_code:string
 }

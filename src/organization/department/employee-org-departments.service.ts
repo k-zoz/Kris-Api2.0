@@ -3,6 +3,10 @@ import { UtilService } from "@core/utils/util.service";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 import { OrgDeptPrismaHelperService } from "@organization/org-prisma-helper-services/org-dept-prisma-helper.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
+import { CreateDepartmentInBranchDto } from "@core/dto/global/organization.dto";
+import {
+  OrgBranchPrismaHelperService
+} from "@organization/org-prisma-helper-services/org-branch-prisma-helper.service";
 
 @Injectable()
 export class EmployeeOrgDepartmentsService {
@@ -11,16 +15,17 @@ export class EmployeeOrgDepartmentsService {
   constructor(private readonly utilService: UtilService,
               private readonly orgHelperService: OrganizationPrismaHelperService,
               private readonly employeeService: EmployeePrismaHelperService,
-              private readonly departmentHelperService:OrgDeptPrismaHelperService
+              private readonly departmentHelperService:OrgDeptPrismaHelperService,
+              private readonly branchHelperService:OrgBranchPrismaHelperService
   ) {}
 
 
-  async addDepartment(dto, orgID) {
-    await this.utilService.isEmpty(dto.deptName);
+  async addDepartment(dto:CreateDepartmentInBranchDto, orgID, creatorEmail) {
     await this.orgHelperService.findOrgByID(orgID);
-    dto.deptName = this.utilService.toUpperCase(dto.deptName);
-    await this.departmentHelperService.findDeptDuplicates(dto, orgID);
-    return await this.departmentHelperService.addDepartmentToOrg(dto, orgID);
+    dto.name = this.utilService.toUpperCase(dto.name);
+    await this.branchHelperService.findBranchBranchCode(dto.branchCode, orgID)
+    await this.departmentHelperService.findDeptDuplicates(dto);
+    return await this.departmentHelperService.addDepartmentToBranch(dto, orgID, creatorEmail);
   }
 
 

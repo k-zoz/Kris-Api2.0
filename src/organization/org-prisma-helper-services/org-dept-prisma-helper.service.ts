@@ -9,19 +9,24 @@ export class OrgDeptPrismaHelperService {
   constructor(private readonly prismaService: PrismaService) {
   }
 
-  async findDeptDuplicates(dto, orgID) {
+  async findDeptDuplicates(dto) {
     const existingDept = await this.prismaService.department.findFirst({
       where: {
-        name: { contains: dto.deptName },
-        organizationId: orgID
+        name: {
+          contains: dto.name
+        },
+        Org_Branch: {
+          branch_code: dto.branchCode
+        }
       }
     });
     if (existingDept) {
-      throw new AppConflictException(`Department  ${dto.deptName} exists`);
+      throw new AppConflictException(`Department  ${dto.name} exists in the branch already`);
     }
   }
 
-  async addDepartmentToOrg(dto, orgID) {
+
+  async addDepartmentToBranch(dto, orgID, creatorEmail) {
     try {
       return await this.prismaService.$transaction(async (tx) => {
         await tx.organization.findUnique({
@@ -30,10 +35,18 @@ export class OrgDeptPrismaHelperService {
           }
         });
 
+        const branch = await tx.org_Branch.findFirst({
+          where: {
+            branch_code:dto.branchCode
+          }
+        });
+
         const department = await tx.department.create({
           data: {
-            name: dto.deptName,
-            organizationId: orgID
+            name: dto.name,
+            createdBy: creatorEmail,
+            organizationId: orgID,
+            org_BranchId: branch.id
           }
         });
 

@@ -69,3 +69,12 @@ export class ModifyOrg {
   @IsOptional()
   teamName: string;
 }
+
+
+export class CreateDepartmentInBranchDto {
+  @IsNotEmpty({message:"Name of Department is required"})
+  name:string
+  @IsNotEmpty({message:"Branch code is required"})
+  branchCode:string
+
+}
