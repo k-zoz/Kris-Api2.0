@@ -20,6 +20,9 @@ import { OrgEmpPrismaHelperService } from "@organization/org-prisma-helper-servi
 import { OrgEmployeeService } from "@organization/orgEmployee/org-employee.service";
 import { EmpOrgBranchController } from "@organization/branch/emp-org-branch.controller";
 import { EmpOrgBranchService } from "@organization/branch/emp-org-branch.service";
+import { EmpOrgClienteleController } from "@organization/clentele/emp-org-clientele.controller";
+import { EmpOrgClienteleService } from "@organization/clentele/emp-org-clientele.service";
+import { EmpClienteleHelperService } from "@organization/org-prisma-helper-services/emp-clientele-helper.service";
 
 @Global()
 @Module({
@@ -27,10 +30,10 @@ import { EmpOrgBranchService } from "@organization/branch/emp-org-branch.service
   exports: [LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService,
     OrgDeptPrismaHelperService, OrgTeamPrismaHelperService, OrgTeamService,
     OrgEmpPrismaHelperService, OrgEmployeeService, EmployeeOrganizationService, OrgBranchPrismaHelperService],
-  controllers: [LeaveController, EmployeeOrganizationController,
+  controllers: [LeaveController, EmployeeOrganizationController, EmpOrgClienteleController,
     EmployeeOrgDepartmentsController, OrgTeamController, OrgEmployeeController, EmpOrgBranchController],
   providers: [LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService,
-    OrgDeptPrismaHelperService, EmpOrgBranchService,
+    OrgDeptPrismaHelperService, EmpOrgBranchService, EmpOrgClienteleService,EmpClienteleHelperService,
     OrgTeamPrismaHelperService, OrgTeamService, OrgEmpPrismaHelperService, OrgEmployeeService,
     LocaleService, UtilService, EmployeeOrganizationService, OrgBranchPrismaHelperService]
 })

@@ -5,7 +5,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { EmployeeRoleGuard } from "@core/guard/employee-role.guard";
 import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
-import { ModifyOrg } from "@core/dto/global/organization.dto";
+import { CreateTeamInDepartmentDto, ModifyOrg } from "@core/dto/global/organization.dto";
 import { SearchRequest } from "@core/model/search-request";
 
 @Controller("organization/team")
@@ -17,14 +17,13 @@ export class OrgTeamController extends BaseController {
   }
 
 
-  @Post("/:orgID/:deptID/addTeam")
+  @Post("/:orgID/addTeam")
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
-  async addTeamToOrg(@Param("orgID") orgID: string,
-                     @Param("deptID") deptID: string,
-                     @Body(ValidationPipe) dto: ModifyOrg
+  async addTeamToDepartment(@Param("orgID") orgID: string,
+                     @Body(ValidationPipe) dto: CreateTeamInDepartmentDto
   ) {
     return this.response({
-      payload: await this.orgTeamService.addTeam(dto, orgID, deptID),
+      payload: await this.orgTeamService.addTeam(dto, orgID),
       message: "Added Successfully"
     });
   }

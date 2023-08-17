@@ -4,21 +4,16 @@ import { AppConflictException, AppException, AppNotFoundException } from "@core/
 
 @Injectable()
 export class OrgTeamPrismaHelperService {
-  private readonly logger = new Logger(OrgTeamPrismaHelperService.name)
+  private readonly logger = new Logger(OrgTeamPrismaHelperService.name);
 
-  constructor(private readonly prismaService:PrismaService) {
+  constructor(private readonly prismaService: PrismaService) {
   }
 
 
-
-  async addTeamToOrg(dto, orgID, department) {
+  async addTeamToDepss(dto, orgID, department) {
     try {
       return await this.prismaService.$transaction(async (tx) => {
-        await tx.organization.findUnique({
-          where: {
-            id: orgID
-          }
-        });
+
         const team = await tx.team.create({
           data: {
             name: dto.teamName,
@@ -26,19 +21,19 @@ export class OrgTeamPrismaHelperService {
             departmentId: department.id
           }
         });
-        return { team };
+        return "Successfully added team to department"
       });
     } catch (e) {
       this.logger.error(e);
-      throw new AppException();
+      throw new AppException("Error creating team");
     }
   }
 
-  async findTeamDuplicates(dto, orgID) {
+  async findTeamDuplicates(dto, department) {
     const existingTeam = await this.prismaService.team.findFirst({
       where: {
-        name: { contains: dto.teamName },
-        organizationId: orgID
+        name: { equals: dto.teamName },
+        departmentId: department.id
       }
     });
     if (existingTeam) {
@@ -52,8 +47,9 @@ export class OrgTeamPrismaHelperService {
       const [teams, total] = await this.prismaService.$transaction([
         this.prismaService.team.findMany({
           where: {
-            organizationId: orgID
+            organizationId: orgID,
           },
+
           skip,
           take
 
@@ -71,7 +67,6 @@ export class OrgTeamPrismaHelperService {
       throw new AppException();
     }
   }
-
 
 
   async findTeam(deptId, orgID, teamID) {

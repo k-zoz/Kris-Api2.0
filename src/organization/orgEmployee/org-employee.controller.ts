@@ -150,6 +150,14 @@ export class OrgEmployeeController extends BaseController {
     });
   };
 
+  @Get("/:orgID/employee/:empID")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async findOneEmployee(@Param("orgID") orgID: string,
+                        @Param("empID") empID: string
+  ) {
+    return this.response({ payload: await this.employeeService.findOneEmployee(orgID, empID) });
+  }
+
   // TODO delete employee, delete from team, department, leave plans, e.t.c
 
 }

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { PrismaService } from "@prisma/prisma.service";
+import { CreateTeamInDepartmentDto } from "@core/dto/global/organization.dto";
 
 @Injectable()
 export class OrgDeptPrismaHelperService {
@@ -13,7 +14,7 @@ export class OrgDeptPrismaHelperService {
     const existingDept = await this.prismaService.department.findFirst({
       where: {
         name: {
-          contains: dto.name
+          equals: dto.name
         },
         Org_Branch: {
           branch_code: dto.branchCode
@@ -37,7 +38,7 @@ export class OrgDeptPrismaHelperService {
 
         const branch = await tx.org_Branch.findFirst({
           where: {
-            branch_code:dto.branchCode
+            branch_code: dto.branchCode
           }
         });
 
@@ -50,11 +51,11 @@ export class OrgDeptPrismaHelperService {
           }
         });
 
-        return { department };
+        return "Created Successfully";
       });
     } catch (e) {
       this.logger.error(e);
-      throw new AppException();
+      throw new AppException("Error creating department");
     }
   }
 
@@ -112,7 +113,8 @@ export class OrgDeptPrismaHelperService {
           where: {
             organizationId: orgID
           }, include: {
-            teams: true
+            teams: true,
+            Org_Branch: true
           },
           skip,
           take
@@ -132,4 +134,18 @@ export class OrgDeptPrismaHelperService {
     }
   }
 
+  async findDeptByName(dto: CreateTeamInDepartmentDto, orgID) {
+    const department = await this.prismaService.department.findFirst({
+      where: {
+        name: {
+          equals: dto.departmentName
+        },
+        organizationId: orgID
+      }
+    });
+    return department;
+    if (!department) {
+      throw new AppNotFoundException(`Can't find Department with name ${dto.departmentName} `);
+    }
+  }
 }

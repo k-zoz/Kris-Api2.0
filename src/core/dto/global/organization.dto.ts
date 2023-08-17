@@ -1,5 +1,5 @@
 import { BaseDto } from "@core/dto/global/base.dto";
-import { IsDate, IsEmail, IsISO8601, IsNotEmpty, IsOptional, MinLength } from "class-validator";
+import { IsDate, IsEmail, IsISO8601, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
 
 export class CreateOrgDto extends BaseDto {
   @IsNotEmpty({ message: "Organization name is required!" })
@@ -34,7 +34,7 @@ export class CreateOrgDto extends BaseDto {
   orgIndustry: string;
   createdBy: string;
   modifiedBy: string;
-  orgKrisId:string
+  orgKrisId: string;
 }
 
 
@@ -70,11 +70,25 @@ export class ModifyOrg {
   teamName: string;
 }
 
+export class CreateTeamInDepartmentDto {
+  @IsNotEmpty({message:"Department Name is required"})
+  @IsString()
+  departmentName: string;
+  @IsNotEmpty({message:"Team Name is required"})
+  @IsString()
+  teamName: string;
+}
+
 
 export class CreateDepartmentInBranchDto {
-  @IsNotEmpty({message:"Name of Department is required"})
-  name:string
-  @IsNotEmpty({message:"Branch code is required"})
-  branchCode:string
+  @IsNotEmpty({ message: "Name of Department is required" })
+  @IsString()
+  name: string;
+  @IsNotEmpty({ message: "Branch code is required" })
+  branchCode: string;
+}
+
+
+export class CreateDepartmentClientele {
 
 }

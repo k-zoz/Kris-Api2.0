@@ -106,8 +106,15 @@ model Org_Branch {
 }
 
 model Org_Clientele {
-  id             String       @id @default(uuid())
-  name           String
+  id   String @id @default(uuid())
+  name String
+
+  location       String
+  state          String
+  city           String
+  country        String
+  clientele_code String @unique
+
   organizationId String
   Organization   Organization @relation(fields: [organizationId], references: [id])
   employees      Employee[]

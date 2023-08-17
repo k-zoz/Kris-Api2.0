@@ -88,4 +88,9 @@ export class EmployeeService {
   roles(): Array<CodeValue> {
     return EnumValues.getNamesAndValues(EmployeeRoleEnum).map(value => CodeValue.of(value.name, value.value as string));
   }
+
+  async findOneEmployee(orgID: string, empID: string) {
+    await  this.orgHelperService.findOrgByID(orgID)
+    return await this.employeeHelperService.findOneEmpAndExclude(empID)
+  }
 }

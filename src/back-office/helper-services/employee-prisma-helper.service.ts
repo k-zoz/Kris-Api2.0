@@ -20,11 +20,12 @@ export class EmployeePrismaHelperService {
   // private readonly resend = new Resend(this.resendKey);
   private readonly mailSource = this.configService.get("mailSender");
   private resend: Resend;
+
   constructor(private readonly prismaService: PrismaService,
               private readonly configService: ConfigService,
               private readonly emailService: EmailService,
               private readonly localeService: LocaleService) {
-    const resendKey = this.configService.get("resendApiKey")
+    const resendKey = this.configService.get("resendApiKey");
     this.resend = new Resend("re_fDGEEX19_ApMHyit8rirENaRa6R4c7htQ");
   }
 
@@ -44,6 +45,15 @@ export class EmployeePrismaHelperService {
       throw new AppNotFoundException(AuthMsg.USER_NOT_FOUND);
     }
     return found;
+  }
+
+  async findOneEmpAndExclude(empID) {
+    try {
+      return await this.prismaService.employee.findFirst({ where: { id: empID }, select: prismaExclude("Employee", ["password", "refreshToken"] ) });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppNotFoundException(AuthMsg.USER_NOT_FOUND);
+    }
   }
 
   async editEmployee(email, request) {
@@ -176,7 +186,7 @@ export class EmployeePrismaHelperService {
     return this.prismaService.employee.findUniqueOrThrow({
       where: { email: user.email },
       select: prismaExclude("Employee", ["password", "refreshToken", "email", "krisID", "idNumber", "phoneNumber",
-        "status", "org_ClienteleId", "org_BranchId", "createdBy", "modifiedBy", "createdDate", "modifiedDate", "departmentId", "teamId", ])
+        "status", "org_ClienteleId", "org_BranchId", "createdBy", "modifiedBy", "createdDate", "modifiedDate", "departmentId", "teamId"])
     });
   }
 
