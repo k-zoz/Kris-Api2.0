@@ -36,7 +36,6 @@ export class UserController extends BaseController {
   }
 
   @Get("status")
-  @Permission(UserRoleEnum.SUPER_ADMIN)
   allBoStatus() {
     return this.response({ payload: this.userService.boStatus() });
   }

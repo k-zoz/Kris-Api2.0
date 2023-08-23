@@ -8,6 +8,11 @@ export class NewBackOfficerEvent {
   template?:MsgTemplate
 }
 
+export class NewEmployeePasswordResetEvent {
+  email:string
+  password:string
+  firstname:string
+}
 
 export class NewOrganizationEvent {
   organizationName:string

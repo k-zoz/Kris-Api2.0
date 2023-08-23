@@ -9,7 +9,9 @@ import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { CreateBranchDto } from "@core/dto/global/branch.dto";
 import { EmpOrgBranchService } from "@organization/branch/emp-org-branch.service";
 import { SearchRequest } from "@core/model/search-request";
+import { SkipThrottle } from "@nestjs/throttler";
 
+@SkipThrottle()
 @Controller("organization/branch")
 @UseGuards(AuthGuard())
 @UseGuards(EmployeeRoleGuard)

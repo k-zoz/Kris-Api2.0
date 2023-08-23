@@ -21,6 +21,7 @@ export class LeaveService {
 
   async createLeavePlan(dto: CreateLeaveDto, orgID: string, creatorEmail: string) {
     await this.orgHelperService.findOrgByID(orgID);
+    dto.leaveName = this.utilService.toUpperCase(dto.leaveName);
     await this.leaveHelperService.findLeaveDuplicates(dto, orgID);
     return await this.leaveHelperService.createLeavePlanAndEmployeeLeave(dto, orgID, creatorEmail);
   }
@@ -31,18 +32,23 @@ export class LeaveService {
     return await this.leaveHelperService.findAllLeavePlansForOrg(orgID);
   }
 
+  // TODO Check for overlapping leave requests
+  // Weekends and weekndays days to know day to minus duration
 
   async leaveApplication(dto: ApplyForLeave, orgID: string, userPayLoad: AuthPayload) {
     await this.orgHelperService.findOrgByID(orgID);
+    dto.leaveName = this.utilService.toUpperCase(dto.leaveName);
     await this.leaveHelperService.findOrgLeaveByName(dto.leaveName, orgID);
     const employee = await this.employeeHelperService.findEmpByEmail(userPayLoad.email);
     //date conversion based on how dates are entered or could be handled in the front end
     dto.leaveDuration = this.utilService.calcLeaveDuration(dto.leaveStartDate, dto.leaveEndDate);
-    dto.leaveEndDate = this.utilService.convertLeaveDate(dto.leaveEndDate);
-    dto.leaveStartDate = this.utilService.convertLeaveDate(dto.leaveStartDate);
+    dto.leaveEndDate = this.utilService.convertDate(dto.leaveEndDate);
+    dto.leaveStartDate = this.utilService.convertDate(dto.leaveStartDate);
+    console.log(dto);
     await this.leaveHelperService.leaveDurationRequest(employee, dto);
-    // return await this.leaveHelperService.applyLeave(dto, orgID, employee);
+    return await this.leaveHelperService.applyLeave(dto, orgID, employee);
   }
+
 
   async leaveHistory(orgID: string, userPayLoad: AuthPayload) {
     await this.orgHelperService.findOrgByID(orgID);
@@ -66,6 +72,16 @@ export class LeaveService {
   //   await this.orgHelperService.findOrgByID(orgID)
   //   return await this.leaveHelperService.findAllEmpLeaveHistory(orgID);
   // }
+  async allEmployeesOnLeave(orgID: string) {
+    await this.orgHelperService.findOrgByID(orgID);
+    return await this.leaveHelperService.allEmployeeLeaveStatus(orgID);
+  }
+
+  async findOneLeave(orgID: string, leaveID: string, email) {
+    await this.orgHelperService.findOrgByID(orgID);
+    const employee = await this.employeeHelperService.findEmpByEmail(email)
+    return await this.leaveHelperService.findOneLeave(orgID, leaveID, employee);
+  }
 }
 
 

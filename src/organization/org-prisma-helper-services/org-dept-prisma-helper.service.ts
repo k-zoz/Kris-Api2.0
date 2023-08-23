@@ -1,7 +1,11 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { PrismaService } from "@prisma/prisma.service";
-import { CreateTeamInDepartmentDto } from "@core/dto/global/organization.dto";
+import {
+  CreateTeamInDepartmentDto,
+  DepartmentNameSearchDto,
+  SearchBranchNameOrCodeDto
+} from "@core/dto/global/organization.dto";
 
 @Injectable()
 export class OrgDeptPrismaHelperService {
@@ -134,18 +138,68 @@ export class OrgDeptPrismaHelperService {
     }
   }
 
-  async findDeptByName(dto: CreateTeamInDepartmentDto, orgID) {
+  async findDeptByName(dto: any, orgID) {
     const department = await this.prismaService.department.findFirst({
       where: {
-        name: {
-          equals: dto.departmentName
-        },
+        name: dto.departmentName,
         organizationId: orgID
       }
     });
-    return department;
+
     if (!department) {
       throw new AppNotFoundException(`Can't find Department with name ${dto.departmentName} `);
+    }
+    return department;
+  }
+
+
+  async findDeptByNameAlone(departmentName, orgID) {
+    if (!departmentName) {
+    } else {
+      const department = await this.prismaService.department.findFirst({
+        where: {
+          name: departmentName,
+          organizationId: orgID
+        }
+      });
+
+      if (!department) {
+        throw new AppNotFoundException(`Can't find Department with name ${departmentName} `);
+      }
+      return department;
+    }
+
+  }
+
+  async findAllDeptsInBranch(orgID: string, searchRequest: SearchBranchNameOrCodeDto) {
+    const { skip, take } = searchRequest;
+    try {
+      const [departments, total] = await this.prismaService.$transaction([
+        this.prismaService.department.findMany({
+          where: {
+            organizationId: orgID,
+            Org_Branch: {
+              name: searchRequest.name,
+              branch_code: searchRequest.branch_code
+            }
+          },
+          skip,
+          take
+
+        }),
+        this.prismaService.department.count({
+          where: {
+            organizationId: orgID,
+            Org_Branch: {
+              name: searchRequest.name
+            }
+          }
+        })
+      ]);
+      const totalPage = Math.ceil(total / take) || 1;
+      return { total, totalPage, departments };
+    } catch (e) {
+
     }
   }
 }

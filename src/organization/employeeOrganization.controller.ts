@@ -12,7 +12,9 @@ import { SearchRequest } from "@core/model/search-request";
 import { Permission } from "@core/decorator/roles.decorator";
 import { UserRoleEnum } from "@core/enum/user-role-enum";
 import { OrganizationService } from "@back-office/orgnization/organization.service";
+import { SkipThrottle } from "@nestjs/throttler";
 
+@SkipThrottle()
 @Controller("organization")
 @UseGuards(AuthGuard())
 @UseGuards(EmployeeRoleGuard)
@@ -25,7 +27,6 @@ export class EmployeeOrganizationController extends BaseController {
 
 
   @Get("/:orgID/information")
-  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async getOrgInfo(@Param("orgID") orgID: string) {
     return this.response({ payload: await this.employeeOrganizationService.findOrgInfo(orgID) });
   }

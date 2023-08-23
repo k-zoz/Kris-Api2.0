@@ -5,7 +5,7 @@ import { OnEvent } from "@nestjs/event-emitter";
 import { KrisEventConst } from "@core/event/kris-event.const";
 import {
   NewBackOfficerEvent,
-  NewEmployeeEvent,
+  NewEmployeeEvent, NewEmployeePasswordResetEvent,
   NewOrganizationEvent,
   PasswordChangeEvent
 } from "@core/event/back-office-event";
@@ -42,7 +42,7 @@ export class EmailService {
     return template(data);
   }
 
-  async sendResetPasswordDetailsMail(event: NewBackOfficerEvent) {
+  async sendResetPasswordDetailsMail(event: NewBackOfficerEvent| NewEmployeePasswordResetEvent) {
     const relativePath = "../../templates/resetPassword.hbs";
     const absolutePath = path.join(__dirname, relativePath);
     const sourceFile = fs.readFileSync(absolutePath, "utf-8");

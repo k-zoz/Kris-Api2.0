@@ -5,7 +5,7 @@ import { EmployeePrismaHelperService } from "@back-office/helper-services/employ
 import { OrgTeamPrismaHelperService } from "@organization/org-prisma-helper-services/org-team-prisma-helper.service";
 import { OrgDeptPrismaHelperService } from "@organization/org-prisma-helper-services/org-dept-prisma-helper.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
-import { CreateTeamInDepartmentDto } from "@core/dto/global/organization.dto";
+import { CreateTeamInDepartmentDto, DepartmentNameSearchDto } from "@core/dto/global/organization.dto";
 
 @Injectable()
 export class OrgTeamService {
@@ -20,11 +20,11 @@ export class OrgTeamService {
   }
 
 
-  async addTeam(dto:CreateTeamInDepartmentDto, orgID) {
+  async addTeam(dto: CreateTeamInDepartmentDto, orgID) {
     await this.orgHelperService.findOrgByID(orgID);
     dto.teamName = this.utilService.toUpperCase(dto.teamName);
-    dto.departmentName = this.utilService.toUpperCase(dto.departmentName)
-   const department= await this.orgDeptHelperService.findDeptByName(dto, orgID)
+    dto.departmentName = this.utilService.toUpperCase(dto.departmentName);
+    const department = await this.orgDeptHelperService.findDeptByName(dto, orgID);
     await this.orgTeamHelperService.findTeamDuplicates(dto, department);
     return await this.orgTeamHelperService.addTeamToDepss(dto, orgID, department);
   }
@@ -38,4 +38,10 @@ export class OrgTeamService {
   //   await this.orgHelperService.findOrgByID(orgID);
   //   return await this.orgTeamHelperService.findAllTeamLeads(orgID, searchRequest);
   // }
+  async allTeamsInDept(orgID: string, dto: DepartmentNameSearchDto) {
+    await this.orgHelperService.findOrgByID(orgID);
+    dto.departmentName = this.utilService.toUpperCase(dto.departmentName);
+    const department = await this.orgDeptHelperService.findDeptByName(dto, orgID);
+    return await this.orgTeamHelperService.findAllTeamsInADepartment(orgID, department, dto);
+  }
 }

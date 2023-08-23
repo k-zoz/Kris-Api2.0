@@ -1,10 +1,12 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { AppConflictException, AppException } from "@core/exception/app-exception";
+import { AppConflictException, AppException, AppUnauthorizedException } from "@core/exception/app-exception";
 import { LocaleService } from "@locale/locale.service";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { DateTime } from "luxon";
 import { randomBytes } from 'crypto';
 import { v4 as uuidV4 } from 'uuid';
+import * as moment from "moment";
+const dayjs = require('dayjs')
 
 
 @Injectable()
@@ -38,13 +40,13 @@ export class UtilService {
     if (typeof role === "string") {
       if (role === "MANAGEMENT") {
         this.logger.error(this.localeService.resolveMessage(AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE));
-        throw new AppException(this.localeService.resolveMessage(AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE));
+        throw new AppUnauthorizedException(this.localeService.resolveMessage(AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE));
       }
     }
     if (Array.isArray(role)) {
       if (role.some(r => r === "MANAGEMENT")) {
         this.logger.error(this.localeService.resolveMessage(AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE));
-        throw new AppException(this.localeService.resolveMessage(AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE));
+        throw new AppUnauthorizedException(this.localeService.resolveMessage(AuthMsg.CANNOT_CREATE_EMPLOYEE_WITH_MANAGEMENT_ROLE));
       }
     }
 
@@ -57,13 +59,30 @@ export class UtilService {
     return duration.as("days");
   }
 
-  convertLeaveDate(date: any) {
-    const newDate = DateTime.fromFormat(date, "MM-dd-yyyy", { zone: "Africa/Lagos" });
-    return newDate.toISO();
+  convertDate(date: any) {
+
+    if(!date){
+    } else {
+      const newDate = DateTime.fromFormat(date, "MM-dd-yyyy", { zone: "Africa/Lagos" });
+      return newDate.toISO();
+    }
   }
 
-   toUpperCase(str: string): string {
-    return str.toUpperCase();
+
+
+  convertDateAgain(date){
+    return dayjs(date).toDate()
+  }
+
+
+
+
+   toUpperCase(str: any): string {
+    if(!str){
+    } else {
+      return str.toUpperCase();
+    }
+
   }
 
 
@@ -101,7 +120,7 @@ export class UtilService {
   generateUUID(name:string){
     const namePart = name.slice(0, 3).toUpperCase()
     const uuid = uuidV4()
-    return `${namePart}-${uuid}`
+    return `KRIS-${namePart}-${uuid}`
   }
 
 

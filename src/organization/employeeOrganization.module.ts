@@ -23,6 +23,16 @@ import { EmpOrgBranchService } from "@organization/branch/emp-org-branch.service
 import { EmpOrgClienteleController } from "@organization/clentele/emp-org-clientele.controller";
 import { EmpOrgClienteleService } from "@organization/clentele/emp-org-clientele.service";
 import { EmpClienteleHelperService } from "@organization/org-prisma-helper-services/emp-clientele-helper.service";
+import { EmpOrgOnboardingController } from "@organization/onboarding/emp-org-onboarding.controller";
+import { EmpOrgOnboardingService } from "@organization/onboarding/emp-org-onboarding.service";
+import {
+  OrgOnboardPrismaHelperService
+} from "@organization/org-prisma-helper-services/org-onboard-prisma-helper.service";
+import { EmpOrgAppraisalController } from "@organization/appraisals/emp-org-appraisal.controller";
+import { EmpOrgAppraisalService } from "@organization/appraisals/emp-org-appraisal.service";
+import {
+  OrgAppraisalPrismaHelperService
+} from "@organization/org-prisma-helper-services/org-appraisal-prisma-helper.service";
 
 @Global()
 @Module({
@@ -30,11 +40,11 @@ import { EmpClienteleHelperService } from "@organization/org-prisma-helper-servi
   exports: [LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService,
     OrgDeptPrismaHelperService, OrgTeamPrismaHelperService, OrgTeamService,
     OrgEmpPrismaHelperService, OrgEmployeeService, EmployeeOrganizationService, OrgBranchPrismaHelperService],
-  controllers: [LeaveController, EmployeeOrganizationController, EmpOrgClienteleController,
+  controllers: [LeaveController, EmployeeOrganizationController, EmpOrgClienteleController,EmpOrgOnboardingController, EmpOrgAppraisalController,
     EmployeeOrgDepartmentsController, OrgTeamController, OrgEmployeeController, EmpOrgBranchController],
-  providers: [LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService,
-    OrgDeptPrismaHelperService, EmpOrgBranchService, EmpOrgClienteleService,EmpClienteleHelperService,
-    OrgTeamPrismaHelperService, OrgTeamService, OrgEmpPrismaHelperService, OrgEmployeeService,
+  providers: [LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService,EmpOrgAppraisalService,
+    OrgDeptPrismaHelperService, EmpOrgBranchService, EmpOrgClienteleService,EmpClienteleHelperService,OrgOnboardPrismaHelperService,
+    OrgTeamPrismaHelperService, OrgTeamService, OrgEmpPrismaHelperService, OrgEmployeeService,EmpOrgOnboardingService,OrgAppraisalPrismaHelperService,
     LocaleService, UtilService, EmployeeOrganizationService, OrgBranchPrismaHelperService]
 })
 export class EmployeeOrganizationModule {

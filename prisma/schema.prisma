@@ -76,8 +76,9 @@ model Organization {
   createdBy      String?
   modifiedBy     String?
 
-  createdDate  DateTime @default(now()) @db.Date
-  modifiedDate DateTime @updatedAt @db.Date
+  createdDate  DateTime    @default(now()) @db.Date
+  modifiedDate DateTime    @updatedAt @db.Date
+  Appraisal    Appraisal[]
 
   @@unique([orgName, orgWebsite, orgEmail, orgNumber, orgRCnumber])
 }
@@ -185,21 +186,31 @@ enum Employee_Status {
 }
 
 model Employee {
-  id           String  @id @default(uuid())
-  email        String  @unique
-  password     String
-  firstname    String
-  lastname     String
-  krisID       String? @unique
-  idNumber     String  @unique
-  phoneNumber  String  @unique
-  refreshToken String?
+  id                   String  @id @default(uuid())
+  email                String  @unique
+  password             String
+  firstname            String
+  lastname             String
+  middleName           String?
+  krisID               String? @unique
+  idNumber             String  @unique
+  phoneNumber          String  @unique
+  refreshToken         String?
+  personalEmail        String? @unique
+  workPhoneNumber      String?
+  personalPhoneNumber2 String?
+  designation          String?
+  employment_type      String?
+
+  dateOfConfirmation DateTime? @db.Date
+  dateOfJoining      DateTime? @db.Date
 
   role               Employee_Role[]
   status             Employee_Status?
   employeeLeave      EmployeeLeave[]
   leaveApplication   LeaveApplication[]
   EmployeeOnboarding EmployeeOnboarding[]
+  Employee_Appraisal Employee_Appraisal[]
 
   organizationId String
   Organization   Organization @relation(fields: [organizationId], references: [id])
@@ -224,14 +235,109 @@ model Employee {
   createdDate  DateTime @default(now()) @db.Date
   modifiedDate DateTime @updatedAt
 
-  @@unique([email, idNumber, phoneNumber])
+  @@unique([email, idNumber, phoneNumber, personalEmail])
+}
+
+model Appraisal {
+  id                 String               @id @default(uuid())
+  name               String
+  description        String
+  startDate          DateTime
+  endDate            DateTime
+  section            Appraisal_Section[]
+  Employee_Appraisal Employee_Appraisal[]
+  Organization       Organization         @relation(fields: [organizationId], references: [id])
+  organizationId     String
+
+  createdBy    String?
+  modifiedBy   String?
+  createdDate  DateTime @default(now()) @db.Date
+  modifiedDate DateTime @updatedAt
+}
+
+model Appraisal_Section {
+  id          String @id @default(uuid())
+  name        String
+  description String
+
+  question    Appraisal_Question[]
+  Appraisal   Appraisal?           @relation(fields: [appraisalId], references: [id])
+  appraisalId String?
+
+  createdBy    String?
+  modifiedBy   String?
+  createdDate  DateTime @default(now()) @db.Date
+  modifiedDate DateTime @updatedAt
+}
+
+model Appraisal_Question {
+  id   String @id @default(uuid())
+  text String
+
+  option                      Appraisal_Question_Options[]
+  Appraisal_Question_Response Appraisal_Question_Response[]
+  response_type               Appraisal_ResponseType
+
+  Appraisal_Section   Appraisal_Section? @relation(fields: [appraisal_SectionId], references: [id])
+  appraisal_SectionId String?
+
+  createdBy    String?
+  modifiedBy   String?
+  createdDate  DateTime @default(now()) @db.Date
+  modifiedDate DateTime @updatedAt
+}
+
+model Appraisal_Question_Options {
+  id    String @id @default(uuid())
+  text  String
+  score Int
+
+  Appraisal_Question   Appraisal_Question? @relation(fields: [appraisal_QuestionId], references: [id])
+  appraisal_QuestionId String?
+
+  createdBy                   String?
+  modifiedBy                  String?
+  createdDate                 DateTime                      @default(now()) @db.Date
+  modifiedDate                DateTime                      @updatedAt
+  Appraisal_Question_Response Appraisal_Question_Response[]
+}
+
+model Appraisal_Question_Response {
+  id    String  @id @default(uuid())
+  text  String?
+  score Int?
+
+  option            Appraisal_Question_Options? @relation(fields: [question_optionID], references: [id])
+  question_optionID String?
+
+  question     Appraisal_Question? @relation(fields: [questionID], references: [id])
+  questionID   String?
+  createdBy    String?
+  modifiedBy   String?
+  createdDate  DateTime            @default(now()) @db.Date
+  modifiedDate DateTime            @updatedAt
+}
+
+model Employee_Appraisal {
+  id          String    @id @default(uuid())
+  employeeId  String
+  employee    Employee  @relation(fields: [employeeId], references: [id])
+  appraisal   Appraisal @relation(fields: [appraisalId], references: [id])
+  appraisalId String
+}
+
+enum Appraisal_ResponseType {
+  TEXT
+  OPTION
+  RATING
+  SCORE
 }
 
 model Leave {
-  id       String @id @default(uuid())
-  name     String
-  duration Int
-
+  id               String             @id @default(uuid())
+  name             String
+  duration         Int
+  type             LeaveType?
   employeeLeave    EmployeeLeave[]
   leaveApplication LeaveApplication[]
 
@@ -240,6 +346,11 @@ model Leave {
 
   createdBy   String?
   createdDate DateTime @default(now()) @db.Date
+}
+
+enum LeaveType {
+  PAID
+  UNPAID
 }
 
 model Onboarding {
@@ -256,7 +367,8 @@ model Onboarding {
 model EmployeeOnboarding {
   id           String      @id @default(uuid())
   name         String
-  completed    String
+  description  String
+  completed    Boolean     @default(false)
   Onboarding   Onboarding? @relation(fields: [onboardingId], references: [id])
   onboardingId String?
   employeeId   String
@@ -277,6 +389,8 @@ model EmployeeLeave {
   leave       Leave    @relation(fields: [leaveId], references: [id])
   createdDate DateTime @default(now()) @db.Date
   createdBy   String?
+
+  @@unique([employeeId, leaveId])
 }
 
 model LeaveApplication {

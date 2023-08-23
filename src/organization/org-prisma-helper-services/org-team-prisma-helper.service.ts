@@ -21,7 +21,8 @@ export class OrgTeamPrismaHelperService {
             departmentId: department.id
           }
         });
-        return "Successfully added team to department"
+
+        return "Successfully added team to department";
       });
     } catch (e) {
       this.logger.error(e);
@@ -37,7 +38,7 @@ export class OrgTeamPrismaHelperService {
       }
     });
     if (existingTeam) {
-      throw new AppConflictException(`Department  ${dto.teamName} exists`);
+      throw new AppConflictException(`Team  ${dto.teamName} exists in ${department.name}`);
     }
   }
 
@@ -47,7 +48,7 @@ export class OrgTeamPrismaHelperService {
       const [teams, total] = await this.prismaService.$transaction([
         this.prismaService.team.findMany({
           where: {
-            organizationId: orgID,
+            organizationId: orgID
           },
 
           skip,
@@ -82,6 +83,26 @@ export class OrgTeamPrismaHelperService {
       throw  new AppNotFoundException(`Can't find team with id ${teamID} `);
     }
     return team;
+  }
+
+
+  async findTeamByName(deptId, orgID, teamName) {
+    if (!teamName) {
+    } else {
+      const team = await this.prismaService.team.findFirst({
+        where: {
+          name: teamName,
+          organizationId: orgID,
+          departmentId: deptId
+        }
+      });
+
+      if (!team) {
+        throw  new AppNotFoundException(`Can't find team with name ${teamName} `);
+      }
+      return team;
+    }
+
   }
 
 
@@ -126,4 +147,32 @@ export class OrgTeamPrismaHelperService {
   //   }
   // }
 
+  async findAllTeamsInADepartment(orgID: string, department, searchRequest) {
+    const { skip, take } = searchRequest;
+
+    try {
+      const [teams, total] = await this.prismaService.$transaction([
+        this.prismaService.team.findMany({
+          where: {
+            organizationId: orgID,
+            departmentId: department.id
+          },
+          skip,
+          take
+
+        }),
+        this.prismaService.team.count({
+          where: {
+            organizationId: orgID,
+            departmentId: department.id
+          }
+        })
+      ]);
+      const totalPage = Math.ceil(total / take) || 1;
+      return { total, totalPage, teams };
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException();
+    }
+  }
 }

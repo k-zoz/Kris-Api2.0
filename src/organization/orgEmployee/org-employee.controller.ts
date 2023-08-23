@@ -7,7 +7,13 @@ import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
-import { CreateEmployeeDto, EditEmployeeDto, RoleToEmployee } from "@core/dto/global/employee.dto";
+import {
+  CreateEmployeeDto,
+  EditEmployeeDto,
+  EmployeeOnboardRequest,
+
+  RoleToEmployee
+} from "@core/dto/global/employee.dto";
 import { EmployeeService } from "@back-office/employee/employee.service";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { Permission } from "@core/decorator/roles.decorator";
@@ -29,6 +35,16 @@ export class OrgEmployeeController extends BaseController {
     return this.response({ payload });
   };
 
+  @Get("roles")
+  allRoles() {
+    return this.response({ payload: this.orgEmployeeService.roles() });
+  }
+
+  @Get("status")
+  allBoStatus() {
+    return this.response({ payload: this.employeeService.empStatus() });
+  }
+
   @Post("/:orgID/editProfile")
   async editMyProfile(
     @GetUser() payload: AuthPayload,
@@ -45,7 +61,7 @@ export class OrgEmployeeController extends BaseController {
   @EmpPermission(EmployeeRoleEnum.MANAGEMENT, EmployeeRoleEnum.HUMAN_RESOURCE)
   async onboardEmployeeToMyOrg(@GetUser() payload: AuthPayload,
                                @Param("orgID") orgID: string,
-                               @Body(ValidationPipe) request: CreateEmployeeDto
+                               @Body(ValidationPipe) request: EmployeeOnboardRequest
   ) {
     return this.response({
       message: "Created Successfully",
@@ -159,5 +175,16 @@ export class OrgEmployeeController extends BaseController {
   }
 
   // TODO delete employee, delete from team, department, leave plans, e.t.c
+  @Get("/:orgID/resetPassword/:empID")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async resetPassword(@Param("orgID") orgID: string,
+                      @Param("empID") empID: string,
+                      @GetUser() payload: AuthPayload
+  ) {
+    return this.response({
+      payload: await this.orgEmployeeService.resetEmployeePassword(orgID, empID, payload.email),
+      message: "Changes saved successfully"
+    });
+  }
 
 }

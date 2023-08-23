@@ -3,7 +3,7 @@ import { PrismaService } from "@prisma/prisma.service";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { AppConst } from "@core/const/app.const";
 import { prismaExclude } from "@prisma/prisma-utils";
-import { RoleToEmployee, Employee } from "@core/dto/global/employee.dto";
+import { RoleToEmployee, Employee, EmployeeOnboardRequest } from "@core/dto/global/employee.dto";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { LocaleService } from "@locale/locale.service";
 import * as argon from "argon2";
@@ -49,7 +49,10 @@ export class EmployeePrismaHelperService {
 
   async findOneEmpAndExclude(empID) {
     try {
-      return await this.prismaService.employee.findFirst({ where: { id: empID }, select: prismaExclude("Employee", ["password", "refreshToken"] ) });
+      return await this.prismaService.employee.findFirst({
+        where: { id: empID },
+        select: prismaExclude("Employee", ["password", "refreshToken"])
+      });
     } catch (e) {
       this.logger.error(e);
       throw new AppNotFoundException(AuthMsg.USER_NOT_FOUND);
@@ -186,7 +189,10 @@ export class EmployeePrismaHelperService {
     return this.prismaService.employee.findUniqueOrThrow({
       where: { email: user.email },
       select: prismaExclude("Employee", ["password", "refreshToken", "email", "krisID", "idNumber", "phoneNumber",
-        "status", "org_ClienteleId", "org_BranchId", "createdBy", "modifiedBy", "createdDate", "modifiedDate", "departmentId", "teamId"])
+        "status", "org_ClienteleId", "org_BranchId", "createdBy",
+        "modifiedBy", "createdDate", "modifiedDate", "departmentId",
+        "dateOfConfirmation", "dateOfJoining", "designation", "employment_type", "personalEmail", "personalPhoneNumber2", "workPhoneNumber",
+        "teamId"])
     });
   }
 
@@ -294,6 +300,20 @@ export class EmployeePrismaHelperService {
                   email: true,
                   role: true,
                   id: true,
+                  krisID: true,
+                  workPhoneNumber: true,
+                  dateOfConfirmation: true,
+                  dateOfJoining: true,
+                  org_Branch: true,
+                  Organization: true,
+                  designation: true,
+                  employment_type: true,
+                  middleName: true,
+                  Org_Clientele: true,
+                  personalEmail: true,
+                  personalPhoneNumber2: true,
+                  managedBranch: true,
+                  status: true,
                   phoneNumber: true,
                   idNumber: true,
                   Team: true,
@@ -316,4 +336,99 @@ export class EmployeePrismaHelperService {
   }
 
 
+  async createNewEmployeeAndSendWelcomeMail(request: EmployeeOnboardRequest, newPassword: string, creatorMail: string, orgName, client) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        if (!request.work.employeeBranch) {
+        }
+        const branch = await tx.org_Branch.findFirst({
+          where: {
+            organizationId: orgName.id,
+            name: request.work.employeeBranch
+          }
+        });
+
+        if (!request.work.department) {
+        }
+        const department = await tx.department.findFirst({
+          where: {
+            organizationId: orgName.id,
+            org_BranchId: branch.id,
+            name: request.work.department
+          }
+        });
+
+        if (!request.work.empTeam) {
+        }
+        const team = await tx.team.findFirst({
+          where: {
+            organizationId: orgName.id,
+            departmentId: department.id,
+            name: request.work.empTeam
+          }
+        });
+
+        if (!request.work.employeeClient) {
+        }
+        const clientele = await tx.org_Clientele.findFirst({
+          where: {
+            organizationId: orgName.id,
+            name: request.work.employeeClient
+          }
+        });
+
+        const saved = await tx.employee.create({
+          data: {
+            email: request.basic.email,
+            password: await argon.hash(newPassword),
+            lastname: request.basic.lastName,
+            firstname: request.basic.firstName,
+            idNumber: request.basic.employeeID,
+            krisID: request.basic.krisID,
+            phoneNumber: request.contact.personalPhoneNumber,
+            workPhoneNumber: request.contact.workPhoneNumber,
+            personalPhoneNumber2: request.contact.personalPhoneNumber2,
+            personalEmail: request.contact.personalEmail,
+            dateOfConfirmation: request.work.dateOfConfirmation,
+            dateOfJoining: request.work.dateOfJoining,
+            departmentId: department.id,
+            designation: request.work.designation,
+            teamId: team.id,
+            org_BranchId: branch.id,
+            role: request.work.employeeKrisRole,
+            status: request.work.employeeStatus,
+            employment_type: request.work.employmentType,
+            createdBy: creatorMail,
+            middleName: request.basic.middleName,
+            organizationId: orgName.id,
+            org_ClienteleId: clientele.id
+          }
+        });
+
+        try {
+          const html = await this.emailService.sendWelcomeEmployeeDetailMail({
+            email: saved.email,
+            password: newPassword,
+            firstname: saved.firstname,
+            organizationName: orgName.orgName
+          } as NewEmployeeEvent);
+          await this.resend.emails.send({
+            from: `${this.mailSource}`,
+            to: `${saved.email}`,
+            subject: `Welcome to ${orgName.orgName}`,
+            html: `${html}`
+          });
+          this.logger.log(`Employee ${saved.firstname} Saved. Welcome Email successfully sent`);
+          return `Employee ${saved.firstname}  Welcome Email successfully sent`;
+        } catch (e) {
+          this.logger.error(e, "Error sending email");
+          throw new AppException(e);
+        }
+      });
+      return `Employee created successfully. Welcome Email successfully sent`;
+    } catch (e) {
+      this.logger.error(AuthMsg.ERROR_CREATING_EMPLOYEE);
+      throw new AppConflictException(AppConst.error, { context: AuthMsg.ERROR_CREATING_EMPLOYEE });
+    }
+  }
 }

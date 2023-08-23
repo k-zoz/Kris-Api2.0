@@ -8,7 +8,7 @@ import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
 import { CodeValue } from "@core/dto/global/code-value";
 import { EnumValues } from "enum-values";
-import { UserRoleEnum } from "@core/enum/user-role-enum";
+import { BoStatusEnum, UserRoleEnum } from "@core/enum/user-role-enum";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 
 
@@ -92,5 +92,9 @@ export class EmployeeService {
   async findOneEmployee(orgID: string, empID: string) {
     await  this.orgHelperService.findOrgByID(orgID)
     return await this.employeeHelperService.findOneEmpAndExclude(empID)
+  }
+
+  empStatus() {
+      return EnumValues.getNamesAndValues(BoStatusEnum).map(value => CodeValue.of(value.name, value.value as string));
   }
 }

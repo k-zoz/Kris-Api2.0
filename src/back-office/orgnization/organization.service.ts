@@ -17,7 +17,7 @@ export class OrganizationService {
   async onboardOrganization(org: CreateOrgDto, creatorEmail: string) {
     await this.orgHelperService.validateDtoRequest(org);
     org.createdBy = creatorEmail;
-    org.orgDateFounded = this.utilService.convertLeaveDate(org.orgDateFounded)
+    org.orgDateFounded = this.utilService.convertDate(org.orgDateFounded)
     org.orgKrisId = this.utilService.generateUUID(org.orgName);
     return this.orgHelperService.saveOrganizationAndSendWelcomeEmail(org, creatorEmail);
   }

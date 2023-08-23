@@ -71,10 +71,10 @@ export class ModifyOrg {
 }
 
 export class CreateTeamInDepartmentDto {
-  @IsNotEmpty({message:"Department Name is required"})
+  @IsNotEmpty({ message: "Department Name is required" })
   @IsString()
   departmentName: string;
-  @IsNotEmpty({message:"Team Name is required"})
+  @IsNotEmpty({ message: "Team Name is required" })
   @IsString()
   teamName: string;
 }
@@ -89,6 +89,18 @@ export class CreateDepartmentInBranchDto {
 }
 
 
-export class CreateDepartmentClientele {
+export class DepartmentNameSearchDto {
+  @IsNotEmpty({ message: "Name of Department is required" })
+  @IsString()
+  departmentName: string;
+  readonly skip: number
+  readonly take: number
+}
 
+export class SearchBranchNameOrCodeDto{
+  branch_code:string
+  @IsNotEmpty({message:"Branch name is required!"})
+  name:string
+  readonly skip: number
+  readonly take: number
 }

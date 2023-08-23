@@ -3,7 +3,11 @@ import { UtilService } from "@core/utils/util.service";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 import { OrgDeptPrismaHelperService } from "@organization/org-prisma-helper-services/org-dept-prisma-helper.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
-import { CreateDepartmentInBranchDto } from "@core/dto/global/organization.dto";
+import {
+  CreateDepartmentInBranchDto,
+  DepartmentNameSearchDto,
+  SearchBranchNameOrCodeDto
+} from "@core/dto/global/organization.dto";
 import {
   OrgBranchPrismaHelperService
 } from "@organization/org-prisma-helper-services/org-branch-prisma-helper.service";
@@ -46,5 +50,12 @@ export class EmployeeOrgDepartmentsService {
   async allDepartments(orgID, searchRequest) {
     await this.orgHelperService.findOrgByID(orgID);
     return await this.departmentHelperService.findAllDepts(orgID, searchRequest);
+  }
+
+  async allDepartmentsInBranch(orgID: string, searchRequest: SearchBranchNameOrCodeDto) {
+    await this.orgHelperService.findOrgByID(orgID);
+    searchRequest.name = this.utilService.toUpperCase(searchRequest.name)
+    await this.branchHelperService.findBranchByName(searchRequest.name,orgID)
+    return await this.departmentHelperService.findAllDeptsInBranch(orgID, searchRequest)
   }
 }

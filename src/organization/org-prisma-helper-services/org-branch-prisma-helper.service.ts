@@ -55,6 +55,38 @@ export class OrgBranchPrismaHelperService {
   }
 
 
+  async findBranchByName(branchName, orgID) {
+    if (!branchName) {
+    } else {
+      const branch = await this.prismaService.org_Branch.findFirst({
+        where: {
+          name: branchName,
+          organizationId: orgID
+        }
+      });
+
+      if (!branch) {
+        throw  new AppNotFoundException(`Can't find Branch with name ${branchName} `);
+      }
+      return branch;
+    }
+
+  }
+
+  async findBranchByCode(branchCode, orgID) {
+    const department = await this.prismaService.org_Branch.findFirst({
+      where: {
+        branch_code: branchCode,
+        organizationId: orgID
+      }
+    });
+
+    if (!department) {
+      throw  new AppNotFoundException(`Can't find Branch with code ${branchCode} `);
+    }
+    return department;
+  }
+
   async findBranchBranchCode(branchName, orgID) {
     const branch = await this.prismaService.org_Branch.findFirst({
       where: {

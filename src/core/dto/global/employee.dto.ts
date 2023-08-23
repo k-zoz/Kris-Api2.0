@@ -1,6 +1,17 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, IsStrongPassword, MinLength } from "class-validator";
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsStrongPassword,
+  MinLength,
+  ValidateNested
+} from "class-validator";
 import { BaseDto } from "@core/dto/global/base.dto";
 import { IsValidEmployeeRole } from "@core/validators/role/employee-role-validator";
+import { Type } from 'class-transformer';
+import { IsValidEmploymentStatus } from "@core/validators/dto/status-validator";
+
 
 export class CreateEmployeeDto extends BaseDto {
   @IsNotEmpty({ message: "Employee email address is required" })
@@ -27,6 +38,87 @@ export class CreateEmployeeDto extends BaseDto {
 }
 
 
+export class EmployeeBasic {
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+  @IsNotEmpty()
+  @IsString()
+  employeeID: string;
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(3, { message: "First name must not be less than 3 characters" })
+  firstName: string;
+  @IsNotEmpty()
+  @IsString()
+  lastName: string;
+  @IsOptional()
+  @IsString()
+  middleName: string;
+  krisID:string
+}
+
+
+export class EmployeeWork {
+  @IsOptional()
+  dateOfConfirmation: any;
+  @IsNotEmpty()
+  dateOfJoining: any;
+  @IsNotEmpty()
+  @IsString()
+  department: string;
+  @IsOptional()
+  @IsString()
+  designation: string;
+  @IsOptional()
+  @IsString()
+  empTeam: string;
+  @IsNotEmpty()
+  @IsString()
+  employeeBranch: string;
+  @IsOptional()
+  @IsString()
+  employeeClient: string;
+  @IsNotEmpty()
+  @IsString()
+  @IsValidEmployeeRole()
+  employeeKrisRole: any;
+  @IsNotEmpty()
+  @IsString()
+  @IsValidEmploymentStatus()
+  employeeStatus: any;
+  @IsOptional()
+  @IsString()
+  employmentType: string;
+}
+
+
+
+export class EmployeeContact {
+  @IsNotEmpty()
+  @IsEmail()
+  personalEmail:string
+  @IsNotEmpty()
+  personalPhoneNumber:string
+  @IsOptional()
+  workPhoneNumber:string
+  @IsOptional()
+  personalPhoneNumber2:string
+}
+
+
+export class EmployeeOnboardRequest extends BaseDto {
+  @ValidateNested()
+  @Type(()=>EmployeeBasic)
+  basic: EmployeeBasic;
+  @ValidateNested()
+  @Type(()=>EmployeeWork)
+  work: EmployeeWork;
+  @ValidateNested()
+  @Type(()=>EmployeeContact)
+  contact: EmployeeContact;
+}
+
 export class CreateMgtEmpDto extends BaseDto {
   @IsNotEmpty({ message: "Employee email address is required" })
   @IsEmail()
@@ -42,13 +134,13 @@ export class CreateMgtEmpDto extends BaseDto {
   @IsNotEmpty({ message: "Employee ID Number is required" })
   empIDNumber: string;
   @IsNotEmpty({ message: "Employee Phone Number is required" })
-  @MinLength(11, {message:"Digits must be 11"})
+  @MinLength(11, { message: "Digits must be 11" })
   empPhoneNumber: string;
   @IsNotEmpty({ message: "Employee role is required" })
   @IsValidEmployeeRole({ message: "Role must be a valid employee role!" })
   employee_role: any;
   empPassword: string;
-  orgKrisId:string
+  orgKrisId: string;
 
 }
 

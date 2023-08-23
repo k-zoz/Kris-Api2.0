@@ -7,9 +7,16 @@ import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
-import { CreateDepartmentInBranchDto, ModifyOrg } from "@core/dto/global/organization.dto";
+import {
+  CreateDepartmentInBranchDto,
+  DepartmentNameSearchDto,
+  ModifyOrg,
+  SearchBranchNameOrCodeDto
+} from "@core/dto/global/organization.dto";
 import { SearchRequest } from "@core/model/search-request";
+import { SkipThrottle } from "@nestjs/throttler";
 
+@SkipThrottle()
 @Controller('organization/department')
 @UseGuards(AuthGuard())
 @UseGuards(EmployeeRoleGuard)
@@ -61,6 +68,14 @@ export class EmployeeOrgDepartmentsController extends BaseController{
                                @Body() searchRequest: SearchRequest
   ) {
     return this.response({ payload: await this.departmentService.allDepartments(orgID, searchRequest) });
+  }
+
+  @Post("/:orgID/allDeptInBranch")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async getAllDepartmentsInBranch(@Param("orgID") orgID: string,
+                                  @Body() searchRequest:SearchBranchNameOrCodeDto
+  ){
+    return this.response({payload:await this.departmentService.allDepartmentsInBranch(orgID, searchRequest)})
   }
 
 }

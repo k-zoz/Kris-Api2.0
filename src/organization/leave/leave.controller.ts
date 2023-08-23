@@ -6,10 +6,11 @@ import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
-import { ApplyForLeave, CreateLeaveDto, MockLeaveDto } from "@core/dto/global/leave.dto";
+import { ApplyForLeave, CreateLeaveDto } from "@core/dto/global/leave.dto";
 import { LeaveService } from "@organization/leave/leave.service";
+import { SkipThrottle } from "@nestjs/throttler";
 
-
+@SkipThrottle()
 @Controller("organization/leave")
 @UseGuards(AuthGuard())
 @UseGuards(EmployeeRoleGuard)
@@ -19,7 +20,7 @@ export class LeaveController extends BaseController {
   }
 
   @Post("/:orgID/create")
-  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE)
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async createLeave(@GetUser() payload: AuthPayload,
                     @Param("orgID") orgID: string,
                     @Body(ValidationPipe) dto: CreateLeaveDto
@@ -41,7 +42,7 @@ export class LeaveController extends BaseController {
   @Post("/:orgID/apply")
   async applyForLeave(@GetUser() payload: AuthPayload,
                       @Param("orgID") orgID: string,
-                      @Body(new ValidationPipe({ whitelist: true })) dto: ApplyForLeave
+                      @Body(ValidationPipe) dto: ApplyForLeave
   ) {
     return this.response({
       payload: await this.leaveService.leaveApplication(dto, orgID, payload),
@@ -81,6 +82,19 @@ export class LeaveController extends BaseController {
     return this.response({ payload: await this.leaveService.leaveHistory(orgID, payload) });
   }
 
+  @Get("/:orgID/allEmployeesOnLeave")
+  async getAllEmployeesOnLeave(@Param("orgID") orgID: string
+  ){
+    return this.response({payload: await this.leaveService.allEmployeesOnLeave(orgID)})
+  }
+
+  @Get("/:orgID/:leaveID/leave")
+  async getOneLeave(@Param("orgID") orgID: string,
+                    @Param("leaveID")leaveID:string,
+                    @GetUser() payload:AuthPayload
+  ){
+    return this.response({payload:await this.leaveService.findOneLeave(orgID, leaveID,payload.email)})
+  }
 
   //Testing
   // @Get("onboarders")

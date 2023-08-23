@@ -4,10 +4,18 @@ import { EmployeePrismaHelperService } from "@back-office/helper-services/employ
 import { OrgEmpPrismaHelperService } from "@organization/org-prisma-helper-services/org-emp-prisma-helper.service";
 import { OrgTeamPrismaHelperService } from "@organization/org-prisma-helper-services/org-team-prisma-helper.service";
 import { OrgDeptPrismaHelperService } from "@organization/org-prisma-helper-services/org-dept-prisma-helper.service";
-import { CreateEmployeeDto } from "@core/dto/global/employee.dto";
+import { CreateEmployeeDto, EmployeeOnboardRequest } from "@core/dto/global/employee.dto";
 import * as argon from "argon2";
 import { LeaveService } from "@organization/leave/leave.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
+import { EnumValues } from "enum-values";
+import { BoStatusEnum, UserRoleEnum } from "@core/enum/user-role-enum";
+import { CodeValue } from "@core/dto/global/code-value";
+import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
+import {
+  OrgBranchPrismaHelperService
+} from "@organization/org-prisma-helper-services/org-branch-prisma-helper.service";
+import { EmpClienteleHelperService } from "@organization/org-prisma-helper-services/emp-clientele-helper.service";
 
 @Injectable()
 export class OrgEmployeeService {
@@ -20,23 +28,50 @@ export class OrgEmployeeService {
               private readonly orgEmployeeHelperService: OrgEmpPrismaHelperService,
               private readonly orgTeamHelperService: OrgTeamPrismaHelperService,
               private readonly orgDeptHelperService: OrgDeptPrismaHelperService,
-              private readonly leaveService: LeaveService
+              private readonly leaveService: LeaveService,
+              private readonly orgBranchHelperService: OrgBranchPrismaHelperService,
+              private readonly orgDepartmentHelperService: OrgDeptPrismaHelperService,
+              private readonly orgClientHelperService: EmpClienteleHelperService
   ) {
   }
 
 
-  async onboardEmpToMyOrg(request: CreateEmployeeDto, orgID, creatorMail) {
+  // async onboardEmpToMyOrg(request: CreateEmployeeDto, orgID, creatorMail) {
+  //   await this.orgEmployeeHelperService.validateRequest(request);
+  //   const orgName = await this.orgHelperService.findOrgByID(orgID);
+  //   request.createdBy = creatorMail;
+  //   request.empPassword = this.utilService.generateRandomPassword();
+  //   request.empFirstName = this.utilService.toUpperCase(request.empFirstName);
+  //   request.empLastName = this.utilService.toUpperCase(request.empLastName);
+  //   await this.utilService.checkIfRoleIsManagement(request.employee_role);
+  //   const employee = await this.employeeHelperService.createEmployeeAndSendWelcomeEmail(request, orgID, orgName);
+  //   //TODO leave onboarding for new employee
+  //   await this.leaveService.onboardLeaveForNewEmployee(orgID, employee);
+  //   // return this.employeeHelperService.findAndExcludeFields(employee);
+  // }
+
+
+  async onboardEmpToMyOrg(request: EmployeeOnboardRequest, orgID, creatorMail) {
     await this.orgEmployeeHelperService.validateRequest(request);
     const orgName = await this.orgHelperService.findOrgByID(orgID);
-    request.createdBy = creatorMail;
-    request.empPassword = this.utilService.generateRandomPassword();
-    request.empFirstName = this.utilService.toUpperCase(request.empFirstName);
-    request.empLastName = this.utilService.toUpperCase(request.empLastName);
-    await this.utilService.checkIfRoleIsManagement(request.employee_role);
-    const employee = await this.employeeHelperService.createEmployeeAndSendWelcomeEmail(request, orgID, orgName);
-    //TODO leave onboarding for new employee
-    await this.leaveService.onboardLeaveForNewEmployee(orgID, employee);
-    // return this.employeeHelperService.findAndExcludeFields(employee);
+    const newPassword = this.utilService.generateRandomPassword();
+    request.basic.firstName = this.utilService.toUpperCase(request.basic.firstName);
+    request.basic.lastName = this.utilService.toUpperCase(request.basic.lastName);
+    request.work.employeeBranch = this.utilService.toUpperCase(request.work.employeeBranch);
+    request.work.department = this.utilService.toUpperCase(request.work.department);
+    request.work.empTeam = this.utilService.toUpperCase(request.work.empTeam);
+    request.work.employeeClient = this.utilService.toUpperCase(request.work.employeeClient)
+    request.work.dateOfConfirmation = this.utilService.convertDate(request.work.dateOfConfirmation);
+    request.work.dateOfJoining = this.utilService.convertDate(request.work.dateOfJoining);
+    request.basic.krisID = this.utilService.generateUUID(request.basic.firstName);
+    const branch = await this.orgBranchHelperService.findBranchByName(request.work.employeeBranch, orgID);
+    const department = await this.orgDepartmentHelperService.findDeptByNameAlone(request.work.department, orgID);
+    const client = await this.orgClientHelperService.findClientByName(request.work.employeeClient, orgID);
+    await this.orgTeamHelperService.findTeamByName(department.id, orgID, request.work.empTeam);
+    await this.utilService.checkIfRoleIsManagement(request.work.employeeKrisRole);
+    return await this.employeeHelperService.createNewEmployeeAndSendWelcomeMail(request, newPassword, creatorMail, orgName, client);
+    // //TODO leave, onboarding, appraisals for new employee
+    // await this.leaveService.onboardLeaveForNewEmployee(orgID, employee);
   }
 
 
@@ -77,4 +112,20 @@ export class OrgEmployeeService {
   //   await this.orgEmployeeHelperService.isEmployeeTeamLeadVerification(empID, teamID);
   //   return await this.orgEmployeeHelperService.removeEmpTeamLead(empID, teamID, orgID);
   // }
+
+  async resetEmployeePassword(orgID, empID, modifierEmail) {
+    await this.orgHelperService.findOrgByID(orgID);
+    const employee = await this.employeeService.findEmpById(empID);
+    await this.utilService.compareEmails(modifierEmail, employee.email);
+    const newPassword = this.utilService.generateRandomPassword();
+    return await this.orgHelperService.resetEmpPasswordAndSendResetMail(empID, modifierEmail, newPassword);
+  }
+
+  roles(): Array<CodeValue> {
+    return EnumValues.getNamesAndValues(EmployeeRoleEnum).map(value => CodeValue.of(value.name, value.value as string));
+  }
+
+  empStatus() {
+    return EnumValues.getNamesAndValues(BoStatusEnum).map(value => CodeValue.of(value.name, value.value as string));
+  }
 }

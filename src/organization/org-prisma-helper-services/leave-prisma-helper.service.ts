@@ -18,6 +18,7 @@ export class LeavePrismaHelperService {
           data: {
             name: dto.leaveName,
             duration: dto.leaveDuration,
+            type: dto.leaveType,
             createdBy: creatorEmail,
             Organization: {
               connect: { id: orgID }
@@ -63,57 +64,57 @@ export class LeavePrismaHelperService {
     }
   }
 
-  // async applyLeave(dto, orgID, employee) {
-  //   try {
-  //     await this.prismaService.$transaction(async (tx) => {
-  //       const leave = await tx.leave.findFirst(
-  //         {
-  //           where: {
-  //             name: { contains: dto.leaveName },
-  //             organizationId: orgID
-  //           }
-  //         }
-  //       );
-  //
-  //       //Employee's instance of his own leave
-  //       const employeeLeave = await tx.employeeLeave.findFirst({
-  //         where: {
-  //           employeeId: employee.id,
-  //           leaveId: leave.id
-  //         }
-  //       });
-  //
-  //       const leaveApplication = await tx.leaveApplication.create({
-  //         data: {
-  //           leaveName: dto.leaveName,
-  //           duration: dto.leaveDuration,
-  //           startDate: dto.leaveStartDate,
-  //           endDate: dto.leaveEndDate,
-  //           employeeId: employee.id,
-  //           leaveId: leave.id
-  //         }
-  //       });
-  //
-  //       const updatedEmployeeLeave = await tx.employeeLeave.update({
-  //         where: {
-  //           employeeId_leaveId: {
-  //             employeeId: employee.id,
-  //             leaveId: leave.id
-  //           }
-  //         },
-  //         data: {
-  //           remainingDuration: {
-  //             decrement: dto.leaveDuration
-  //           }
-  //         }
-  //       });
-  //     });
-  //     return "Applied Successfullly";
-  //   } catch (e) {
-  //     this.logger.error(e);
-  //     throw new AppException(AuthMsg.ERROR_APPLYING_LEAVE);
-  //   }
-  // }
+  async applyLeave(dto, orgID, employee) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        const leave = await tx.leave.findFirst(
+          {
+            where: {
+              name: dto.leaveName,
+              organizationId: orgID
+            }
+          }
+        );
+
+        //Employee's instance of his own leave
+        const employeeLeave = await tx.employeeLeave.findFirst({
+          where: {
+            employeeId: employee.id,
+            leaveId: leave.id
+          }
+        });
+
+        const leaveApplication = await tx.leaveApplication.create({
+          data: {
+            leaveName: dto.leaveName,
+            duration: dto.leaveDuration,
+            startDate: dto.leaveStartDate,
+            endDate: dto.leaveEndDate,
+            employeeId: employee.id,
+            leaveId: leave.id
+          }
+        });
+
+        const updatedEmployeeLeave = await tx.employeeLeave.update({
+          where: {
+            employeeId_leaveId: {
+              employeeId: employee.id,
+              leaveId: leave.id
+            }
+          },
+          data: {
+            remainingDuration: {
+              decrement: dto.leaveDuration
+            }
+          }
+        });
+      });
+      return "Applied Successfullly";
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException(AuthMsg.ERROR_APPLYING_LEAVE);
+    }
+  }
 
   async leaveDurationRequest(employee, dto) {
     const employeeLeave = await this.findEmpLeaveByName(dto.leaveName, employee);
@@ -153,10 +154,10 @@ export class LeavePrismaHelperService {
   async findOrgLeaveByName(leaveName, orgID) {
     const leave = await this.prismaService.leave.findFirst({
       where: {
-        name: { contains: leaveName },
-        organizationId: orgID
+        name: leaveName
       }
     });
+
     if (!leave) {
       throw  new AppNotFoundException("Leave Plan does not exist");
     }
@@ -172,7 +173,7 @@ export class LeavePrismaHelperService {
     });
 
     if (!employeeLeave) {
-      throw  new AppNotFoundException("Leave Plan does not exist");
+      throw  new AppNotFoundException("Employee Leave Plan does not exist");
     }
     return employeeLeave;
   }
@@ -219,18 +220,20 @@ export class LeavePrismaHelperService {
     try {
       const [leaveApplications, employeeLeave] = await this.prismaService.$transaction([
         this.prismaService.leaveApplication.deleteMany({
-          where:{
-            employeeId:empID
+          where: {
+            employeeId: empID
           }
         }),
 
-        this.prismaService.employeeLeave.deleteMany({where:{
-          employeeId:empID
-          }})
-      ])
-    }catch (e) {
+        this.prismaService.employeeLeave.deleteMany({
+          where: {
+            employeeId: empID
+          }
+        })
+      ]);
+    } catch (e) {
       this.logger.error(e);
-      throw new AppException()
+      throw new AppException();
     }
   }
 
@@ -243,5 +246,53 @@ export class LeavePrismaHelperService {
   //
   //   }
   // }
+
+  async allEmployeeLeaveStatus(orgID: string) {
+    try {
+      return await this.prismaService.$transaction(async (tx) => {
+        const currentDate = new Date();
+        const leaveApp = await tx.leaveApplication.findMany({
+          where: {
+            startDate: { lte: currentDate },
+            endDate: { gte: currentDate },
+            employee: {
+              organizationId: orgID
+            }
+          },
+          select: {
+            employee: {
+              select: {
+                firstname: true,
+                lastname: true
+              }
+            },
+            leaveStatus: true,
+            duration:true,
+            endDate:true
+          }
+          // include: { employee: { select: { firstname: true, lastname: true } } }
+        });
+       // return leaveApp.map((applications) => applications.employee);
+        return leaveApp
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException();
+    }
+  }
+
+  async findOneLeave(orgID: string, leaveID: string,employee) {
+    try {
+      return await this.prismaService.employeeLeave.findFirst({
+        where: {
+          id: leaveID,
+          employeeId: employee.id
+        }
+      });
+    } catch (e) {
+      this.logger.error("Leave does not exist");
+      throw new AppException();
+    }
+  }
 }
 

@@ -6,8 +6,8 @@ import { CreateOrgDto } from "@core/dto/global/organization.dto";
 import { EmailService } from "../../alert/email/email.service";
 import { ConfigService } from "@nestjs/config";
 import { Resend } from "resend";
-import { NewOrganizationEvent } from "@core/event/back-office-event";
-
+import { NewEmployeePasswordResetEvent, NewOrganizationEvent } from "@core/event/back-office-event";
+import * as argon from "argon2";
 
 @Injectable()
 export class OrganizationPrismaHelperService {
@@ -16,13 +16,13 @@ export class OrganizationPrismaHelperService {
   // private readonly resendKey = this.configService.get("resendApiKey")
   // private readonly resend = new Resend(this.resendKey);
   private resend: Resend;
+
   constructor(private readonly prismaService: PrismaService,
               private readonly emailService: EmailService,
               private readonly configService: ConfigService
-
   ) {
     // const resendKey = this.configService.get("resendApiKey")
-    const resendKey = this.configService.get("resendApiKey")
+    const resendKey = this.configService.get("resendApiKey");
     this.resend = new Resend(resendKey);
   }
 
@@ -116,7 +116,7 @@ export class OrganizationPrismaHelperService {
             subject: "Welcome to KRIS",
             html: `${html}`
           });
-          this.logger.log(`Organization ${saved.orgName}  Welcome Email successfully sent`)
+          this.logger.log(`Organization ${saved.orgName}  Welcome Email successfully sent`);
           return `Organization ${saved.orgName}  Welcome Email successfully sent`;
         } catch (e) {
           this.logger.error("Error sending email");
@@ -198,5 +198,45 @@ export class OrganizationPrismaHelperService {
       this.logger.error(AppException);
       throw new AppException();
     }
+  }
+
+  async resetEmpPasswordAndSendResetMail(empID, modifierEmail, newPassword: string) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        const employee = await tx.employee.update({
+          where: { id: empID },
+          data: {
+            password: await argon.hash(newPassword),
+            modifiedBy: modifierEmail
+          }
+        });
+
+        try {
+          const html = await this.emailService.sendResetPasswordDetailsMail({
+            email: employee.email,
+            password: newPassword,
+            firstname: employee.firstname
+          } as NewEmployeePasswordResetEvent);
+          await this.resend.emails.send({
+            from: `${this.mailSource}`,
+            to: `${employee.email}`,
+            subject: "Password Reset",
+            html: `${html}`
+          });
+          this.logger.log(`New Password Email Successfully sent to ${employee.email}`);
+          this.logger.log(`User ${employee.email} password changed successfully`);
+          return `User ${employee.email} password changed successfully`;
+        } catch (e) {
+          this.logger.error("Error sending email");
+          throw new AppException(e);
+        }
+      });
+      return `New Password Email Successfully sent`;
+    } catch (e) {
+      const msg = `Error resetting password`;
+      this.logger.error(e);
+      throw new AppConflictException(AppConst.error, { context: msg });
+    }
+
   }
 }

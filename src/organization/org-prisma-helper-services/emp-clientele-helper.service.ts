@@ -96,4 +96,23 @@ export class EmpClienteleHelperService {
 
 
   }
+
+  async findClientByName(clienteleName: string, orgID: string) {
+    if (!clienteleName) {
+    } else {
+      const client = await this.prismaService.org_Clientele.findFirst({
+        where: {
+          name: clienteleName,
+          organizationId: orgID
+        }
+      });
+
+      if (!client) {
+        throw  new AppNotFoundException(`Can't find Client with name ${clienteleName} `);
+      }
+      return client;
+    }
+
+
+  }
 }
