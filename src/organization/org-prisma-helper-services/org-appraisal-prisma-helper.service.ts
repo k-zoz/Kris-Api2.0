@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
 import { CreateAppraisalDto, CreateSectionsForAppraisal, QuestionsDto } from "@core/dto/global/appraisal";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
+import { Appraisal } from "@prisma/client";
 
 @Injectable()
 export class OrgAppraisalPrismaHelperService {
@@ -216,12 +217,33 @@ export class OrgAppraisalPrismaHelperService {
     return found;
   }
 
+  // async removeAppraisal(orgID: string, appraisalID: string) {
+  //   try {
+  //     await this.prismaService.appraisal.delete({
+  //       where: {
+  //         id: appraisalID
+  //       }
+  //     });
+  //     return "Deleted Appraisal successfully";
+  //   } catch (e) {
+  //     this.logger.error(e);
+  //     throw new AppException("Error removing appraisal");
+  //   }
+  // }
+
+
   async removeAppraisal(orgID: string, appraisalID: string) {
     try {
-      await this.prismaService.appraisal.delete({
-        where: {
-          id: appraisalID
+      await this.prismaService.$transaction(async (prisma) => {
+        const appraisal = await prisma.appraisal.findUnique({
+          where: { id: appraisalID }
+        });
+        if (!appraisal) {
+          throw new AppException(`Appraisal with ID ${appraisalID} not found`);
         }
+        await prisma.appraisal.delete({
+          where: { id: appraisalID }
+        });
       });
       return "Deleted Appraisal successfully";
     } catch (e) {
@@ -229,4 +251,48 @@ export class OrgAppraisalPrismaHelperService {
       throw new AppException("Error removing appraisal");
     }
   }
+
+
+  async sendAppraisalToAllStaff(dto: Appraisal, appraisalID: string, orgID: string) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        const employees = await tx.employee.findMany({ where: { organizationId: orgID } });
+        return await Promise.all(
+          employees.map((employee) =>
+            tx.employee_Appraisal.create({
+              data: {
+                appraisalId: appraisalID,
+                employeeId: employee.id
+              }
+            })
+          )
+        );
+      });
+
+      return "sent successfully";
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException(e);
+    }
+  }
+
+  async getMyAppraisal(employee) {
+    try {
+      return await this.prismaService.employee_Appraisal.findMany({
+        where: {
+          employeeId: employee.id
+        },
+        include:{
+          appraisal:true
+        }
+      });
+
+
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException(e);
+    }
+  }
+
+
 }

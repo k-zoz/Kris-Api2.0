@@ -8,7 +8,6 @@ import { Request } from "express";
 import { UserService } from "@back-office/user/user.service";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { AppTokenExpiredException } from "@core/exception/app-exception";
-import * as process from "process";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -18,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: process.env.ACCESS_TOKEN_SECRET,
-      jsonWebTokenOptions: { expiresIn: process.env.ACCESS_TOKEN_LIFETIME }
+      jsonWebTokenOptions: { expiresIn: process.env.ACCESS_TOKEN_LIFETIME },
     });
   }
 

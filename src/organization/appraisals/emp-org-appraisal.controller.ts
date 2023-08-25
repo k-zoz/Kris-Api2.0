@@ -8,6 +8,7 @@ import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { CreateAppraisalDto, CreateSectionsForAppraisal, QuestionsDto } from "@core/dto/global/appraisal";
+import { Appraisal } from "@prisma/client";
 
 
 @Controller("organization/appraisal")
@@ -58,7 +59,7 @@ export class EmpOrgAppraisalController extends BaseController {
   }
 
   @Get("/:orgID/:appraisalID/appraisal")
-  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+ // @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async getAppraisalAndAllSections(@Param("orgID") orgID: string,
                                    @Param("appraisalID") appraisalID: string
   ) {
@@ -77,7 +78,7 @@ export class EmpOrgAppraisalController extends BaseController {
 
 
   @Get("/:orgID/allAppraisals")
-  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+ // @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async getAllAppraisals(@Param("orgID") orgID: string) {
     return this.response({ payload: await this.appraisalService.allOrgAppraisals(orgID) });
   }
@@ -99,4 +100,22 @@ export class EmpOrgAppraisalController extends BaseController {
                          @Param("appraisalID") appraisalID: string,){
     return this.appraisalService.deleteAppraisal(orgID, appraisalID)
   }
+
+  @Post("/:orgID/:appraisalID/sendToAllEmployees")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async  shareAppraisalToAllEmployees(@Param("orgID") orgID: string,
+                                      @Param("appraisalID") appraisalID: string,
+                                      @Body(ValidationPipe) dto: Appraisal
+                                      ){
+    return this.response({payload: await this.appraisalService.sendToAllEMployees(dto, orgID, appraisalID)})
+  }
+
+  @Get("/myAppraisal")
+  async  getMyAppraisal(@GetUser()payload:AuthPayload
+  ){
+    return this.response({payload: await this.appraisalService.myAppraisal(payload.email)})
+  }
+
+  //TODO review deleting appraisal
+  //TODO review getting all employees appraisal
 }

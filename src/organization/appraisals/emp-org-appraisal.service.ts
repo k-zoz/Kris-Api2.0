@@ -5,6 +5,8 @@ import {
 import { CreateAppraisalDto, CreateSectionsForAppraisal, QuestionsDto } from "@core/dto/global/appraisal";
 import { UtilService } from "@core/utils/util.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
+import { Appraisal } from "@prisma/client";
+import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 
 @Injectable()
 export class EmpOrgAppraisalService {
@@ -12,7 +14,8 @@ export class EmpOrgAppraisalService {
 
   constructor(private readonly empAppraisalHelperService: OrgAppraisalPrismaHelperService,
               private readonly utilService: UtilService,
-              private readonly orgHelperService: OrganizationPrismaHelperService
+              private readonly orgHelperService: OrganizationPrismaHelperService,
+              private readonly employeeHelperService: EmployeePrismaHelperService
   ) {
   }
 
@@ -76,5 +79,17 @@ export class EmpOrgAppraisalService {
     await this.orgHelperService.findOrgByID(orgID);
     await this.empAppraisalHelperService.findAppraisalByID(appraisalID, orgID);
     return await this.empAppraisalHelperService.removeAppraisal(orgID, appraisalID);
+  }
+
+  async sendToAllEMployees(dto: Appraisal, orgID: string, appraisalID: string) {
+    await this.orgHelperService.findOrgByID(orgID);
+    await this.empAppraisalHelperService.findAppraisalByID(appraisalID, orgID);
+    return await this.empAppraisalHelperService.sendAppraisalToAllStaff(dto, appraisalID, orgID);
+  }
+
+  async myAppraisal(email: string) {
+    const employee = await this.employeeHelperService.findEmpByEmail(email);
+    return await this.empAppraisalHelperService.getMyAppraisal(employee);
+
   }
 }
