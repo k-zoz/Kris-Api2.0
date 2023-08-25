@@ -12,9 +12,6 @@ export class TokenService {
   ) {
   }
 
-  // async generateAccessToken(payload) {
-  //   return this.jwtService.sign(payload);
-  // }
 
   async generateAccessToken(payload) {
     return this.jwtService.sign(payload, {
@@ -23,6 +20,12 @@ export class TokenService {
     });
   }
 
+  async generateEmployeeAccessToken(payload){
+    return this.jwtService.sign(payload, {
+      secret: process.env.ACCESS_TOKEN_SECRET,
+      expiresIn:process.env.ACCESS_TOKEN_LIFETIME
+    })
+  }
 
   
   async generateRefreshToken(payload: any) {
