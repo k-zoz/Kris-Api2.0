@@ -427,7 +427,7 @@ export class EmployeePrismaHelperService {
       });
       return `Employee created successfully. Welcome Email successfully sent`;
     } catch (e) {
-      this.logger.error(AuthMsg.ERROR_CREATING_EMPLOYEE);
+      this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: AuthMsg.ERROR_CREATING_EMPLOYEE });
     }
   }
