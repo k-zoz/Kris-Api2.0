@@ -87,7 +87,7 @@ export class LeavePrismaHelperService {
         const leaveApplication = await tx.leaveApplication.create({
           data: {
             leaveName: dto.leaveName,
-            duration: dto.leaveDuration,
+            duration: parseInt(dto.leaveDuration),
             startDate: dto.leaveStartDate,
             endDate: dto.leaveEndDate,
             employeeId: employee.id,
@@ -267,13 +267,13 @@ export class LeavePrismaHelperService {
               }
             },
             leaveStatus: true,
-            duration:true,
-            endDate:true
+            duration: true,
+            endDate: true
           }
           // include: { employee: { select: { firstname: true, lastname: true } } }
         });
-       // return leaveApp.map((applications) => applications.employee);
-        return leaveApp
+        // return leaveApp.map((applications) => applications.employee);
+        return leaveApp;
       });
     } catch (e) {
       this.logger.error(e);
@@ -281,7 +281,7 @@ export class LeavePrismaHelperService {
     }
   }
 
-  async findOneLeave(orgID: string, leaveID: string,employee) {
+  async findOneLeave(orgID: string, leaveID: string, employee) {
     try {
       return await this.prismaService.employeeLeave.findFirst({
         where: {
