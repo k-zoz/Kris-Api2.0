@@ -486,7 +486,7 @@ enum Appraisal_ResponseType {
 model Leave {
   id               String             @id @default(uuid())
   name             String
-  duration         Int
+  duration         Float
   type             LeaveType?
   employeeLeave    EmployeeLeave[]
   leaveApplication LeaveApplication[]
