@@ -2,8 +2,8 @@ import { Injectable, Logger } from "@nestjs/common";
 import { UtilService } from "@core/utils/util.service";
 import { OrganizationService } from "@back-office/orgnization/organization.service";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
-import { OrgTeamPrismaHelperService } from "@organization/org-prisma-helper-services/org-team-prisma-helper.service";
-import { OrgDeptPrismaHelperService } from "@organization/org-prisma-helper-services/org-dept-prisma-helper.service";
+import { OrgTeamPrismaHelperService } from "@organization/org-prisma-helper-services/organization/org-team-prisma-helper.service";
+import { OrgDeptPrismaHelperService } from "@organization/org-prisma-helper-services/organization/org-dept-prisma-helper.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
 import { CreateTeamInDepartmentDto, DepartmentNameSearchDto } from "@core/dto/global/organization.dto";
 

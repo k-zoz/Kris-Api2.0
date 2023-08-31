@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { CreateClienteleDto } from "@core/dto/global/branch.dto";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
-import { EmpClienteleHelperService } from "@organization/org-prisma-helper-services/emp-clientele-helper.service";
+import { EmpClienteleHelperService } from "@organization/org-prisma-helper-services/organization/emp-clientele-helper.service";
 import { UtilService } from "@core/utils/util.service";
 import { SearchRequest } from "@core/model/search-request";
 

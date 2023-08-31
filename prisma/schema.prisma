@@ -72,13 +72,21 @@ model Organization {
   Org_Branch     Org_Branch[]
   Org_Clientele  Org_Clientele[]
   Onboarding     Onboarding[]
+  Appraisal      Appraisal[]
+  HireRequest    HireRequest[]
   leavePlan      Leave[]
-  createdBy      String?
-  modifiedBy     String?
+  Allowance      Allowance[]
+  Deduction      Deduction[]
+  Bonuses        Bonuses[]
+  Payslip        Payslip[]
+  PayGrade       PayGrade[]
 
-  createdDate  DateTime    @default(now()) @db.Date
-  modifiedDate DateTime    @updatedAt @db.Date
-  Appraisal    Appraisal[]
+  createdBy  String?
+  modifiedBy String?
+
+  createdDate  DateTime   @default(now()) @db.Date
+  modifiedDate DateTime   @updatedAt @db.Date
+  PayGroup     PayGroup[]
 
   @@unique([orgName, orgWebsite, orgEmail, orgNumber, orgRCnumber])
 }
@@ -211,9 +219,10 @@ model Employee {
   leaveApplication   LeaveApplication[]
   EmployeeOnboarding EmployeeOnboarding[]
   Employee_Appraisal Employee_Appraisal[]
-
-  organizationId String
-  Organization   Organization @relation(fields: [organizationId], references: [id])
+  HireRequest        HireRequest[]
+  Payslip            Payslip[]
+  organizationId     String
+  Organization       Organization         @relation(fields: [organizationId], references: [id])
 
   org_Branch   Org_Branch? @relation("Org_BranchToEmployees", fields: [org_BranchId], references: [id])
   org_BranchId String?
@@ -230,12 +239,153 @@ model Employee {
   teamId String?
   Team   Team?   @relation("teamEmplBelongsTo", fields: [teamId], references: [id])
 
+  PayGrade   PayGrade? @relation(fields: [payGradeId], references: [id])
+  payGradeId String?
+
+  PayGroup   PayGroup? @relation(fields: [payGroupId], references: [id])
+  payGroupId String?
+
   createdBy    String?
   modifiedBy   String?
   createdDate  DateTime @default(now()) @db.Date
   modifiedDate DateTime @updatedAt
 
   @@unique([email, idNumber, phoneNumber, personalEmail])
+}
+
+model Allowance {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  type        String
+  amount      Float
+  frequency   String
+  taxable     String
+
+  PayGroup   PayGroup? @relation(fields: [payGroupId], references: [id])
+  payGroupId String?
+
+  PayGrade   PayGrade? @relation(fields: [payGradeId], references: [id])
+  payGradeId String?
+
+  payslipId String?
+  Payslip   Payslip? @relation(fields: [payslipId], references: [id])
+
+  organizationId String?
+  Organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  createdBy    String?
+  modifiedBy   String?
+  createdDate  DateTime @default(now()) @db.Date
+  modifiedDate DateTime @updatedAt
+}
+
+model Deduction {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  relief      String?
+  groupBy     String?
+  type        String
+  amount      Float
+
+  payslipId String?
+  Payslip   Payslip? @relation(fields: [payslipId], references: [id])
+
+  PayGrade   PayGrade? @relation(fields: [payGradeId], references: [id])
+  payGradeId String?
+
+  PayGroup   PayGroup? @relation(fields: [payGroupId], references: [id])
+  payGroupId String?
+
+  organizationId String?
+  Organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  createdBy    String?
+  modifiedBy   String?
+  createdDate  DateTime @default(now()) @db.Date
+  modifiedDate DateTime @updatedAt
+}
+
+model Bonuses {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  frequency   String
+  taxable     String
+  amount      Float
+
+  PayGrade   PayGrade? @relation(fields: [payGradeId], references: [id])
+  payGradeId String?
+
+  PayGroup   PayGroup? @relation(fields: [payGroupId], references: [id])
+  payGroupId String?
+
+  payslipId String?
+  Payslip   Payslip? @relation(fields: [payslipId], references: [id])
+
+  organizationId String?
+  Organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  createdBy    String?
+  modifiedBy   String?
+  createdDate  DateTime @default(now()) @db.Date
+  modifiedDate DateTime @updatedAt
+}
+
+model PayGrade {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  employees   Employee[]
+  allowances  Allowance[]
+  deductions  Deduction[]
+  bonuses     Bonuses[]
+
+  organizationId String?
+  Organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  createdBy    String?
+  modifiedBy   String?
+  createdDate  DateTime @default(now()) @db.Date
+  modifiedDate DateTime @updatedAt
+}
+
+model PayGroup {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  employees   Employee[]
+  allowances  Allowance[]
+  deductions  Deduction[]
+  bonuses     Bonuses[]
+
+  organizationId String?
+  Organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  createdBy    String?
+  modifiedBy   String?
+  createdDate  DateTime @default(now()) @db.Date
+  modifiedDate DateTime @updatedAt
+}
+
+model Payslip {
+  id         String   @id @default(uuid())
+  date       DateTime @db.Date
+  employeeId String
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+
+  organizationId String?
+  Organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  allowances Allowance[]
+  deductions Deduction[]
+  Bonuses    Bonuses[]
+
+  createdBy    String?
+  modifiedBy   String?
+  createdDate  DateTime @default(now()) @db.Date
+  modifiedDate DateTime @updatedAt
 }
 
 model Appraisal {
@@ -421,7 +571,33 @@ enum LeaveApplicationStatus {
   COMPLETED
 }
 
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  COMPLETED
+}
+
 enum SupervisorDecision {
   APPROVED
   DECLINED
+}
+
+model HireRequest {
+  id                 String              @id @default(uuid())
+  title              String
+  numberNeeded       String
+  yoe                String
+  qualifications     String
+  skillSet           String?
+  other              String
+  urgency            String?
+  hireStatus         ApplicationStatus   @default(PENDING)
+  supervisorDecision SupervisorDecision?
+  employeeId         String?
+  employee           Employee?           @relation(fields: [employeeId], references: [id])
+  organizationID     String?
+  Organization       Organization?       @relation(fields: [organizationID], references: [id])
+  createdDate        DateTime            @default(now()) @db.Date
+  createdBy          String?
 }

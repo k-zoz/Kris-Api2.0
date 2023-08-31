@@ -1,9 +1,9 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { UtilService } from "@core/utils/util.service";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
-import { OrgEmpPrismaHelperService } from "@organization/org-prisma-helper-services/org-emp-prisma-helper.service";
-import { OrgTeamPrismaHelperService } from "@organization/org-prisma-helper-services/org-team-prisma-helper.service";
-import { OrgDeptPrismaHelperService } from "@organization/org-prisma-helper-services/org-dept-prisma-helper.service";
+import { OrgEmpPrismaHelperService } from "@organization/org-prisma-helper-services/organization/org-emp-prisma-helper.service";
+import { OrgTeamPrismaHelperService } from "@organization/org-prisma-helper-services/organization/org-team-prisma-helper.service";
+import { OrgDeptPrismaHelperService } from "@organization/org-prisma-helper-services/organization/org-dept-prisma-helper.service";
 import { CreateEmployeeDto, EmployeeOnboardRequest } from "@core/dto/global/employee.dto";
 import * as argon from "argon2";
 import { LeaveService } from "@organization/leave/leave.service";
@@ -14,8 +14,8 @@ import { CodeValue } from "@core/dto/global/code-value";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import {
   OrgBranchPrismaHelperService
-} from "@organization/org-prisma-helper-services/org-branch-prisma-helper.service";
-import { EmpClienteleHelperService } from "@organization/org-prisma-helper-services/emp-clientele-helper.service";
+} from "@organization/org-prisma-helper-services/organization/org-branch-prisma-helper.service";
+import { EmpClienteleHelperService } from "@organization/org-prisma-helper-services/organization/emp-clientele-helper.service";
 
 @Injectable()
 export class OrgEmployeeService {

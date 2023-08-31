@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { UtilService } from "@core/utils/util.service";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
-import { OrgDeptPrismaHelperService } from "@organization/org-prisma-helper-services/org-dept-prisma-helper.service";
+import { OrgDeptPrismaHelperService } from "@organization/org-prisma-helper-services/organization/org-dept-prisma-helper.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
 import {
   CreateDepartmentInBranchDto,
@@ -10,7 +10,7 @@ import {
 } from "@core/dto/global/organization.dto";
 import {
   OrgBranchPrismaHelperService
-} from "@organization/org-prisma-helper-services/org-branch-prisma-helper.service";
+} from "@organization/org-prisma-helper-services/organization/org-branch-prisma-helper.service";
 
 @Injectable()
 export class EmployeeOrgDepartmentsService {

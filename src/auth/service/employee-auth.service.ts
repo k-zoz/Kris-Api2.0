@@ -15,8 +15,7 @@ export class EmployeeAuthService {
   constructor(private readonly employeeService: EmployeeService,
               private readonly employeeHelperService: EmployeePrismaHelperService,
               private readonly tokenService: TokenService
-  ) {
-  }
+  ) {}
 
   async employeeLogin(request: LoginRequest) {
     const { email, password } = request;

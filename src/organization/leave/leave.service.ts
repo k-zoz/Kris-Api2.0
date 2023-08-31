@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ApplyForLeave, CreateLeaveDto } from "@core/dto/global/leave.dto";
 import { PrismaService } from "@prisma/prisma.service";
-import { LeavePrismaHelperService } from "@organization/org-prisma-helper-services/leave-prisma-helper.service";
+import { LeavePrismaHelperService } from "@organization/org-prisma-helper-services/leave/leave-prisma-helper.service";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 import { UtilService } from "@core/utils/util.service";

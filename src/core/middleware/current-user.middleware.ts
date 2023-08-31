@@ -9,8 +9,7 @@ import { AppTokenExpiredException } from "@core/exception/app-exception";
 export class CurrentUserMiddleware implements NestMiddleware {
   constructor(private readonly jwtService: JwtService,
               private readonly configService: ConfigService
-  ) {
-  }
+  ) {}
 
   //This middleware was created, for authorization.
   //To access the incoming request, the req header needs the user(payload property)

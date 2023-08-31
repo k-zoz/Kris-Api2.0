@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import {
   OrgAppraisalPrismaHelperService
-} from "@organization/org-prisma-helper-services/org-appraisal-prisma-helper.service";
+} from "@organization/org-prisma-helper-services/organization/org-appraisal-prisma-helper.service";
 import { CreateAppraisalDto, CreateSectionsForAppraisal, QuestionsDto } from "@core/dto/global/appraisal";
 import { UtilService } from "@core/utils/util.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";

@@ -3,10 +3,10 @@ import { AppConflictException, AppException, AppUnauthorizedException } from "@c
 import { LocaleService } from "@locale/locale.service";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { DateTime } from "luxon";
-import { randomBytes } from 'crypto';
-import { v4 as uuidV4 } from 'uuid';
-import * as moment from "moment";
-const dayjs = require('dayjs')
+import { randomBytes } from "crypto";
+import { v4 as uuidV4 } from "uuid";
+
+const dayjs = require("dayjs");
 
 
 @Injectable()
@@ -61,7 +61,7 @@ export class UtilService {
 
   convertDate(date: any) {
 
-    if(!date){
+    if (!date) {
     } else {
       const newDate = DateTime.fromFormat(date, "MM-dd-yyyy", { zone: "Africa/Lagos" });
       return newDate.toISO();
@@ -69,16 +69,13 @@ export class UtilService {
   }
 
 
-
-  convertDateAgain(date){
-    return dayjs(date).toDate()
+  convertDateAgain(date) {
+    return dayjs(date).toDate();
   }
 
 
-
-
-   toUpperCase(str: any): string {
-    if(!str){
+  toUpperCase(str: any): string {
+    if (!str) {
     } else {
       return str.toUpperCase();
     }
@@ -86,27 +83,33 @@ export class UtilService {
   }
 
 
+  convertAmount(data: string): number {
+    if (!data) {
+    } else return parseFloat(data);
+  }
+
+
   generateRandomPassword(): string {
     const length = 10;
-    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=';
-    let password = '';
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
+    let password = "";
     let hasUpper = false;
     let hasLower = false;
     let hasNumber = false;
     let hasSymbol = false;
 
     while (!hasUpper || !hasLower || !hasNumber || !hasSymbol) {
-      password = '';
+      password = "";
       for (let i = 0; i < length; i++) {
         const index = randomBytes(1)[0] % charset.length;
         const char = charset[index];
         password += char;
 
-        if (char >= 'A' && char <= 'Z') {
+        if (char >= "A" && char <= "Z") {
           hasUpper = true;
-        } else if (char >= 'a' && char <= 'z') {
+        } else if (char >= "a" && char <= "z") {
           hasLower = true;
-        } else if (char >= '0' && char <= '9') {
+        } else if (char >= "0" && char <= "9") {
           hasNumber = true;
         } else {
           hasSymbol = true;
@@ -117,10 +120,10 @@ export class UtilService {
     return password;
   }
 
-  generateUUID(name:string){
-    const namePart = name.slice(0, 3).toUpperCase()
-    const uuid = uuidV4()
-    return `KRIS-${namePart}-${uuid}`
+  generateUUID(name: string) {
+    const namePart = name.slice(0, 3).toUpperCase();
+    const uuid = uuidV4();
+    return `KRIS-${namePart}-${uuid}`;
   }
 
 

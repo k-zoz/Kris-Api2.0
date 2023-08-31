@@ -1,9 +1,9 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { OrgOnboardPrismaHelperService } from "@organization/org-prisma-helper-services/org-onboard-prisma-helper.service";
+import { OrgOnboardPrismaHelperService } from "@organization/org-prisma-helper-services/organization/org-onboard-prisma-helper.service";
 import { OnboardingDto } from "@core/dto/global/onboarding";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
 import { UtilService } from "@core/utils/util.service";
-import { OrgEmpPrismaHelperService } from "@organization/org-prisma-helper-services/org-emp-prisma-helper.service";
+import { OrgEmpPrismaHelperService } from "@organization/org-prisma-helper-services/organization/org-emp-prisma-helper.service";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 
 @Injectable()

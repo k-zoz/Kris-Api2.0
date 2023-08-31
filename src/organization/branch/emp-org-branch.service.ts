@@ -2,7 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { CreateBranchDto } from "@core/dto/global/branch.dto";
 import {
   OrgBranchPrismaHelperService
-} from "@organization/org-prisma-helper-services/org-branch-prisma-helper.service";
+} from "@organization/org-prisma-helper-services/organization/org-branch-prisma-helper.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
 import { SearchRequest } from "@core/model/search-request";
 import { UtilService } from "@core/utils/util.service";

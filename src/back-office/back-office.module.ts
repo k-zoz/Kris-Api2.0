@@ -4,7 +4,7 @@ import { OrganizationService } from "@back-office/orgnization/organization.servi
 import { PassportModule } from "@nestjs/passport";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
-import { LocaleService } from "../locale/locale.service";
+import { LocaleService } from "@locale/locale.service";
 import { EmployeeController } from "@back-office/employee/employee.controller";
 import { UserPrismaHelperService } from "@back-office/helper-services/user-prisma-helper.service";
 import { UserController } from "@back-office/user/user.controller";
