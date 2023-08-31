@@ -45,7 +45,6 @@ export class LeaveService {
     dto.leaveEndDate = this.utilService.convertDateAgain(dto.leaveEndDate);
     dto.leaveStartDate = this.utilService.convertDateAgain(dto.leaveStartDate);
     await this.leaveHelperService.leaveDurationRequest(employee, dto);
-    console.log(dto);
     return await this.leaveHelperService.applyLeave(dto, orgID, employee);
   }
 
