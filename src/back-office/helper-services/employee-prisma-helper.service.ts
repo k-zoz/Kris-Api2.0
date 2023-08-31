@@ -401,7 +401,6 @@ export class EmployeePrismaHelperService {
             createdBy: creatorMail,
             middleName: request.basic.middleName,
             organizationId: orgName.id,
-            org_ClienteleId: clientele.id
           }
         });
 
