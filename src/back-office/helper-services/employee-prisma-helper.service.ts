@@ -368,14 +368,6 @@ export class EmployeePrismaHelperService {
           }
         });
 
-        if (!request.work.employeeClient) {
-        }
-        const clientele = await tx.org_Clientele.findFirst({
-          where: {
-            organizationId: orgName.id,
-            name: request.work.employeeClient
-          }
-        });
 
         const saved = await tx.employee.create({
           data: {
@@ -400,7 +392,7 @@ export class EmployeePrismaHelperService {
             employment_type: request.work.employmentType,
             createdBy: creatorMail,
             middleName: request.basic.middleName,
-            organizationId: orgName.id,
+            organizationId: orgName.id
           }
         });
 
@@ -423,7 +415,7 @@ export class EmployeePrismaHelperService {
           this.logger.error(e, "Error sending email");
           throw new AppException(e);
         }
-      });
+      }, { maxWait: 5000, timeout: 10000 });
       return `Employee created successfully. Welcome Email successfully sent`;
     } catch (e) {
       this.logger.error(e);
