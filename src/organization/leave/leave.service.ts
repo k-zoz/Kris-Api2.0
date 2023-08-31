@@ -45,6 +45,7 @@ export class LeaveService {
     dto.leaveEndDate = this.utilService.convertDateAgain(dto.leaveEndDate);
     dto.leaveStartDate = this.utilService.convertDateAgain(dto.leaveStartDate);
     await this.leaveHelperService.leaveDurationRequest(employee, dto);
+    console.log(dto);
     return await this.leaveHelperService.applyLeave(dto, orgID, employee);
   }
 
@@ -78,7 +79,7 @@ export class LeaveService {
 
   async findOneLeave(orgID: string, leaveID: string, email) {
     await this.orgHelperService.findOrgByID(orgID);
-    const employee = await this.employeeHelperService.findEmpByEmail(email)
+    const employee = await this.employeeHelperService.findEmpByEmail(email);
     return await this.leaveHelperService.findOneLeave(orgID, leaveID, employee);
   }
 }

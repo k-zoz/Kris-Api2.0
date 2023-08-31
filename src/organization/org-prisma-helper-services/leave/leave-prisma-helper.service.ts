@@ -87,7 +87,7 @@ export class LeavePrismaHelperService {
         const leaveApplication = await tx.leaveApplication.create({
           data: {
             leaveName: dto.leaveName,
-            duration: parseInt(dto.leaveDuration),
+            duration: dto.leaveDuration,
             startDate: dto.leaveStartDate,
             endDate: dto.leaveEndDate,
             employeeId: employee.id,
