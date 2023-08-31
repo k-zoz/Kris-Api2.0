@@ -41,7 +41,7 @@ export class LeaveService {
     await this.leaveHelperService.findOrgLeaveByName(dto.leaveName, orgID);
     const employee = await this.employeeHelperService.findEmpByEmail(userPayLoad.email);
     //date conversion based on how dates are entered or could be handled in the front end
-    dto.leaveDuration = this.utilService.calcLeaveDuration(dto.leaveStartDate, dto.leaveEndDate);
+    dto.leaveDuration = this.utilService.getDifferenceInDays(dto.leaveStartDate, dto.leaveEndDate);
     dto.leaveEndDate = this.utilService.convertDateAgain(dto.leaveEndDate);
     dto.leaveStartDate = this.utilService.convertDateAgain(dto.leaveStartDate);
     await this.leaveHelperService.leaveDurationRequest(employee, dto);

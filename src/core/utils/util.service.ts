@@ -73,6 +73,12 @@ export class UtilService {
     return dayjs(date).toDate();
   }
 
+  getDifferenceInDays(startDate, endDate): number {
+    const start = dayjs(startDate);
+    const end = dayjs(endDate);
+    return end.diff(start, "days");
+
+  }
 
   toUpperCase(str: any): string {
     if (!str) {
