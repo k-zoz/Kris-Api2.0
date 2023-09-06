@@ -183,3 +183,65 @@ export class EditEmployeeDto extends BaseDto {
   @IsStrongPassword({ minNumbers: 1, minSymbols: 1, minLowercase: 1, minUppercase: 1, minLength: 8 })
   empPassword: string;
 }
+
+
+
+export class UpdateBasicInformation {
+  firstName?: string
+  lastName?: string
+  middleName?: string
+  personalEmail?: string
+  phoneNumber?: string
+  personalPhoneNumber2?: string
+}
+
+export class UpdatePersonalInformation {
+  dateOfBirth?: string
+  gender?: string
+  maritalStatus?: string
+}
+
+export class UpdateResidentialInformation {
+  address1?: string
+  address2?: string
+  country?: string
+  state?: string
+  city?: string
+  zipCode?: string
+}
+
+export class UpdateNokInformation {
+  nok_legalName?: string
+  nok_address?: string
+  nok_occupation?: string
+  nok_phoneNumber?: string
+  nok_relationship?: string
+  nok_email?: string
+}
+
+export class UpdateGuarantorInformation {
+  gua_legalName?: string
+  gua_address?: string
+  gua_occupation?: string
+  gua_phoneNumber?: string
+  gua_relationship?: string
+  gua_email?: string
+}
+
+export class FinancialInformation {
+  accountName?: string
+  bankName?: string
+  accountNumber?: string
+  pensionNumber?: string
+  pensionManager?: string
+}
+
+
+export class EmployeeUpdateRequest {
+  basic!: UpdateBasicInformation
+  personal!: UpdatePersonalInformation
+  residential!:UpdateResidentialInformation
+  financial!:FinancialInformation
+  nok!:UpdateNokInformation
+  gua!:UpdateGuarantorInformation
+}

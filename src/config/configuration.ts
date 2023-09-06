@@ -16,5 +16,8 @@ export default () => ({
   rateLimitThrottleTtl: parseInt(process.env.RATE_LIMIT_THROTTLE_TTL, 10),
   rateLimitThrottleLimit: parseInt(process.env.RATE_LIMIT_THROTTLE_LIMIT, 10),
   resendApiKey:process.env.RESEND_API_KEY,
-  mailSender:process.env.MAIL_SENDER
+  mailSender:process.env.MAIL_SENDER,
+  cloudinaryCloudName:process.env.CLOUDINARY_CLOUD_NAME,
+  cloudinaryApiKey:process.env.CLOUDINARY_API_KEY,
+  cloudinaryApiSecret:process.env.CLOUDINARY_API_SECRET
 })

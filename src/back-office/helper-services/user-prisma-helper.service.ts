@@ -7,9 +7,7 @@ import { AppConst } from "@core/const/app.const";
 import { prismaExclude } from "@prisma/prisma-utils";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { NewBackOfficerEvent, PasswordChangeEvent } from "@core/event/back-office-event";
-import { KrisEventConst } from "@core/event/kris-event.const";
-import { EmailService } from "../../alert/email/email.service";
-import { MailerService } from "@nestjs-modules/mailer";
+import { EmailService } from "@alert/email/email.service";
 import { ConfigService } from "@nestjs/config";
 import { Resend } from "resend";
 
@@ -17,8 +15,6 @@ import { Resend } from "resend";
 export class UserPrismaHelperService {
   private readonly logger = new Logger(UserPrismaHelperService.name);
   private readonly mailSource = this.configService.get("mailSender");
-  // private readonly resendKey = this.configService.get("resendApiKey")
-  // private readonly resend = new Resend(this.resendKey);
   private resend: Resend;
 
   constructor(private readonly prismaService: PrismaService,
@@ -164,8 +160,8 @@ export class UserPrismaHelperService {
           });
           this.logger.log(`Email Successfully sent to ${saved.email}`);
         } catch (e) {
-          this.logger.error("Error sending email");
-          throw new AppException(e);
+          this.logger.error(e);
+          throw new AppException("Error sending email");
         }
       });
       this.logger.log(`User ${email} password changed successfully`);

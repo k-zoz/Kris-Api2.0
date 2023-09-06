@@ -1,17 +1,11 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { Resend } from "resend";
-import { OnEvent } from "@nestjs/event-emitter";
-import { KrisEventConst } from "@core/event/kris-event.const";
 import {
   NewBackOfficerEvent,
   NewEmployeeEvent, NewEmployeePasswordResetEvent,
   NewOrganizationEvent,
-  PasswordChangeEvent
+  PasswordChangeEvent, PayslipEmailEvent
 } from "@core/event/back-office-event";
-import { MailerService } from "@nestjs-modules/mailer";
-import { template } from "handlebars";
-import { AppException } from "@core/exception/app-exception";
+
 import * as path from "path";
 
 const Handlebars = require("handlebars");
@@ -42,7 +36,7 @@ export class EmailService {
     return template(data);
   }
 
-  async sendResetPasswordDetailsMail(event: NewBackOfficerEvent| NewEmployeePasswordResetEvent) {
+  async sendResetPasswordDetailsMail(event: NewBackOfficerEvent | NewEmployeePasswordResetEvent) {
     const relativePath = "../../templates/resetPassword.hbs";
     const absolutePath = path.join(__dirname, relativePath);
     const sourceFile = fs.readFileSync(absolutePath, "utf-8");
@@ -65,29 +59,44 @@ export class EmailService {
     return template(data);
   }
 
-  async sendWelcomeEmployeeDetailMail(event:NewEmployeeEvent){
+  async sendWelcomeEmployeeDetailMail(event: NewEmployeeEvent) {
     const relativePath = "../../templates/welcomeEmployee.hbs";
     const absolutePath = path.join(__dirname, relativePath);
     const sourceFile = fs.readFileSync(absolutePath, "utf-8");
     const template = Handlebars.compile(sourceFile);
     const data = {
       firstname: event.firstname,
-      email:event.email,
+      email: event.email,
       password: event.password,
       organizationName: event.organizationName
     };
-    return template(data)
+    return template(data);
   }
 
-  async sendPasswordChangeSuccessfulEmail(event:PasswordChangeEvent) {
+  async sendPasswordChangeSuccessfulEmail(event: PasswordChangeEvent) {
     const relativePath = "../../templates/passwordChangeSuccessful.hbs";
     const absolutePath = path.join(__dirname, relativePath);
     const sourceFile = fs.readFileSync(absolutePath, "utf-8");
     const template = Handlebars.compile(sourceFile);
     const data = {
       firstname: event.firstName
-    }
-    return template(data)
+    };
+    return template(data);
+  }
+
+  async sendPayrollEmail(event: PayslipEmailEvent) {
+    const relativePath = "../../templates/paySlipEmail.hbs";
+    const absolutePath = path.join(__dirname, relativePath);
+    const sourceFile = fs.readFileSync(absolutePath, "utf-8");
+    const template = Handlebars.compile(sourceFile);
+    const data = {
+      organizationName: event.organizationName,
+      employeeFirstName: event.employeeFirstName,
+      employeeLastName: event.employeeLastName,
+      payslipStartDate: event.payslipStartDate,
+      payslipEndDate: event.payslipEndDate
+    };
+    return template(data);
   }
 
 

@@ -79,7 +79,7 @@ export class UserService implements OnModuleInit {
     if(!await this.validatePassword(user1, dto.current)){
       throw new AppConflictException("current password incorrect!")
     }
-    return this.userHelperService.changePasswordAndSendPasswordChangeEmail(user1.email, user1.email, dto.newPassword, user1)
+    return await this.userHelperService.changePasswordAndSendPasswordChangeEmail(user1.email, user1.email, dto.newPassword, user1)
   }
 
   async changeUserPassword(modifierMail: string, id: string, newPassword: string) {

@@ -1,17 +1,14 @@
 import { Global, Module } from "@nestjs/common";
 import { EmailService } from "./email/email.service";
-import { MailerModule } from "@nestjs-modules/mailer";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import mailConfig from "@config/mail.config";
-import { join } from "path";
-import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
+import { PdfService } from "./pdf/pdf.service";
+import { CloudinaryProvider } from "@config/cloudinary.provider";
 
 @Global()
 @Module({
   imports: [],
   controllers: [],
-  providers: [EmailService],
-  exports: [EmailService]
+  providers: [EmailService, PdfService, CloudinaryProvider],
+  exports: [EmailService, PdfService, CloudinaryProvider]
 })
 export class AlertModule {
 }

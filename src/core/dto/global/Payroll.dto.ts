@@ -118,3 +118,27 @@ export class PayGroupDto {
   @IsNotEmpty()
   name: string;
 }
+
+export class CreatePayrollPreviewDto {
+  @IsNotEmpty()
+  name: string;
+  @IsNotEmpty()
+  startDate: any;
+  @IsNotEmpty()
+  endDate: any;
+  @IsOptional()
+  date: any;
+}
+
+
+export class EmployeePayrollPreviewDto {
+  id:string
+  @IsOptional()
+  taxes: any;
+  @IsOptional()
+  bonuses: any;
+  @IsOptional()
+  deduction: any;
+  @IsOptional()
+  gross_pay: any;
+}

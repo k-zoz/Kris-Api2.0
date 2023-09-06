@@ -10,7 +10,7 @@ import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import {
   CreateEmployeeDto,
   EditEmployeeDto,
-  EmployeeOnboardRequest,
+  EmployeeOnboardRequest, EmployeeUpdateRequest,
 
   RoleToEmployee
 } from "@core/dto/global/employee.dto";
@@ -19,6 +19,8 @@ import { AuthMsg } from "@core/const/security-msg-const";
 import { Permission } from "@core/decorator/roles.decorator";
 import { UserRoleEnum } from "@core/enum/user-role-enum";
 import { SearchRequest } from "@core/model/search-request";
+import { ConfirmInputPasswordDto } from "@core/dto/auth/user.dto";
+import { Employee } from "@prisma/client";
 
 @Controller("organization/employee")
 @UseGuards(AuthGuard())
@@ -167,7 +169,7 @@ export class OrgEmployeeController extends BaseController {
   };
 
   @Get("/:orgID/employee/:empID")
-  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  // @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async findOneEmployee(@Param("orgID") orgID: string,
                         @Param("empID") empID: string
   ) {
@@ -185,6 +187,22 @@ export class OrgEmployeeController extends BaseController {
       payload: await this.orgEmployeeService.resetEmployeePassword(orgID, empID, payload.email),
       message: "Changes saved successfully"
     });
+  }
+
+
+  @Post("changeMyPassword/:empID")
+  async changeMyPassword(@GetUser() payload: AuthPayload,
+                         @Body(ValidationPipe) dto: ConfirmInputPasswordDto,
+                         @Param("empID") empID: string
+  ) {
+    return this.response({ payload: await this.orgEmployeeService.changeMyPassword(dto, payload.email) });
+  }
+
+  @Post("updateMyProfile")
+  async updateMyProfile(@GetUser() payload: AuthPayload,
+                        @Body()dto:EmployeeUpdateRequest
+                        ){
+    return this.response({payload: await this.orgEmployeeService.updateMyProfile(dto, payload)})
   }
 
 }

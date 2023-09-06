@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payslip</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 0;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>{{organizationName}} Payslip</h1>
+  <p>Dear {{employeeFirstName}} {{employeeLastName}},</p>
+  <p>Please find attached your payslip for the period {{payslipStartDate}} to {{payslipEndDate}}.</p>
+  <p>Thank you for your hard work and dedication.</p>
+  <p>Sincerely,</p>
+  <p>{{organizationName}}</p>
+</div>
+</body>
+</html>

@@ -49,44 +49,46 @@ enum Bo_Status {
 }
 
 model Organization {
-  id             String          @id @default(uuid())
-  orgLogo        String?
-  orgName        String          @unique
-  orgWebsite     String          @unique
-  orgEmail       String          @unique
-  orgNumber      String          @unique
-  orgAddress     String
-  orgAddress2    String?
-  orgState       String
-  orgCity        String?
-  orgCountry     String
-  orgType        String?
-  orgZipCode     String?
-  orgDateFounded DateTime?       @db.Date
-  orgRCnumber    String          @unique
-  orgIndustry    String
-  orgKrisId      String?         @unique
-  team           Team[]
-  employees      Employee[]
-  department     Department[]
-  Org_Branch     Org_Branch[]
-  Org_Clientele  Org_Clientele[]
-  Onboarding     Onboarding[]
-  Appraisal      Appraisal[]
-  HireRequest    HireRequest[]
-  leavePlan      Leave[]
-  Allowance      Allowance[]
-  Deduction      Deduction[]
-  Bonuses        Bonuses[]
-  Payslip        Payslip[]
-  PayGrade       PayGrade[]
+  id              String            @id @default(uuid())
+  orgLogo         String?
+  orgName         String            @unique
+  orgWebsite      String            @unique
+  orgEmail        String            @unique
+  orgNumber       String            @unique
+  orgAddress      String
+  orgAddress2     String?
+  orgState        String
+  orgCity         String?
+  orgCountry      String
+  orgType         String?
+  orgZipCode      String?
+  orgDateFounded  DateTime?         @db.Date
+  orgRCnumber     String            @unique
+  orgIndustry     String
+  orgKrisId       String?           @unique
+  team            Team[]
+  employees       Employee[]
+  department      Department[]
+  Org_Branch      Org_Branch[]
+  Org_Clientele   Org_Clientele[]
+  Onboarding      Onboarding[]
+  Appraisal       Appraisal[]
+  HireRequest     HireRequest[]
+  leavePlan       Leave[]
+  Allowance       Allowance[]
+  Deduction       Deduction[]
+  Bonuses         Bonuses[]
+  Payslip         Payslip[]
+  PayGrade        PayGrade[]
+  PayGroup        PayGroup[]
+  Payroll_Preview Payroll_Preview[]
 
   createdBy  String?
   modifiedBy String?
 
-  createdDate  DateTime   @default(now()) @db.Date
-  modifiedDate DateTime   @updatedAt @db.Date
-  PayGroup     PayGroup[]
+  createdDate         DateTime              @default(now()) @db.Date
+  modifiedDate        DateTime              @updatedAt @db.Date
+  OrganizationPayroll OrganizationPayroll[]
 
   @@unique([orgName, orgWebsite, orgEmail, orgNumber, orgRCnumber])
 }
@@ -194,24 +196,60 @@ enum Employee_Status {
 }
 
 model Employee {
-  id                   String  @id @default(uuid())
-  email                String  @unique
+  id                   String    @id @default(uuid())
+  email                String    @unique
   password             String
   firstname            String
   lastname             String
   middleName           String?
-  krisID               String? @unique
-  idNumber             String  @unique
-  phoneNumber          String  @unique
+  krisID               String?   @unique
+  idNumber             String    @unique
+  phoneNumber          String    @unique
   refreshToken         String?
-  personalEmail        String? @unique
+  personalEmail        String?   @unique
   workPhoneNumber      String?
   personalPhoneNumber2 String?
   designation          String?
   employment_type      String?
+  dateOfBirth          DateTime? @db.Date
+  gender               String?
+  maritalStatus        String?
+  taxes                Float?
+  gross_pay            Float?
+  deduction            Float?
+  bonuses              Float?
+  net_pay              Float?
+  isEdit               Boolean?
+  isSelected           Boolean?
+  dateOfConfirmation   DateTime? @db.Date
+  dateOfJoining        DateTime? @db.Date
 
-  dateOfConfirmation DateTime? @db.Date
-  dateOfJoining      DateTime? @db.Date
+  address1 String?
+  address2 String?
+  country  String?
+  state    String?
+  city     String?
+  zipCode  String?
+
+  accountName    String?
+  bankName       String?
+  accountNmumber String?
+  pensionManager String?
+  pensionNumber  String?
+
+  nok_legalName    String?
+  nok_address      String?
+  nok_occupation   String?
+  nok_phoneNumber  String?
+  nok_relationship String?
+  nok_email        String?
+
+  gua_legalName    String?
+  gua_address      String?
+  gua_occupation   String?
+  gua_phoneNumber  String?
+  gua_relationship String?
+  gua_email        String?
 
   role               Employee_Role[]
   status             Employee_Status?
@@ -245,12 +283,70 @@ model Employee {
   PayGroup   PayGroup? @relation(fields: [payGroupId], references: [id])
   payGroupId String?
 
-  createdBy    String?
-  modifiedBy   String?
-  createdDate  DateTime @default(now()) @db.Date
-  modifiedDate DateTime @updatedAt
+  Payroll_Preview   Payroll_Preview? @relation(fields: [payroll_PreviewId], references: [id])
+  payroll_PreviewId String?
+
+  createdBy       String?
+  modifiedBy      String?
+  createdDate     DateTime          @default(now()) @db.Date
+  modifiedDate    DateTime          @updatedAt
+  EmployeePayroll EmployeePayroll[]
 
   @@unique([email, idNumber, phoneNumber, personalEmail])
+}
+
+model OrganizationPayroll {
+  id               String            @id @default(uuid())
+  date             DateTime          @default(now())
+  totalTaxes       Float?
+  totalBonuses     Float?
+  totalDeduction   Float?
+  totalGross_pay   Float?
+  totalNet_pay     Float?
+  payrollPreview   Payroll_Preview   @relation(fields: [payrollPreviewId], references: [id])
+  payrollPreviewId String
+  organizationId   String?
+  Organization     Organization?     @relation(fields: [organizationId], references: [id])
+  employees        EmployeePayroll[]
+  createdBy        String?
+  modifiedBy       String?
+  createdDate      DateTime          @default(now()) @db.Date
+  modifiedDate     DateTime          @updatedAt
+}
+
+model EmployeePayroll {
+  id           String              @id @default(uuid())
+  employee     Employee            @relation(fields: [employeeId], references: [id])
+  employeeId   String
+  payroll      OrganizationPayroll @relation(fields: [payrollId], references: [id])
+  payrollId    String
+  bonuses      Float?
+  taxes        Float?
+  deduction    Float?
+  gross_pay    Float?
+  net_pay      Float?
+  createdBy    String?
+  modifiedBy   String?
+  createdDate  DateTime            @default(now()) @db.Date
+  modifiedDate DateTime            @updatedAt
+}
+
+model Payroll_Preview {
+  id             String            @id @default(uuid())
+  name           String?
+  date           DateTime?         @db.Date
+  startDate      DateTime?         @db.Date
+  endDate        DateTime?         @db.Date
+  employees      Employee[]
+  status         ApplicationStatus
+  organizationId String?
+  Organization   Organization?     @relation(fields: [organizationId], references: [id])
+
+  createdBy           String?
+  modifiedBy          String?
+  createdDate         DateTime              @default(now()) @db.Date
+  modifiedDate        DateTime              @updatedAt
+  OrganizationPayroll OrganizationPayroll[]
 }
 
 model Allowance {

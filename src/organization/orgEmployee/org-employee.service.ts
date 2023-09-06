@@ -1,10 +1,16 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { UtilService } from "@core/utils/util.service";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
-import { OrgEmpPrismaHelperService } from "@organization/org-prisma-helper-services/organization/org-emp-prisma-helper.service";
-import { OrgTeamPrismaHelperService } from "@organization/org-prisma-helper-services/organization/org-team-prisma-helper.service";
-import { OrgDeptPrismaHelperService } from "@organization/org-prisma-helper-services/organization/org-dept-prisma-helper.service";
-import { CreateEmployeeDto, EmployeeOnboardRequest } from "@core/dto/global/employee.dto";
+import {
+  OrgEmpPrismaHelperService
+} from "@organization/org-prisma-helper-services/organization/org-emp-prisma-helper.service";
+import {
+  OrgTeamPrismaHelperService
+} from "@organization/org-prisma-helper-services/organization/org-team-prisma-helper.service";
+import {
+  OrgDeptPrismaHelperService
+} from "@organization/org-prisma-helper-services/organization/org-dept-prisma-helper.service";
+import { CreateEmployeeDto, EmployeeOnboardRequest, EmployeeUpdateRequest } from "@core/dto/global/employee.dto";
 import * as argon from "argon2";
 import { LeaveService } from "@organization/leave/leave.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
@@ -15,7 +21,13 @@ import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import {
   OrgBranchPrismaHelperService
 } from "@organization/org-prisma-helper-services/organization/org-branch-prisma-helper.service";
-import { EmpClienteleHelperService } from "@organization/org-prisma-helper-services/organization/emp-clientele-helper.service";
+import {
+  EmpClienteleHelperService
+} from "@organization/org-prisma-helper-services/organization/emp-clientele-helper.service";
+import { ConfirmInputPasswordDto } from "@core/dto/auth/user.dto";
+import { AppConflictException } from "@core/exception/app-exception";
+import { Employee } from "@prisma/client";
+import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 
 @Injectable()
 export class OrgEmployeeService {
@@ -60,9 +72,9 @@ export class OrgEmployeeService {
     request.work.employeeBranch = this.utilService.toUpperCase(request.work.employeeBranch);
     request.work.department = this.utilService.toUpperCase(request.work.department);
     request.work.empTeam = this.utilService.toUpperCase(request.work.empTeam);
-    request.work.employeeClient = this.utilService.toUpperCase(request.work.employeeClient)
-    request.work.dateOfConfirmation = this.utilService.convertDate(request.work.dateOfConfirmation);
-    request.work.dateOfJoining = this.utilService.convertDate(request.work.dateOfJoining);
+    request.work.employeeClient = this.utilService.toUpperCase(request.work.employeeClient);
+    request.work.dateOfConfirmation = this.utilService.convertDateAgain(request.work.dateOfConfirmation);
+    request.work.dateOfJoining = this.utilService.convertDateAgain(request.work.dateOfJoining);
     request.basic.krisID = this.utilService.generateUUID(request.basic.firstName);
     const branch = await this.orgBranchHelperService.findBranchByName(request.work.employeeBranch, orgID);
     const department = await this.orgDepartmentHelperService.findDeptByNameAlone(request.work.department, orgID);
@@ -127,5 +139,27 @@ export class OrgEmployeeService {
 
   empStatus() {
     return EnumValues.getNamesAndValues(BoStatusEnum).map(value => CodeValue.of(value.name, value.value as string));
+  }
+
+  async getEmployee(empID: string) {
+    return await this.employeeHelperService.findEmpById(empID);
+  }
+
+  async changeMyPassword(dto: ConfirmInputPasswordDto, email: string) {
+    const employee = await this.employeeService.findEmpByEmail(email);
+    if (!await this.validatePassword(employee, dto.current)) {
+      throw new AppConflictException("Current password incorrect!");
+    }
+    return await this.orgEmployeeHelperService.changeMyPasswordAndSendEmail(dto, employee);
+  }
+
+  async validatePassword(user, password: string): Promise<boolean> {
+    return await argon.verify(user.password, password);
+  }
+
+  async updateMyProfile(dto: EmployeeUpdateRequest, payload: AuthPayload) {
+    const employee = await this.employeeService.findEmpByEmail(payload.email);
+    dto.personal.dateOfBirth = this.utilService.convertDateAgain(dto.personal.dateOfBirth)
+    return await this.orgEmployeeHelperService.updateMyProfile(dto, employee);
   }
 }

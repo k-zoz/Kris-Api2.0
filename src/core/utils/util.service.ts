@@ -2,7 +2,6 @@ import { Injectable, Logger } from "@nestjs/common";
 import { AppConflictException, AppException, AppUnauthorizedException } from "@core/exception/app-exception";
 import { LocaleService } from "@locale/locale.service";
 import { AuthMsg } from "@core/const/security-msg-const";
-import { DateTime } from "luxon";
 import { randomBytes } from "crypto";
 import { v4 as uuidV4 } from "uuid";
 
@@ -50,22 +49,6 @@ export class UtilService {
       }
     }
 
-  }
-
-  calcLeaveDuration(startDate, endDate): number {
-    const start = DateTime.fromFormat(startDate, "MM-dd-yyyy", { zone: "Africa/Lagos" });
-    const end = DateTime.fromFormat(endDate, "MM-dd-yyyy", { zone: "Africa/Lagos" });
-    const duration = end.diff(start);
-    return duration.as("days");
-  }
-
-  convertDate(date: any) {
-
-    if (!date) {
-    } else {
-      const newDate = DateTime.fromFormat(date, "MM-dd-yyyy", { zone: "Africa/Lagos" });
-      return newDate.toISO();
-    }
   }
 
 

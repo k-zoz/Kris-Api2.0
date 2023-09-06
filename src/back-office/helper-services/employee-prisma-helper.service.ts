@@ -16,8 +16,6 @@ import { NewEmployeeEvent } from "@core/event/back-office-event";
 @Injectable()
 export class EmployeePrismaHelperService {
   private readonly logger = new Logger(EmployeePrismaHelperService.name);
-  // private readonly resendKey = this.configService.get("resendApiKey")
-  // private readonly resend = new Resend(this.resendKey);
   private readonly mailSource = this.configService.get("mailSender");
   private resend: Resend;
 
@@ -26,7 +24,7 @@ export class EmployeePrismaHelperService {
               private readonly emailService: EmailService,
               private readonly localeService: LocaleService) {
     const resendKey = this.configService.get("resendApiKey");
-    this.resend = new Resend("re_fDGEEX19_ApMHyit8rirENaRa6R4c7htQ");
+    this.resend = new Resend(resendKey);
   }
 
   async findFirst(email: string) {
@@ -39,7 +37,9 @@ export class EmployeePrismaHelperService {
   }
 
   async findEmpById(id) {
-    const found = await this.prismaService.employee.findFirst({ where: { id } });
+    const found = await this.prismaService.employee.findFirst({
+      where: { id }
+    });
     if (!found) {
       this.logger.error(AuthMsg.USER_NOT_FOUND);
       throw new AppNotFoundException(AuthMsg.USER_NOT_FOUND);
@@ -49,10 +49,20 @@ export class EmployeePrismaHelperService {
 
   async findOneEmpAndExclude(empID) {
     try {
-      return await this.prismaService.employee.findFirst({
+      const employee = await this.prismaService.employee.findFirst({
         where: { id: empID },
-        select: prismaExclude("Employee", ["password", "refreshToken"])
+        include: {
+          Organization: true,
+          Team: true,
+          Department: true,
+          org_Branch: true,
+          managedBranch: true,
+          Org_Clientele: true
+        }
       });
+
+      const { password, refreshToken, ...rest } = employee;
+      return rest;
     } catch (e) {
       this.logger.error(e);
       throw new AppNotFoundException(AuthMsg.USER_NOT_FOUND);
@@ -192,6 +202,7 @@ export class EmployeePrismaHelperService {
         "status", "org_ClienteleId", "org_BranchId", "createdBy",
         "modifiedBy", "createdDate", "modifiedDate", "departmentId",
         "dateOfConfirmation", "dateOfJoining", "designation", "employment_type", "personalEmail", "personalPhoneNumber2", "workPhoneNumber",
+        "payroll_PreviewId", "bonuses", "deduction", "gross_pay", "isEdit", "isSelected", "net_pay", "payGradeId", "payGroupId", "taxes",
         "teamId"])
     });
   }

@@ -63,9 +63,9 @@ export class UpdateBackOfficeUserPassword {
 }
 
 export class ConfirmInputPasswordDto {
-  @IsNotEmpty({ message: "Password is required" })
+  @IsNotEmpty({ message: "Current password is required" })
   current: string;
-  @IsNotEmpty({ message: "Password is required" })
+  @IsNotEmpty({ message: "New password is required" })
   @IsStrongPassword({
     minNumbers: 1,
     minSymbols: 1,
@@ -73,7 +73,7 @@ export class ConfirmInputPasswordDto {
     minLowercase: 1,
     minUppercase: 1
   },
-    { message: "Password must contain at least one lowercase letter, one uppercase letter, one number, one special character, and be at least 8 characters long" })
+    { message: "New password must contain at least one lowercase letter, one uppercase letter, one number, one special character, and be at least 8 characters long" })
   newPassword: string;
   retypeNewPassword: string;
 }
