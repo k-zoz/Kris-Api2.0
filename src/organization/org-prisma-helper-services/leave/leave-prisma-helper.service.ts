@@ -3,12 +3,23 @@ import { PrismaService } from "@prisma/prisma.service";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { CreateLeaveDto } from "@core/dto/global/leave.dto";
+import { LeaveApprovalEvent, PasswordChangeEvent } from "@core/event/back-office-event";
+import { EmailService } from "@alert/email/email.service";
+import { Resend } from "resend";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class LeavePrismaHelperService {
   private readonly logger = new Logger(LeavePrismaHelperService.name);
+  private readonly mailSource = this.configService.get("mailSender");
+  private resend: Resend;
 
-  constructor(private readonly prismaService: PrismaService) {
+  constructor(private readonly prismaService: PrismaService,
+              private readonly configService: ConfigService,
+              private readonly emailService: EmailService
+  ) {
+    const resendKey = this.configService.get("resendApiKey");
+    this.resend = new Resend(resendKey);
   }
 
   async createLeavePlanAndEmployeeLeave(dto: CreateLeaveDto, orgID: string, creatorEmail: string) {
@@ -42,15 +53,13 @@ export class LeavePrismaHelperService {
         await tx.employeeLeave.createMany({
           data: employeeLeaveData
         });
-      });
+      }, { maxWait: 5000, timeout: 10000 });
       return AuthMsg.LEAVE_CREATED;
     } catch (e) {
       this.logger.error(e);
       throw new AppException(AuthMsg.ERROR_CREATING_LEAVE);
-
     }
   }
-
 
   async findLeaveDuplicates(dto, orgID) {
     const existingLeave = await this.prismaService.leave.findFirst({
@@ -108,6 +117,24 @@ export class LeavePrismaHelperService {
             }
           }
         });
+
+        try {
+          const html = await this.emailService.sendLeaveApprovalEmail({
+            employeeName: employee.firstname,
+            leaveEndDate: dto.leaveEndDate,
+            leaveStartDate: dto.leaveStartDate
+          } as LeaveApprovalEvent);
+          await this.resend.emails.send({
+            from: `${this.mailSource}`,
+            to: `${employee.email}`,
+            subject: "Leave Status",
+            html: `${html}`
+          });
+          this.logger.log(`Email Successfully sent to ${employee.email}`);
+        } catch (e) {
+          this.logger.error(e);
+          throw new AppException("Error sending email");
+        }
       });
       return "Applied Successfullly";
     } catch (e) {

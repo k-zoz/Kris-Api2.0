@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional } from "class-validator";
 
 export class CreateNewHireDto {
   @IsNotEmpty({ message: "Job title is required!" })
@@ -38,4 +38,17 @@ export class PostJobDto {
   @IsNotEmpty({ message: "More job information is required" })
   information: string;
 
+}
+
+
+export class ApplyForJobDto {
+  @IsNotEmpty()
+  fullname: string;
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+  @IsNotEmpty()
+  resumeUrl: string;
+  @IsOptional()
+  coverLetterUrl: string;
 }

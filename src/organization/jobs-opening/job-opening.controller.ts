@@ -7,7 +7,7 @@ import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
-import { CreateNewHireDto, PostJobDto } from "@core/dto/global/Jobs.dto";
+import { ApplyForJobDto, CreateNewHireDto, PostJobDto } from "@core/dto/global/Jobs.dto";
 
 @Controller("organization/jobOpening")
 export class JobOpeningController extends BaseController {
@@ -37,5 +37,19 @@ export class JobOpeningController extends BaseController {
     return this.response({ payload: await this.jobOpeningService.allOrgJobs(orgID, orgKrisID) });
   }
 
+
+  @Post("/:orgID/applyForJob/:jobOpeningID")
+  async applyForJob(@Param("orgID") orgID: string,
+                    @Param("jobOpeningID") jobOpeningID: string,
+                    @Body(ValidationPipe) dto: ApplyForJobDto
+  ) {
+    return this.response({ payload: await this.jobOpeningService.jobApply(dto, orgID, jobOpeningID) });
+  }
+
+  @Get("/:orgID/jobOpening/:jobOpeningID")
+  async getJobOpening(@Param("orgID") orgID: string,
+                      @Param("jobOpeningID") jobOpeningID: string) {
+    return this.response({ payload: await this.jobOpeningService.findOneJobOpening(orgID, jobOpeningID) });
+  }
 
 }

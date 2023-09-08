@@ -81,7 +81,8 @@ export class AppModule {
         { path: "auth/login", method: RequestMethod.POST },
         { path: "employee/login", method: RequestMethod.POST },
         { path: "organization/jobOpening/:orgID/allJobs", method: RequestMethod.GET },
-        { path: "organization/jobOpening/:orgID/allJobs/:orgKrisID", method: RequestMethod.GET }
+        { path: "organization/jobOpening/:orgID/allJobs/:orgKrisID", method: RequestMethod.GET },
+        { path: "organization/jobOpening/:orgID/applyForJob/:jobOpeningID", method: RequestMethod.POST }
       )
       .forRoutes({ path: "*", method: RequestMethod.ALL });
   }
