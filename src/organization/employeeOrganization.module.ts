@@ -84,6 +84,11 @@ import {
   PaysSlipsPrismaHelperService
 } from "@organization/org-prisma-helper-services/payroll/pays-slips-prisma-helper.service";
 import { PaysSlipsService } from "@organization/payslips/pays-slips.service";
+import {
+  JobOpeningHelperService
+} from "@organization/org-prisma-helper-services/recruitment/job-opening-helper.service";
+import { JobOpeningService } from "@organization/jobs-opening/job-opening.service";
+import { JobOpeningController } from "@organization/jobs-opening/job-opening.controller";
 
 @Global()
 @Module({
@@ -93,9 +98,10 @@ import { PaysSlipsService } from "@organization/payslips/pays-slips.service";
     OrgEmpPrismaHelperService, OrgEmployeeService, EmployeeOrganizationService, OrgBranchPrismaHelperService],
   controllers: [LeaveController, EmployeeOrganizationController, EmpOrgClienteleController, EmpOrgOnboardingController, EmpOrgAppraisalController,
     EmpJobsController, AllowancesController, BonusesController, DeductionsController, PayGradeController, BonusesController, PayGroupController,
-    PayrollPreviewController,PayrollApproveController,PaysSlipsController,
+    PayrollPreviewController,PayrollApproveController,PaysSlipsController,JobOpeningController,
     EmployeeOrgDepartmentsController, OrgTeamController, OrgEmployeeController, EmpOrgBranchController],
-  providers: [LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService, EmpOrgAppraisalService,
+  providers: [LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService, EmpOrgAppraisalService,JobOpeningHelperService,
+    JobOpeningService,
     PayrollPreviewService,PayrollPreviewHelperService,PayrollApproveService,PayrollApprovePrismaHelperService,PaysSlipsPrismaHelperService,PaysSlipsService,
     OrgDeptPrismaHelperService, EmpOrgBranchService, EmpOrgClienteleService, EmpClienteleHelperService, OrgOnboardPrismaHelperService, EmpJobsService,
     PayrollPrismaHelperService, EmpPayrollService, AllowancesService, BonusesService, DeductionsService, PayGradeService, AllowancesHelperService,

@@ -22,7 +22,7 @@ export class EmpJobsPrismaHelperService {
           qualifications: dto.qualifications,
           other: dto.other,
           skillSet: dto.skillSet,
-          urgency:dto.urgency,
+          urgency: dto.urgency,
           employeeId: employee.id,
           organizationID: orgID,
           createdBy: employee.email
@@ -45,7 +45,10 @@ export class EmpJobsPrismaHelperService {
             organizationID: orgID
           },
           skip,
-          take
+          take,
+          orderBy: {
+           createdDate: 'desc'
+          }
         }),
 
         this.prismaService.hireRequest.count({
@@ -56,6 +59,22 @@ export class EmpJobsPrismaHelperService {
       ]);
       const totalPage = Math.ceil(total / take) || 1;
       return { total, totalPage, hires };
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException();
+    }
+  }
+
+  async allOrgHireRequests(orgID: string) {
+    try {
+      return await this.prismaService.hireRequest.findMany({
+        where: {
+          organizationID: orgID
+        },
+        orderBy: {
+          createdDate: 'desc'
+        }
+      });
     } catch (e) {
       this.logger.error(e);
       throw new AppException();

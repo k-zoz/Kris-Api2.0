@@ -1,4 +1,4 @@
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty, IsOptional } from "class-validator";
 
 export class CreateNewHireDto {
   @IsNotEmpty({ message: "Job title is required!" })
@@ -14,5 +14,28 @@ export class CreateNewHireDto {
   @IsNotEmpty({ message: "Other necessary information is required required" })
   other: string;
   @IsNotEmpty({ message: "urgency is required required" })
-  urgency:string
+  urgency: string;
+}
+
+
+export class PostJobDto {
+  @IsNotEmpty({ message: "Job title is required" })
+  title: string;
+  @IsNotEmpty({ message: "Job type is required" })
+  type: string;
+  @IsNotEmpty({ message: "Year of experience is required" })
+  yoe: string;
+  @IsNotEmpty({ message: "Qualifications is required" })
+  qualification: string;
+  @IsNotEmpty({ message: "Skill sets is required" })
+  skill_set: string;
+  @IsOptional()
+  salary_range: string;
+  @IsNotEmpty({ message: "Job location is required" })
+  location: string;
+  @IsNotEmpty({ message: "Job posting end date is required" })
+  searchEndDate: any;
+  @IsNotEmpty({ message: "More job information is required" })
+  information: string;
+
 }

@@ -1,5 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { EmpJobsPrismaHelperService } from "@organization/org-prisma-helper-services/recruitment/emp-jobs-prisma-helper.service";
+import {
+  EmpJobsPrismaHelperService
+} from "@organization/org-prisma-helper-services/recruitment/emp-jobs-prisma-helper.service";
 import { CreateNewHireDto } from "@core/dto/global/Jobs.dto";
 import { UtilService } from "@core/utils/util.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
@@ -14,8 +16,8 @@ export class EmpJobsService {
               private readonly utilService: UtilService,
               private readonly orgHelperService: OrganizationPrismaHelperService,
               private readonly employeeService: EmployeePrismaHelperService
-  ) {
-  }
+  ) {}
+
 
   async makeANewHireRequest(dto: CreateNewHireDto, orgID: string, email: string) {
     await this.orgHelperService.findOrgByID(orgID);
@@ -24,9 +26,16 @@ export class EmpJobsService {
     return await this.jobsHelperService.makeRequest(dto, employee, orgID);
   }
 
- async allMyHireRequests(searchRequest: SearchRequest, orgID: string, email) {
+
+  async allMyHireRequests(searchRequest: SearchRequest, orgID: string, email) {
     await this.orgHelperService.findOrgByID(orgID);
-   const employee = await this.employeeService.findEmpByEmail(email);
-   return await  this.jobsHelperService.allMyHireRequest(searchRequest, orgID, employee)
+    const employee = await this.employeeService.findEmpByEmail(email);
+    return await this.jobsHelperService.allMyHireRequest(searchRequest, orgID, employee);
+  }
+
+
+  async allOrganizationRequests(orgID: string) {
+    await this.orgHelperService.findOrgByID(orgID);
+    return await this.jobsHelperService.allOrgHireRequests(orgID)
   }
 }

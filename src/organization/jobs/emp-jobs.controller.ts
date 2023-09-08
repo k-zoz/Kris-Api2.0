@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UseGuards, ValidationPipe } from "@nestjs/common";
 import { BaseController } from "@core/utils/base-controller.controller";
 import { EmpJobsService } from "@organization/jobs/emp-jobs.service";
 import { AuthGuard } from "@nestjs/passport";
@@ -36,6 +36,12 @@ export class EmpJobsController extends BaseController {
                       @Body() searchRequest: SearchRequest
   ) {
     return this.response({ payload: await this.jobsService.allMyHireRequests(searchRequest, orgID, payload.email) });
+  }
+
+  @Get("/:orgID/allHireRequests")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async getAllOrganizationHireRequests(@Param("orgID") orgID: string) {
+    return this.response({ payload: await this.jobsService.allOrganizationRequests(orgID) });
   }
 
 }

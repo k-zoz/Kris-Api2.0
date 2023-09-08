@@ -26,6 +26,21 @@ export class OrganizationPrismaHelperService {
     this.resend = new Resend(resendKey);
   }
 
+  async findOrgByKrisId(krisID:string){
+    const found = await this.prismaService.organization.findFirst({
+      where:{
+        orgKrisId:krisID
+      }
+    })
+
+    if (!found) {
+      const msg = `Organization with kris id ${krisID} does not exist`;
+      this.logger.error(msg);
+      throw new AppNotFoundException(msg);
+    }
+    return found;
+  }
+
   async findOrgByID(id) {
     const found = await this.prismaService.organization.findFirst({
       where: { id },

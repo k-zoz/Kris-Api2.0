@@ -203,6 +203,9 @@ export class EmployeePrismaHelperService {
         "modifiedBy", "createdDate", "modifiedDate", "departmentId",
         "dateOfConfirmation", "dateOfJoining", "designation", "employment_type", "personalEmail", "personalPhoneNumber2", "workPhoneNumber",
         "payroll_PreviewId", "bonuses", "deduction", "gross_pay", "isEdit", "isSelected", "net_pay", "payGradeId", "payGroupId", "taxes",
+        "dateOfBirth", "gender", "maritalStatus", "address1", "address2", "country", "state", "city", "zipCode", "accountName", "bankName", "accountNmumber", "pensionManager",
+        "pensionNumber", "nok_address", "nok_legalName", "nok_relationship", "nok_occupation", "nok_phoneNumber", "nok_email", "gua_phoneNumber", "gua_legalName", "gua_address",
+        "gua_occupation", "gua_email", "gua_relationship",
         "teamId"])
     });
   }

@@ -89,6 +89,7 @@ model Organization {
   createdDate         DateTime              @default(now()) @db.Date
   modifiedDate        DateTime              @updatedAt @db.Date
   OrganizationPayroll OrganizationPayroll[]
+  JobOpening          JobOpening[]
 
   @@unique([orgName, orgWebsite, orgEmail, orgNumber, orgRCnumber])
 }
@@ -291,6 +292,7 @@ model Employee {
   createdDate     DateTime          @default(now()) @db.Date
   modifiedDate    DateTime          @updatedAt
   EmployeePayroll EmployeePayroll[]
+  JobOpening      JobOpening[]
 
   @@unique([email, idNumber, phoneNumber, personalEmail])
 }
@@ -696,4 +698,23 @@ model HireRequest {
   Organization       Organization?       @relation(fields: [organizationID], references: [id])
   createdDate        DateTime            @default(now()) @db.Date
   createdBy          String?
+}
+
+model JobOpening {
+  id             String        @id @default(uuid())
+  title          String
+  type           String
+  yoe            String
+  qualification  String
+  skill_set      String
+  salary_range   String?
+  location       String
+  searchEndDate  DateTime      @db.Date
+  information    String
+  employeeId     String?
+  employee       Employee?     @relation(fields: [employeeId], references: [id])
+  organizationID String?
+  Organization   Organization? @relation(fields: [organizationID], references: [id])
+  createdDate    DateTime      @default(now()) @db.Date
+  createdBy      String?
 }

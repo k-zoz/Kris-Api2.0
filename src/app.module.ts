@@ -17,10 +17,6 @@ import { EmployeeOrganizationModule } from "@organization/employeeOrganization.m
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { AlertModule } from "./alert/alert.module";
-import { MailerModule } from "@nestjs-modules/mailer";
-import mailConfig from "@config/mail.config";
-import { join } from "path";
-import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 
 
 @Module({
@@ -83,7 +79,9 @@ export class AppModule {
     consumer.apply(CurrentUserMiddleware)
       .exclude(
         { path: "auth/login", method: RequestMethod.POST },
-        { path: "employee/login", method: RequestMethod.POST }
+        { path: "employee/login", method: RequestMethod.POST },
+        { path: "organization/jobOpening/:orgID/allJobs", method: RequestMethod.GET },
+        { path: "organization/jobOpening/:orgID/allJobs/:orgKrisID", method: RequestMethod.GET }
       )
       .forRoutes({ path: "*", method: RequestMethod.ALL });
   }
