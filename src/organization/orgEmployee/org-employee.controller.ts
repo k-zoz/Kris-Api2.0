@@ -10,9 +10,9 @@ import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import {
   CreateEmployeeDto,
   EditEmployeeDto,
-  EmployeeOnboardRequest, EmployeeUpdateRequest,
+  EmployeeOnboardRequest, EmployeeUpdateRequest, EmployeeWork,
 
-  RoleToEmployee
+  RoleToEmployee, UpdateEmployeeWork
 } from "@core/dto/global/employee.dto";
 import { EmployeeService } from "@back-office/employee/employee.service";
 import { AuthMsg } from "@core/const/security-msg-const";
@@ -69,6 +69,17 @@ export class OrgEmployeeController extends BaseController {
       message: "Created Successfully",
       payload: await this.orgEmployeeService.onboardEmpToMyOrg(request, orgID, payload.email)
     });
+  }
+
+
+  @Post("/:orgID/updateWorkInfo/:empID")
+  @EmpPermission(EmployeeRoleEnum.MANAGEMENT, EmployeeRoleEnum.HUMAN_RESOURCE)
+  async updateEmployeeWorkInformation(@GetUser() payload: AuthPayload,
+                                      @Param("orgID") orgID: string,
+                                      @Param("empID") empID: string,
+                                      @Body(ValidationPipe) dto: UpdateEmployeeWork
+  ) {
+    return this.response({ payload: await this.orgEmployeeService.updateEmployeeWorkInfo(dto, orgID, empID, payload.email) });
   }
 
   @Post("/:orgID/roles/:empID/changeRole")
@@ -200,9 +211,9 @@ export class OrgEmployeeController extends BaseController {
 
   @Post("updateMyProfile")
   async updateMyProfile(@GetUser() payload: AuthPayload,
-                        @Body()dto:EmployeeUpdateRequest
-                        ){
-    return this.response({payload: await this.orgEmployeeService.updateMyProfile(dto, payload)})
+                        @Body() dto: EmployeeUpdateRequest
+  ) {
+    return this.response({ payload: await this.orgEmployeeService.updateMyProfile(dto, payload) });
   }
 
 }

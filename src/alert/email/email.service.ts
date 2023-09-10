@@ -102,19 +102,17 @@ export class EmailService {
 
 
   async sendLeaveApprovalEmail(event: LeaveApprovalEvent) {
-    const relativePath = "../../templates/passwordChangeSuccessful.hbs";
+    const relativePath = "../../templates/leaveApproval.hbs";
     const absolutePath = path.join(__dirname, relativePath);
     const sourceFile = fs.readFileSync(absolutePath, "utf-8");
     const template = Handlebars.compile(sourceFile);
     const data = {
       firstname: event.employeeName,
-      leaveStartDate:event.leaveStartDate,
-      leaveEndDate:event.leaveEndDate
+      leaveStartDate: event.leaveStartDate,
+      leaveEndDate: event.leaveEndDate
     };
     return template(data);
   }
-
-
 
 
 }

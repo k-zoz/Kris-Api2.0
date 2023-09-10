@@ -3,7 +3,13 @@ import { PrismaService } from "@prisma/prisma.service";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { AppConst } from "@core/const/app.const";
 import { prismaExclude } from "@prisma/prisma-utils";
-import { RoleToEmployee, Employee, EmployeeOnboardRequest } from "@core/dto/global/employee.dto";
+import {
+  RoleToEmployee,
+  Employee,
+  EmployeeOnboardRequest,
+  EmployeeWork,
+  UpdateEmployeeWork
+} from "@core/dto/global/employee.dto";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { LocaleService } from "@locale/locale.service";
 import * as argon from "argon2";
@@ -267,6 +273,7 @@ export class EmployeePrismaHelperService {
           role: true
         }
       });
+
       const updatedRole = employee.role.filter(role => role !== request.employee_role);
       const [updatedEmployee] = await this.prismaService.$transaction([
         this.prismaService.employee.update({
@@ -290,6 +297,13 @@ export class EmployeePrismaHelperService {
     const saved = await this.findEmpById(employee.id);
     if (saved.role.length >= 2) {
       throw new AppConflictException(AuthMsg.CANNOT_ASSIGN_MORE_THAN_TWO_ROLES_TO_ONE_EMPLOYEE);
+    }
+  }
+
+  async checkMaximumNumOfLessRoles(employee: Employee) {
+    const saved = await this.findEmpById(employee.id);
+    if (saved.role.length >= 1) {
+      throw new AppConflictException("Employee must have one role");
     }
   }
 
@@ -434,6 +448,74 @@ export class EmployeePrismaHelperService {
     } catch (e) {
       this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: AuthMsg.ERROR_CREATING_EMPLOYEE });
+    }
+  }
+
+  async updateEmployeeWorkDetails(dto: UpdateEmployeeWork, empID, orgName, client, modifierMail: string) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        if (!dto.employeeBranch) {
+        }
+        const branch = await tx.org_Branch.findFirst({
+          where: {
+            organizationId: orgName.id,
+            name: dto.employeeBranch
+          }
+        });
+
+        if (!dto.department) {
+        }
+        const department = await tx.department.findFirst({
+          where: {
+            organizationId: orgName.id,
+            org_BranchId: branch.id,
+            name: dto.department
+          }
+        });
+
+        if (!dto.empTeam) {
+        }
+        const team = await tx.team.findFirst({
+          where: {
+            organizationId: orgName.id,
+            departmentId: department.id,
+            name: dto.empTeam
+          }
+        });
+
+        if (!dto.employeeClient) {
+        }
+        const org_client = await tx.org_Clientele.findFirst({
+          where: {
+            organizationId: orgName.id,
+            name: dto.employeeClient
+          }
+        });
+
+
+        const saved = await tx.employee.update({
+          where: {
+            id: empID
+          }, data: {
+            idNumber: dto.idNumber,
+            email: dto.email,
+            workPhoneNumber: dto.workPhoneNumber,
+            designation: dto.designation,
+            employment_type: dto.employmentType,
+            status: dto.employeeStatus,
+            dateOfJoining: dto.dateOfJoining,
+            dateOfConfirmation: dto.dateOfConfirmation,
+            org_BranchId: branch.id,
+            departmentId: department.id,
+            teamId: team.id,
+            org_ClienteleId: org_client.id
+          }
+        });
+      });
+      return "Profile updated successfully";
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error updating employee profile");
     }
   }
 }

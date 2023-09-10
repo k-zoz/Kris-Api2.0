@@ -71,6 +71,7 @@ export class EmployeeService {
     await this.orgHelperService.findOrgByID(orgID);
     const employee = await this.employeeHelperService.findEmpById(empID);
     await this.utilService.compareEmails(modifierEmail, employee.email);
+    await this.employeeHelperService.checkMaximumNumOfLessRoles(employee)
     request.modifiedBy = modifierEmail;
     return this.employeeHelperService.removeRole(request, empID);
   }

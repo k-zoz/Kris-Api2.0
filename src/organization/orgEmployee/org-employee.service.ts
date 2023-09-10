@@ -10,7 +10,12 @@ import {
 import {
   OrgDeptPrismaHelperService
 } from "@organization/org-prisma-helper-services/organization/org-dept-prisma-helper.service";
-import { CreateEmployeeDto, EmployeeOnboardRequest, EmployeeUpdateRequest } from "@core/dto/global/employee.dto";
+import {
+  CreateEmployeeDto,
+  EmployeeOnboardRequest,
+  EmployeeUpdateRequest,
+  EmployeeWork, UpdateEmployeeWork
+} from "@core/dto/global/employee.dto";
 import * as argon from "argon2";
 import { LeaveService } from "@organization/leave/leave.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
@@ -86,6 +91,23 @@ export class OrgEmployeeService {
     // await this.leaveService.onboardLeaveForNewEmployee(orgID, employee);
   }
 
+  async updateEmployeeWorkInfo(dto: UpdateEmployeeWork, orgID: string, empID: string, modifierMail: string) {
+    const orgName = await this.orgHelperService.findOrgByID(orgID);
+    await this.employeeService.findEmpById(empID);
+    dto.dateOfConfirmation = this.utilService.convertDateAgain(dto.dateOfConfirmation);
+    dto.dateOfJoining = this.utilService.convertDateAgain(dto.dateOfJoining);
+    dto.employeeBranch = this.utilService.toUpperCase(dto.employeeBranch);
+    dto.department = this.utilService.toUpperCase(dto.department);
+    dto.empTeam = this.utilService.toUpperCase(dto.empTeam);
+    dto.employeeClient = this.utilService.toUpperCase(dto.employeeClient);
+    await this.orgBranchHelperService.findBranchByName(dto.employeeBranch, orgID);
+    const department = await this.orgDepartmentHelperService.findDeptByNameAlone(dto.department, orgID);
+    await this.orgTeamHelperService.findTeamByName(department.id, orgID, dto.empTeam);
+    const client = await this.orgClientHelperService.findClientByName(dto.employeeClient, orgID);
+    return await this.employeeHelperService.updateEmployeeWorkDetails(dto, empID, orgName, client, modifierMail);
+
+  }
+
 
   async addEmployeeToATeam(orgID, teamID, empID, deptID) {
     await this.employeeService.findEmpById(empID);
@@ -159,7 +181,9 @@ export class OrgEmployeeService {
 
   async updateMyProfile(dto: EmployeeUpdateRequest, payload: AuthPayload) {
     const employee = await this.employeeService.findEmpByEmail(payload.email);
-    dto.personal.dateOfBirth = this.utilService.convertDateAgain(dto.personal.dateOfBirth)
+    dto.personal.dateOfBirth = this.utilService.convertDateAgain(dto.personal.dateOfBirth);
     return await this.orgEmployeeHelperService.updateMyProfile(dto, employee);
   }
+
+
 }

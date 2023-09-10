@@ -79,7 +79,6 @@ export class EmployeeWork {
   @IsOptional()
   @IsString()
   employeeClient: string;
-  @IsNotEmpty()
   @IsString()
   @IsValidEmployeeRole()
   employeeKrisRole: any;
@@ -90,6 +89,44 @@ export class EmployeeWork {
   @IsOptional()
   @IsString()
   employmentType: string;
+  idNumber:string
+  @IsEmail()
+  email:string
+  workPhoneNumber:string
+}
+
+
+export class UpdateEmployeeWork {
+  @IsOptional()
+  dateOfConfirmation: any;
+  @IsNotEmpty()
+  dateOfJoining: any;
+  @IsNotEmpty()
+  @IsString()
+  department: string;
+  @IsOptional()
+  @IsString()
+  designation: string;
+  @IsOptional()
+  @IsString()
+  empTeam: string;
+  @IsNotEmpty()
+  @IsString()
+  employeeBranch: string;
+  @IsOptional()
+  @IsString()
+  employeeClient: string;
+  @IsNotEmpty()
+  @IsString()
+  @IsValidEmploymentStatus()
+  employeeStatus: any;
+  @IsOptional()
+  @IsString()
+  employmentType: string;
+  idNumber:string
+  @IsEmail()
+  email:string
+  workPhoneNumber:string
 }
 
 

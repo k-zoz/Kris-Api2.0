@@ -206,9 +206,9 @@ model Employee {
   middleName           String?
   krisID               String?   @unique
   idNumber             String    @unique
-  phoneNumber          String    @unique
+  phoneNumber          String
   refreshToken         String?
-  personalEmail        String?   @unique
+  personalEmail        String?
   workPhoneNumber      String?
   personalPhoneNumber2 String?
   designation          String?
@@ -295,7 +295,7 @@ model Employee {
   EmployeePayroll EmployeePayroll[]
   JobOpening      JobOpening[]
 
-  @@unique([email, idNumber, phoneNumber, personalEmail])
+  @@unique([email, idNumber])
 }
 
 model OrganizationPayroll {

@@ -32,8 +32,6 @@ export class OrgEmpPrismaHelperService {
   async validateRequest(dto) {
     await this.checkEmpPropertyExists("email", dto.basic.email, "Email address");
     await this.checkEmpPropertyExists("idNumber", dto.basic.employeeID, "ID Number");
-    await this.checkEmpPropertyExists("phoneNumber", dto.contact.personalPhoneNumber, "Phone Number");
-    await this.checkEmpPropertyExists("personalEmail", dto.contact.personalEmail, "Personal Email");
   }
 
   async checkEmpPropertyExists(propertyName, propertyValue, propertyDescription) {
