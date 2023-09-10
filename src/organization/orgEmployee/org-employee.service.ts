@@ -86,9 +86,10 @@ export class OrgEmployeeService {
     const client = await this.orgClientHelperService.findClientByName(request.work.employeeClient, orgID);
     await this.orgTeamHelperService.findTeamByName(department.id, orgID, request.work.empTeam);
     await this.utilService.checkIfRoleIsManagement(request.work.employeeKrisRole);
-    return await this.employeeHelperService.createNewEmployeeAndSendWelcomeMail(request, newPassword, creatorMail, orgName, client);
+    const employee = await this.employeeHelperService.createNewEmployeeAndSendWelcomeMail(request, newPassword, creatorMail, orgName, client);
     // //TODO leave, onboarding, appraisals for new employee
-    // await this.leaveService.onboardLeaveForNewEmployee(orgID, employee);
+    await this.leaveService.onboardLeaveForNewEmployee(orgID, employee);
+
   }
 
   async updateEmployeeWorkInfo(dto: UpdateEmployeeWork, orgID: string, empID: string, modifierMail: string) {

@@ -33,3 +33,8 @@ export class QuestionsDto2 extends BaseDto {
   @IsNotEmpty()
   questions: { text: string; response_type: any; options?: { text: string; score: number; }[];}[];
 }
+
+export class AppraisalResponseDto extends BaseDto {
+  appraiserComment: string
+  rating:any
+}

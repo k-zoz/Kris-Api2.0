@@ -1,8 +1,14 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
-import { CreateAppraisalDto, CreateSectionsForAppraisal, QuestionsDto } from "@core/dto/global/appraisal";
+import {
+  AppraisalResponseDto,
+  CreateAppraisalDto,
+  CreateSectionsForAppraisal,
+  QuestionsDto
+} from "@core/dto/global/appraisal";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { Appraisal } from "@prisma/client";
+import { AuthMsg } from "@core/const/security-msg-const";
 
 @Injectable()
 export class OrgAppraisalPrismaHelperService {
@@ -175,6 +181,8 @@ export class OrgAppraisalPrismaHelperService {
       return await this.prismaService.appraisal.findMany({
         where: {
           organizationId: orgID
+        }, orderBy: {
+          createdBy: "desc"
         }
       });
 
@@ -268,7 +276,6 @@ export class OrgAppraisalPrismaHelperService {
           )
         );
       });
-
       return "sent successfully";
     } catch (e) {
       this.logger.error(e);
@@ -276,14 +283,22 @@ export class OrgAppraisalPrismaHelperService {
     }
   }
 
-  async getMyAppraisal(employee) {
+  async getAllMyAppraisals(employee) {
     try {
       return await this.prismaService.employee_Appraisal.findMany({
         where: {
           employeeId: employee.id
         },
-        include:{
-          appraisal:true
+        include: {
+          appraisal: {
+            include: {
+              section: {
+                include: {
+                  question: true
+                }
+              }
+            }
+          }
         }
       });
 
@@ -295,4 +310,59 @@ export class OrgAppraisalPrismaHelperService {
   }
 
 
+  async findMyAppraisalById(myAppraisalID: string, empID: any) {
+    const found = await this.prismaService.employee_Appraisal.findUnique({
+      where: {
+        id: myAppraisalID
+      }
+    });
+    if (!found) {
+      throw new AppNotFoundException(`Your appraisal with id ${myAppraisalID} does not exist`);
+    }
+    return found;
+  }
+
+  async findMyAppraisalAndSections(myAppraisalID: string, empID: any) {
+    try {
+      return await this.prismaService.employee_Appraisal.findUnique({
+        where: {
+          id: myAppraisalID
+        },
+        include: {
+          appraisal: {
+            include: {
+              section: {
+                include: {
+                  question: true
+                }
+              }
+            }
+          }
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException(e);
+    }
+
+  }
+
+  async answerQuestionInMyAppraisal(dto: AppraisalResponseDto, myAppraisalID: string, sectionID: string, questionID: string, employee) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        await tx.appraisal_Question_Response.create({
+          data: {
+            score: dto.rating,
+            comment: dto.appraiserComment,
+            questionID: questionID,
+            sectionID: sectionID,
+            employeeAppraisalId: myAppraisalID
+          }
+        });
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException(e);
+    }
+  }
 }

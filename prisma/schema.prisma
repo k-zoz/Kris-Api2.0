@@ -513,10 +513,11 @@ model Appraisal_Section {
   Appraisal   Appraisal?           @relation(fields: [appraisalId], references: [id])
   appraisalId String?
 
-  createdBy    String?
-  modifiedBy   String?
-  createdDate  DateTime @default(now()) @db.Date
-  modifiedDate DateTime @updatedAt
+  createdBy                   String?
+  modifiedBy                  String?
+  createdDate                 DateTime                      @default(now()) @db.Date
+  modifiedDate                DateTime                      @updatedAt
+  Appraisal_Question_Response Appraisal_Question_Response[]
 }
 
 model Appraisal_Question {
@@ -552,27 +553,35 @@ model Appraisal_Question_Options {
 }
 
 model Appraisal_Question_Response {
-  id    String  @id @default(uuid())
-  text  String?
-  score Int?
+  id      String  @id @default(uuid())
+  text    String?
+  score   Int?
+  comment String?
 
   option            Appraisal_Question_Options? @relation(fields: [question_optionID], references: [id])
   question_optionID String?
 
-  question     Appraisal_Question? @relation(fields: [questionID], references: [id])
-  questionID   String?
-  createdBy    String?
-  modifiedBy   String?
-  createdDate  DateTime            @default(now()) @db.Date
-  modifiedDate DateTime            @updatedAt
+  sectionID         String?
+  appraisal_section Appraisal_Section? @relation(fields: [sectionID], references: [id])
+
+  question   Appraisal_Question? @relation(fields: [questionID], references: [id])
+  questionID String?
+
+  employeeAppraisal   Employee_Appraisal? @relation(fields: [employeeAppraisalId], references: [id])
+  employeeAppraisalId String?
+  createdBy           String?
+  modifiedBy          String?
+  createdDate         DateTime            @default(now()) @db.Date
+  modifiedDate        DateTime            @updatedAt
 }
 
 model Employee_Appraisal {
-  id          String    @id @default(uuid())
-  employeeId  String
-  employee    Employee  @relation(fields: [employeeId], references: [id])
-  appraisal   Appraisal @relation(fields: [appraisalId], references: [id])
-  appraisalId String
+  id                          String                        @id @default(uuid())
+  employeeId                  String
+  employee                    Employee                      @relation(fields: [employeeId], references: [id])
+  appraisal                   Appraisal                     @relation(fields: [appraisalId], references: [id])
+  appraisalId                 String
+  Appraisal_Question_Response Appraisal_Question_Response[]
 }
 
 enum Appraisal_ResponseType {

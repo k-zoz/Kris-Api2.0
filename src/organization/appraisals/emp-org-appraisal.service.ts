@@ -2,7 +2,12 @@ import { Injectable, Logger } from "@nestjs/common";
 import {
   OrgAppraisalPrismaHelperService
 } from "@organization/org-prisma-helper-services/organization/org-appraisal-prisma-helper.service";
-import { CreateAppraisalDto, CreateSectionsForAppraisal, QuestionsDto } from "@core/dto/global/appraisal";
+import {
+  AppraisalResponseDto,
+  CreateAppraisalDto,
+  CreateSectionsForAppraisal,
+  QuestionsDto
+} from "@core/dto/global/appraisal";
 import { UtilService } from "@core/utils/util.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
 import { Appraisal } from "@prisma/client";
@@ -23,7 +28,6 @@ export class EmpOrgAppraisalService {
     await this.orgHelperService.findOrgByID(orgID);
     dto.startDate = this.utilService.convertDateAgain(dto.startDate);
     dto.endDate = this.utilService.convertDateAgain(dto.endDate);
-    // console.log(dto);
     return await this.empAppraisalHelperService.createOrganizationAppraisal(dto, orgID, email);
   }
 
@@ -81,7 +85,7 @@ export class EmpOrgAppraisalService {
     return await this.empAppraisalHelperService.removeAppraisal(orgID, appraisalID);
   }
 
-  async sendToAllEMployees(dto: Appraisal, orgID: string, appraisalID: string) {
+  async sendToAllEmployees(dto: Appraisal, orgID: string, appraisalID: string) {
     await this.orgHelperService.findOrgByID(orgID);
     await this.empAppraisalHelperService.findAppraisalByID(appraisalID, orgID);
     return await this.empAppraisalHelperService.sendAppraisalToAllStaff(dto, appraisalID, orgID);
@@ -89,7 +93,20 @@ export class EmpOrgAppraisalService {
 
   async myAppraisal(email: string) {
     const employee = await this.employeeHelperService.findEmpByEmail(email);
-    return await this.empAppraisalHelperService.getMyAppraisal(employee);
+    return await this.empAppraisalHelperService.getAllMyAppraisals(employee);
 
+  }
+
+  async allMyAppraisal(orgID: string, myAppraisalID: string, email: string) {
+    await this.orgHelperService.findOrgByID(orgID);
+    const employee = await this.employeeHelperService.findEmpByEmail(email);
+    await this.empAppraisalHelperService.findMyAppraisalById(myAppraisalID, employee.id);
+    return await this.empAppraisalHelperService.findMyAppraisalAndSections(myAppraisalID, employee.id);
+  }
+
+  async answerAppraisal(dto: AppraisalResponseDto, myAppraisalID: string, sectionID: string, questionID: string, email: string) {
+    const employee = await this.employeeHelperService.findEmpByEmail(email);
+    await this.empAppraisalHelperService.findMyAppraisalById(myAppraisalID, employee.id);
+    return await this.empAppraisalHelperService.answerQuestionInMyAppraisal(dto, myAppraisalID, sectionID, questionID, employee);
   }
 }

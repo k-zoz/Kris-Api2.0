@@ -20,7 +20,6 @@ import { Permission } from "@core/decorator/roles.decorator";
 import { UserRoleEnum } from "@core/enum/user-role-enum";
 import { SearchRequest } from "@core/model/search-request";
 import { ConfirmInputPasswordDto } from "@core/dto/auth/user.dto";
-import { Employee } from "@prisma/client";
 
 @Controller("organization/employee")
 @UseGuards(AuthGuard())

@@ -224,7 +224,6 @@ export class LeavePrismaHelperService {
         await tx.employeeLeave.createMany({
           data: employeeLeaveDate
         });
-
       });
     } catch (e) {
       this.logger.error(e);
