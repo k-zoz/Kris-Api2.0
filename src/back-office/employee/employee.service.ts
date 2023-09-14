@@ -24,15 +24,15 @@ export class EmployeeService {
   }
 
 
-  async createOrgMgtEmployee(orgEmp: CreateMgtEmpDto, orgID, creatorMail) {
-    await this.employeeHelperService.validateRequest(orgEmp);
+  async createOrgMgtEmployee(dto: CreateMgtEmpDto, orgID, creatorMail) {
+    await this.employeeHelperService.validateRequest(dto);
     const org = await this.orgHelperService.findOrgByID(orgID);
-    orgEmp.empFirstName = this.utilService.toUpperCase(orgEmp.empFirstName);
-    orgEmp.empLastName = this.utilService.toUpperCase(orgEmp.empLastName);
-    orgEmp.createdBy = creatorMail;
-    orgEmp.empPassword = this.utilService.generateRandomPassword();
-    orgEmp.orgKrisId =  this.utilService.generateUUID(orgEmp.empFirstName)
-    return await this.employeeHelperService.createEmployeeAndSendWelcomeEmail(orgEmp, orgID, org.orgName);
+    dto.empFirstName = this.utilService.toUpperCase(dto.empFirstName);
+    dto.empLastName = this.utilService.toUpperCase(dto.empLastName);
+    dto.createdBy = creatorMail;
+    dto.empPassword = this.utilService.generateRandomPassword();
+    dto.orgKrisId = this.utilService.generateUUID(dto.empFirstName);
+    return await this.employeeHelperService.createEmployeeAndSendWelcomeEmail(dto, orgID, org.orgName);
 
   }
 
@@ -50,6 +50,7 @@ export class EmployeeService {
     await this.orgHelperService.findOrgByID(orgID);
     const employee = await this.employeeHelperService.findEmpById(empID);
     await this.utilService.compareEmails(modifierEmail, employee.email);
+    await this.employeeHelperService.checkIfEmployeeAlreadyHaveRole(request.employee_role, employee);
     await this.utilService.checkIfRoleIsManagement(request.employee_role);
     await this.employeeHelperService.checkMaximumNumOfRoles(employee);
     request.modifiedBy = modifierEmail;
@@ -71,7 +72,7 @@ export class EmployeeService {
     await this.orgHelperService.findOrgByID(orgID);
     const employee = await this.employeeHelperService.findEmpById(empID);
     await this.utilService.compareEmails(modifierEmail, employee.email);
-    await this.employeeHelperService.checkMaximumNumOfLessRoles(employee)
+    await this.employeeHelperService.checkMinimumNumOfRoles(employee);
     request.modifiedBy = modifierEmail;
     return this.employeeHelperService.removeRole(request, empID);
   }
@@ -91,11 +92,11 @@ export class EmployeeService {
   }
 
   async findOneEmployee(orgID: string, empID: string) {
-    await  this.orgHelperService.findOrgByID(orgID)
-    return await this.employeeHelperService.findOneEmpAndExclude(empID)
+    await this.orgHelperService.findOrgByID(orgID);
+    return await this.employeeHelperService.findOneEmpAndExclude(empID);
   }
 
   empStatus() {
-      return EnumValues.getNamesAndValues(BoStatusEnum).map(value => CodeValue.of(value.name, value.value as string));
+    return EnumValues.getNamesAndValues(BoStatusEnum).map(value => CodeValue.of(value.name, value.value as string));
   }
 }

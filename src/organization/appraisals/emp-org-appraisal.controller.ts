@@ -110,9 +110,10 @@ export class EmpOrgAppraisalController extends BaseController {
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async shareAppraisalToAllEmployees(@Param("orgID") orgID: string,
                                      @Param("appraisalID") appraisalID: string,
-                                     @Body(ValidationPipe) dto: Appraisal
+                                     @Body(ValidationPipe) dto: Appraisal,
+                                     @GetUser() payload: AuthPayload
   ) {
-    return this.response({ payload: await this.appraisalService.sendToAllEmployees(dto, orgID, appraisalID) });
+    return this.response({ payload: await this.appraisalService.sendToAllEmployees(dto, orgID, appraisalID, payload.email) });
   }
 
   @Get("/myAppraisal")
@@ -127,9 +128,25 @@ export class EmpOrgAppraisalController extends BaseController {
                        @Param("sectionID") sectionID: string,
                        @Param("questionID") questionID: string,
                        @Body(ValidationPipe) dto: AppraisalResponseDto,
-                       @GetUser() payload: AuthPayload,
+                       @GetUser() payload: AuthPayload
   ) {
-return this.response({payload: await this.appraisalService.answerAppraisal(dto, myAppraisalID, sectionID, questionID, payload.email)})
+    return this.response({ payload: await this.appraisalService.answerAppraisal(dto, myAppraisalID, sectionID, questionID, payload.email) });
+  }
+
+  @Post("/:sectionID/commentsToMyAppraisal/:myAppraisalID")
+  async addCommentsToAppraisal(@Param("myAppraisalID") myAppraisalID: string,
+                               @Param("sectionID") sectionID: string,
+                               @Body(ValidationPipe) dto: AppraisalResponseDto,
+                               @GetUser() payload: AuthPayload
+  ) {
+    return this.response({ payload: await this.appraisalService.commentAppraisal(dto, myAppraisalID, sectionID, payload.email) });
+  }
+
+  @Get("/complete/:myAppraisalID")
+  async completeAppraisal(@Param("myAppraisalID") myAppraisalID: string,
+                          @GetUser() payload: AuthPayload
+  ) {
+    return this.response({ payload: await this.appraisalService.completeAppraisal(myAppraisalID, payload.email) });
   }
 
 
@@ -141,6 +158,14 @@ return this.response({payload: await this.appraisalService.answerAppraisal(dto, 
     return this.response({ payload: await this.appraisalService.allMyAppraisal(orgID, myAppraisalID, payload.email) });
   }
 
-  //TODO review deleting appraisal
-  //TODO review getting all employees appraisal
+  @Get(":appraisalID/responses/:myAppraisalID")
+  async myAppraisalResponses(@Param("myAppraisalID") myAppraisalID: string,
+                             @Param("appraisalID") appraisalID: string,
+                             @GetUser() payload: AuthPayload
+  ) {
+    return this.response({ payload: await this.appraisalService.allMyAppraisalResponses(myAppraisalID,appraisalID, payload.email) });
+  }
+
+
+  //TODO dont answer same question and add comment twice
 }

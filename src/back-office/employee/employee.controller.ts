@@ -4,18 +4,12 @@ import { EmployeeService } from "@back-office/employee/employee.service";
 import { AuthGuard } from "@nestjs/passport";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { EmployeeRoleGuard } from "@core/guard/employee-role.guard";
-import { EmpPermission } from "@core/decorator/employee-role.decorator";
-import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
-import {
-  CreateEmployeeDto, CreateMgtEmpDto, EditEmployeeDto,
-  RoleToEmployee
-} from "@core/dto/global/employee.dto";
+import { CreateMgtEmpDto, RoleToEmployee } from "@core/dto/global/employee.dto";
 import { SearchRequest } from "@core/model/search-request";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { Permission } from "@core/decorator/roles.decorator";
 import { UserRoleEnum } from "@core/enum/user-role-enum";
-import { OrganizationService } from "@back-office/orgnization/organization.service";
 
 
 @Controller("backoffice/employee")
@@ -28,20 +22,20 @@ export class EmployeeController extends BaseController {
   }
 
   @Get("roles")
-  allEmpRoles(){
-    return this.response({payload: this.employeeService.roles()})
+  allEmpRoles() {
+    return this.response({ payload: this.employeeService.roles() });
   }
 
   @Post("onboard/:orgID/employee")
   @Permission(UserRoleEnum.SUPPORT)
   async onboardOrgMgtEmployee(@GetUser() payload: AuthPayload,
                               @Param("orgID") orgID: string,
-                              @Body(ValidationPipe) request: CreateMgtEmpDto
+                              @Body(ValidationPipe) dto: CreateMgtEmpDto
   ) {
     return this.response({
       message: "Created successfully",
       status: HttpStatus.CREATED,
-      payload: await this.employeeService.createOrgMgtEmployee(request, orgID, payload.email)
+      payload: await this.employeeService.createOrgMgtEmployee(dto, orgID, payload.email)
     });
   }
 
@@ -95,8 +89,6 @@ export class EmployeeController extends BaseController {
       payload: await this.employeeService.findAllEmployees(searchRequest, orgID)
     });
   };
-
-
 
 
   //Testing

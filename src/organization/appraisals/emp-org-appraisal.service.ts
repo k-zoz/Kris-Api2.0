@@ -85,10 +85,11 @@ export class EmpOrgAppraisalService {
     return await this.empAppraisalHelperService.removeAppraisal(orgID, appraisalID);
   }
 
-  async sendToAllEmployees(dto: Appraisal, orgID: string, appraisalID: string) {
+  async sendToAllEmployees(dto: Appraisal, orgID: string, appraisalID: string, creatorEmail: string) {
     await this.orgHelperService.findOrgByID(orgID);
     await this.empAppraisalHelperService.findAppraisalByID(appraisalID, orgID);
-    return await this.empAppraisalHelperService.sendAppraisalToAllStaff(dto, appraisalID, orgID);
+    await this.empAppraisalHelperService.checkIfEmployeesHaveAppraisal(appraisalID, orgID);
+    return await this.empAppraisalHelperService.sendAppraisalToAllStaff(dto, appraisalID, orgID, creatorEmail);
   }
 
   async myAppraisal(email: string) {
@@ -107,6 +108,28 @@ export class EmpOrgAppraisalService {
   async answerAppraisal(dto: AppraisalResponseDto, myAppraisalID: string, sectionID: string, questionID: string, email: string) {
     const employee = await this.employeeHelperService.findEmpByEmail(email);
     await this.empAppraisalHelperService.findMyAppraisalById(myAppraisalID, employee.id);
-    return await this.empAppraisalHelperService.answerQuestionInMyAppraisal(dto, myAppraisalID, sectionID, questionID, employee);
+    await this.empAppraisalHelperService.checkIfResponseHasAlreadyBeenGiven(myAppraisalID, sectionID, questionID);
+    return await this.empAppraisalHelperService.answerQuestionInMyAppraisal(dto, myAppraisalID, sectionID, questionID);
+  }
+
+  async commentAppraisal(dto: AppraisalResponseDto, myAppraisalID: string, sectionID: string, email: string) {
+    const employee = await this.employeeHelperService.findEmpByEmail(email);
+    await this.empAppraisalHelperService.findMyAppraisalById(myAppraisalID, employee.id);
+    dto.appraiserComment = JSON.stringify(dto.appraiserComment);
+    return await this.empAppraisalHelperService.addCommentsToMyAppraisal(dto, sectionID, myAppraisalID, employee);
+  }
+
+  async completeAppraisal(myAppraisalID: string, email: string) {
+    const employee = await this.employeeHelperService.findEmpByEmail(email);
+    await this.empAppraisalHelperService.findMyAppraisalById(myAppraisalID, employee.id);
+    return await this.empAppraisalHelperService.completeMyAppraisal(myAppraisalID, employee);
+
+  }
+
+  async allMyAppraisalResponses(myAppraisalID: string, appraisalID: string, email: string) {
+    const employee = await this.employeeHelperService.findEmpByEmail(email);
+    await this.empAppraisalHelperService.findAppraisalByID(appraisalID, employee.organizationId);
+    await this.empAppraisalHelperService.findMyAppraisalById(myAppraisalID, employee.id);
+    return await this.empAppraisalHelperService.myResponses(myAppraisalID, appraisalID);
   }
 }

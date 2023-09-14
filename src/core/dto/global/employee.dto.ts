@@ -170,7 +170,7 @@ export class CreateMgtEmpDto extends BaseDto {
   empLastName: string;
   @IsNotEmpty({ message: "Employee ID Number is required" })
   empIDNumber: string;
-  @IsNotEmpty({ message: "Employee Phone Number is required" })
+  @IsOptional()
   @MinLength(11, { message: "Digits must be 11" })
   empPhoneNumber: string;
   @IsNotEmpty({ message: "Employee role is required" })
@@ -178,7 +178,6 @@ export class CreateMgtEmpDto extends BaseDto {
   employee_role: any;
   empPassword: string;
   orgKrisId: string;
-
 }
 
 export class Employee {

@@ -206,7 +206,7 @@ model Employee {
   middleName           String?
   krisID               String?   @unique
   idNumber             String    @unique
-  phoneNumber          String
+  phoneNumber          String?
   refreshToken         String?
   personalEmail        String?
   workPhoneNumber      String?
@@ -582,6 +582,11 @@ model Employee_Appraisal {
   appraisal                   Appraisal                     @relation(fields: [appraisalId], references: [id])
   appraisalId                 String
   Appraisal_Question_Response Appraisal_Question_Response[]
+  status                      ApplicationStatus?
+  createdBy                   String?
+  modifiedBy                  String?
+  createdDate                 DateTime?                     @default(now()) @db.Date
+  modifiedDate                DateTime?                     @updatedAt
 }
 
 enum Appraisal_ResponseType {

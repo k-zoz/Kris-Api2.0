@@ -15,8 +15,9 @@ import { LocaleService } from "@locale/locale.service";
 import * as argon from "argon2";
 import { Resend } from "resend";
 import { ConfigService } from "@nestjs/config";
-import { EmailService } from "../../alert/email/email.service";
+import { EmailService } from "@alert/email/email.service";
 import { NewEmployeeEvent } from "@core/event/back-office-event";
+import { Employee_Role } from "@prisma/client";
 
 
 @Injectable()
@@ -111,7 +112,6 @@ export class EmployeePrismaHelperService {
   async validateRequest(dto) {
     await this.checkEmpPropertyExists("email", dto.empEmail, "Email address");
     await this.checkEmpPropertyExists("idNumber", dto.empIDNumber, "ID Number");
-    await this.checkEmpPropertyExists("phoneNumber", dto.empPhoneNumber, "Phone Number");
   }
 
   async checkEmpPropertyExists(propertyName, propertyValue, propertyDescription) {
@@ -153,20 +153,20 @@ export class EmployeePrismaHelperService {
   // }
 
 
-  async createEmployeeAndSendWelcomeEmail(orgEmp, orgID, orgName) {
+  async createEmployeeAndSendWelcomeEmail(dto, orgID, orgName) {
     try {
       await this.prismaService.$transaction(async (tx) => {
         const saved = await tx.employee.create({
           data: {
-            email: orgEmp.empEmail,
-            firstname: orgEmp.empFirstName,
-            password: await argon.hash(orgEmp.empPassword),
-            lastname: orgEmp.empLastName,
-            phoneNumber: orgEmp.empPhoneNumber,
-            idNumber: orgEmp.empIDNumber,
-            role: orgEmp.employee_role,
+            email: dto.empEmail,
+            firstname: dto.empFirstName,
+            password: await argon.hash(dto.empPassword),
+            lastname: dto.empLastName,
+            workPhoneNumber: dto.empPhoneNumber,
+            idNumber: dto.empIDNumber,
+            role: dto.employee_role,
             krisID: orgID.krisID,
-            createdBy: orgEmp.createdBy,
+            createdBy: dto.createdBy,
             Organization: {
               connect: {
                 id: orgID
@@ -177,7 +177,7 @@ export class EmployeePrismaHelperService {
         try {
           const html = await this.emailService.sendWelcomeEmployeeDetailMail({
             email: saved.email,
-            password: orgEmp.empPassword,
+            password: dto.empPassword,
             firstname: saved.firstname,
             organizationName: orgName
           } as NewEmployeeEvent);
@@ -190,13 +190,13 @@ export class EmployeePrismaHelperService {
           this.logger.log(`Employee ${saved.firstname} Saved. Welcome Email successfully sent`);
           return `Employee ${saved.firstname}  Welcome Email successfully sent`;
         } catch (e) {
-          this.logger.error(e, "Error sending email");
-          throw new AppException(e);
+          this.logger.error(e);
+          throw new AppException("Error sending email");
         }
       });
       return `Employee created successfully`;
     } catch (e) {
-      this.logger.error(AuthMsg.ERROR_CREATING_EMPLOYEE);
+      this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: AuthMsg.ERROR_CREATING_EMPLOYEE });
     }
   }
@@ -300,9 +300,16 @@ export class EmployeePrismaHelperService {
     }
   }
 
-  async checkMaximumNumOfLessRoles(employee: Employee) {
+  async checkIfEmployeeAlreadyHaveRole(newRole: Employee_Role, employee: Employee) {
     const saved = await this.findEmpById(employee.id);
-    if (saved.role.length >= 1) {
+    if (saved.role.includes(newRole)) {
+      throw new AppConflictException(`Employee already has ${newRole}`);
+    }
+  }
+
+  async checkMinimumNumOfRoles(employee: Employee) {
+    const saved = await this.findEmpById(employee.id);
+    if (saved.role.length === 1) {
       throw new AppConflictException("Employee must have one role");
     }
   }
@@ -511,7 +518,7 @@ export class EmployeePrismaHelperService {
             org_ClienteleId: org_client.id
           }
         });
-      });
+      }, { maxWait: 5000, timeout: 10000 });
       return "Profile updated successfully";
     } catch (e) {
       this.logger.error(e);

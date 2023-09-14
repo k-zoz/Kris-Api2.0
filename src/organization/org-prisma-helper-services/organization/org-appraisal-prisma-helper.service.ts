@@ -172,7 +172,7 @@ export class OrgAppraisalPrismaHelperService {
       });
     } catch (e) {
       this.logger.error(e);
-      throw new AppException("Error creating question for appraisal. Contact Administrator");
+      throw new AppException("Error creating question for appraisal.");
     }
   }
 
@@ -182,7 +182,7 @@ export class OrgAppraisalPrismaHelperService {
         where: {
           organizationId: orgID
         }, orderBy: {
-          createdBy: "desc"
+          createdDate: "desc"
         }
       });
 
@@ -261,7 +261,20 @@ export class OrgAppraisalPrismaHelperService {
   }
 
 
-  async sendAppraisalToAllStaff(dto: Appraisal, appraisalID: string, orgID: string) {
+  async checkIfEmployeesHaveAppraisal(appraisalID: string, orgID: string) {
+    const employees = await this.prismaService.employee_Appraisal.findMany({
+      where: { appraisalId: appraisalID }
+    });
+
+    if (employees.length > 0) {
+      const msg = `Employees already have this appraisal appraisal`;
+      this.logger.error(msg);
+      throw new AppNotFoundException(msg);
+    }
+  }
+
+
+  async sendAppraisalToAllStaff(dto: Appraisal, appraisalID: string, orgID: string, creatorEmail: string) {
     try {
       await this.prismaService.$transaction(async (tx) => {
         const employees = await tx.employee.findMany({ where: { organizationId: orgID } });
@@ -270,7 +283,9 @@ export class OrgAppraisalPrismaHelperService {
             tx.employee_Appraisal.create({
               data: {
                 appraisalId: appraisalID,
-                employeeId: employee.id
+                employeeId: employee.id,
+                status: "PENDING",
+                createdBy: creatorEmail
               }
             })
           )
@@ -279,9 +294,10 @@ export class OrgAppraisalPrismaHelperService {
       return "sent successfully";
     } catch (e) {
       this.logger.error(e);
-      throw new AppException(e);
+      throw new AppException("Error sending appraisals to employee");
     }
   }
+
 
   async getAllMyAppraisals(employee) {
     try {
@@ -299,13 +315,15 @@ export class OrgAppraisalPrismaHelperService {
               }
             }
           }
+        },
+        orderBy: {
+          createdDate: "desc"
         }
       });
 
-
     } catch (e) {
       this.logger.error(e);
-      throw new AppException(e);
+      throw new AppException("Error getting all appraisals");
     }
   }
 
@@ -327,6 +345,7 @@ export class OrgAppraisalPrismaHelperService {
       return await this.prismaService.employee_Appraisal.findUnique({
         where: {
           id: myAppraisalID
+
         },
         include: {
           appraisal: {
@@ -342,18 +361,31 @@ export class OrgAppraisalPrismaHelperService {
       });
     } catch (e) {
       this.logger.error(e);
-      throw new AppException(e);
+      throw new AppException("Error getting all appraisals");
     }
 
   }
 
-  async answerQuestionInMyAppraisal(dto: AppraisalResponseDto, myAppraisalID: string, sectionID: string, questionID: string, employee) {
+  async checkIfResponseHasAlreadyBeenGiven(myAppraisalID: string, sectionID: string, questionID: string) {
+    const found = await this.prismaService.appraisal_Question_Response.findFirst({
+      where: {
+        sectionID: sectionID,
+        questionID: questionID,
+        employeeAppraisalId: myAppraisalID
+      }
+    });
+
+    if (found) {
+      throw new AppNotFoundException(`Response for this question has been recorded.`);
+    }
+  }
+
+  async answerQuestionInMyAppraisal(dto: AppraisalResponseDto, myAppraisalID: string, sectionID: string, questionID: string) {
     try {
       await this.prismaService.$transaction(async (tx) => {
         await tx.appraisal_Question_Response.create({
           data: {
             score: dto.rating,
-            comment: dto.appraiserComment,
             questionID: questionID,
             sectionID: sectionID,
             employeeAppraisalId: myAppraisalID
@@ -362,7 +394,94 @@ export class OrgAppraisalPrismaHelperService {
       });
     } catch (e) {
       this.logger.error(e);
-      throw new AppException(e);
+      throw new AppException("Error submitting answer");
     }
   }
+
+  async addCommentsToMyAppraisal(dto: AppraisalResponseDto, sectionID: string, myAppraisalID: string, employee) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        await tx.appraisal_Question_Response.create({
+          data: {
+            comment: dto.appraiserComment,
+            sectionID: sectionID,
+            employeeAppraisalId: myAppraisalID
+          }
+        });
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error adding comments to appraisal");
+    }
+  }
+
+  async completeMyAppraisal(myAppraisalID: string, employee) {
+    try {
+      await this.prismaService.employee_Appraisal.update({
+        where: { id: myAppraisalID },
+        data: { status: "APPROVED" }
+      });
+      return "C";
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error completing appraisal");
+    }
+  }
+
+  async myResponses(myAppraisalID: string, appraisalID: string) {
+    try {
+      const [myAppraisalSubmittedResponses] = await this.prismaService.$transaction([
+        this.prismaService.appraisal.findUnique({
+          where: {
+            id: appraisalID // replace with the actual appraisal ID
+          },
+          include: {
+            section: {
+              orderBy: {
+                name: "asc" // order by section name
+              },
+              select: {
+                name: true,
+                question: {
+                  orderBy: {
+                    id: "asc" // order by question ID or any other field
+                  },
+                  select: {
+                    text: true,
+                    Appraisal_Question_Response: {
+                      where: {
+                        employeeAppraisalId: myAppraisalID // replace with the actual employee appraisal ID
+
+                      },
+                      select: {
+                        score: true
+                      },
+                      orderBy: {
+                        id: "asc" // order by response ID or any other field
+                      }
+                    }
+                  }
+                },
+                Appraisal_Question_Response: {
+                  where: {
+                    comment: {
+                      not: null
+                    }
+                  },
+                  select: { comment: true },
+                  orderBy: { sectionID: "asc" }
+                }
+              }
+            }
+          }
+        })
+      ]);
+      return { myAppraisalSubmittedResponses };
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error getting appraisal responses");
+    }
+  }
+
+
 }
