@@ -89,6 +89,7 @@ export class OrgEmployeeService {
     await this.utilService.checkIfRoleIsManagement(request.work.employeeKrisRole);
     const employee = await this.employeeHelperService.createNewEmployeeAndSendWelcomeMail(request, newPassword, creatorMail, orgName, client);
     // //TODO leave, onboarding, appraisals for new employee
+    console.log(employee);
     await this.leaveService.onboardLeaveForNewEmployee(orgID, employee);
   }
 

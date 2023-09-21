@@ -373,7 +373,7 @@ export class EmployeePrismaHelperService {
 
   async createNewEmployeeAndSendWelcomeMail(request: EmployeeOnboardRequest, newPassword: string, creatorMail: string, orgName, client) {
     try {
-      await this.prismaService.$transaction(async (tx) => {
+      return await this.prismaService.$transaction(async (tx) => {
         if (!request.work.employeeBranch) {
         }
         const branch = await tx.org_Branch.findFirst({
@@ -445,13 +445,13 @@ export class EmployeePrismaHelperService {
             html: `${html}`
           });
           this.logger.log(`Employee ${saved.firstname} Saved. Welcome Email successfully sent`);
-          return `Employee ${saved.firstname}  Welcome Email successfully sent`;
+          return saved;
         } catch (e) {
           this.logger.error(e, "Error sending email");
           throw new AppException(e);
         }
       }, { maxWait: 5000, timeout: 10000 });
-      return `Employee created successfully. Welcome Email successfully sent`;
+
     } catch (e) {
       this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: AuthMsg.ERROR_CREATING_EMPLOYEE });

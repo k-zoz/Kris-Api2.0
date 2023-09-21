@@ -9,7 +9,7 @@ import {
 } from "class-validator";
 import { BaseDto } from "@core/dto/global/base.dto";
 import { IsValidEmployeeRole } from "@core/validators/role/employee-role-validator";
-import { Type } from "class-transformer";
+import { Type } from 'class-transformer';
 import { IsValidEmploymentStatus } from "@core/validators/dto/status-validator";
 
 
@@ -55,7 +55,7 @@ export class EmployeeBasic {
   @IsOptional()
   @IsString()
   middleName: string;
-  krisID: string;
+  krisID:string
 }
 
 
@@ -89,8 +89,11 @@ export class EmployeeWork {
   @IsOptional()
   @IsString()
   employmentType: string;
-  idNumber: string;
-  workPhoneNumber: string;
+  idNumber:string
+  @IsOptional()
+  @IsEmail()
+  email:string
+  workPhoneNumber:string
 }
 
 export class ClientEmployeeWork {
@@ -114,10 +117,10 @@ export class ClientEmployeeWork {
   @IsOptional()
   @IsString()
   employmentType: string;
-  idNumber: string;
+  idNumber:string
   @IsEmail()
-  email: string;
-  workPhoneNumber: string;
+  email:string
+  workPhoneNumber:string
 }
 
 
@@ -148,48 +151,50 @@ export class UpdateEmployeeWork {
   @IsOptional()
   @IsString()
   employmentType: string;
-  idNumber: string;
+  idNumber:string
   @IsEmail()
-  email: string;
-  workPhoneNumber: string;
+  email:string
+  workPhoneNumber:string
 }
+
 
 
 export class EmployeeContact {
   @IsNotEmpty()
   @IsEmail()
-  personalEmail: string;
+  personalEmail:string
   @IsNotEmpty()
-  personalPhoneNumber: string;
+  personalPhoneNumber:string
   @IsOptional()
-  workPhoneNumber: string;
+  workPhoneNumber:string
   @IsOptional()
-  personalPhoneNumber2: string;
+  personalPhoneNumber2:string
 }
 
 
 export class EmployeeOnboardRequest extends BaseDto {
   @ValidateNested()
-  @Type(() => EmployeeBasic)
+  @Type(()=>EmployeeBasic)
   basic: EmployeeBasic;
   @ValidateNested()
-  @Type(() => EmployeeWork)
+  @Type(()=>EmployeeWork)
   work: EmployeeWork;
   @ValidateNested()
-  @Type(() => EmployeeContact)
+  @Type(()=>EmployeeContact)
   contact: EmployeeContact;
 }
 
 
+
 export class ClientEmployeeOnboardRequest extends BaseDto {
   @ValidateNested()
-  @Type(() => EmployeeBasic)
+  @Type(()=>EmployeeBasic)
   basic: EmployeeBasic;
   @ValidateNested()
-  @Type(() => ClientEmployeeWork)
+  @Type(()=>ClientEmployeeWork)
   work: ClientEmployeeWork;
   @ValidateNested()
-  @Type(() => EmployeeContact)
+  @Type(()=>EmployeeContact)
   contact: EmployeeContact;
 }
 
@@ -258,62 +263,63 @@ export class EditEmployeeDto extends BaseDto {
 }
 
 
+
 export class UpdateBasicInformation {
-  firstName?: string;
-  lastName?: string;
-  middleName?: string;
-  personalEmail?: string;
-  phoneNumber?: string;
-  personalPhoneNumber2?: string;
+  firstName?: string
+  lastName?: string
+  middleName?: string
+  personalEmail?: string
+  phoneNumber?: string
+  personalPhoneNumber2?: string
 }
 
 export class UpdatePersonalInformation {
-  dateOfBirth?: string;
-  gender?: string;
-  maritalStatus?: string;
+  dateOfBirth?: string
+  gender?: string
+  maritalStatus?: string
 }
 
 export class UpdateResidentialInformation {
-  address1?: string;
-  address2?: string;
-  country?: string;
-  state?: string;
-  city?: string;
-  zipCode?: string;
+  address1?: string
+  address2?: string
+  country?: string
+  state?: string
+  city?: string
+  zipCode?: string
 }
 
 export class UpdateNokInformation {
-  nok_legalName?: string;
-  nok_address?: string;
-  nok_occupation?: string;
-  nok_phoneNumber?: string;
-  nok_relationship?: string;
-  nok_email?: string;
+  nok_legalName?: string
+  nok_address?: string
+  nok_occupation?: string
+  nok_phoneNumber?: string
+  nok_relationship?: string
+  nok_email?: string
 }
 
 export class UpdateGuarantorInformation {
-  gua_legalName?: string;
-  gua_address?: string;
-  gua_occupation?: string;
-  gua_phoneNumber?: string;
-  gua_relationship?: string;
-  gua_email?: string;
+  gua_legalName?: string
+  gua_address?: string
+  gua_occupation?: string
+  gua_phoneNumber?: string
+  gua_relationship?: string
+  gua_email?: string
 }
 
 export class FinancialInformation {
-  accountName?: string;
-  bankName?: string;
-  accountNumber?: string;
-  pensionNumber?: string;
-  pensionManager?: string;
+  accountName?: string
+  bankName?: string
+  accountNumber?: string
+  pensionNumber?: string
+  pensionManager?: string
 }
 
 
 export class EmployeeUpdateRequest {
-  basic!: UpdateBasicInformation;
-  personal!: UpdatePersonalInformation;
-  residential!: UpdateResidentialInformation;
-  financial!: FinancialInformation;
-  nok!: UpdateNokInformation;
-  gua!: UpdateGuarantorInformation;
+  basic!: UpdateBasicInformation
+  personal!: UpdatePersonalInformation
+  residential!:UpdateResidentialInformation
+  financial!:FinancialInformation
+  nok!:UpdateNokInformation
+  gua!:UpdateGuarantorInformation
 }

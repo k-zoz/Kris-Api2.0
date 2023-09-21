@@ -5,6 +5,7 @@ import { AuthMsg } from "@core/const/security-msg-const";
 import { randomBytes } from "crypto";
 import { v4 as uuidV4 } from "uuid";
 import * as moment from "moment";
+
 const dayjs = require("dayjs");
 
 
@@ -53,7 +54,12 @@ export class UtilService {
 
 
   convertDateAgain(date) {
-    return dayjs(date).toDate();
+    if (!date) {
+
+    } else {
+      return dayjs(date).toDate();
+    }
+
   }
 
   getDifferenceInDays(startDate, endDate): number {
@@ -72,7 +78,7 @@ export class UtilService {
       if (currentDate.isoWeekday() <= 5) {
         count++;
       }
-      currentDate = currentDate.add(1, 'days');
+      currentDate = currentDate.add(1, "days");
     }
 
     return count;
