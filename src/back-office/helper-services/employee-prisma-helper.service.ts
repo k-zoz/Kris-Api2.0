@@ -371,7 +371,7 @@ export class EmployeePrismaHelperService {
   }
 
 
-  async createNewEmployeeAndSendWelcomeMail(request: EmployeeOnboardRequest, newPassword: string, creatorMail: string, orgName, client) {
+  async createNewEmployeeAndSendWelcomeMail(request: EmployeeOnboardRequest, newPassword: string, creatorMail: string, orgName) {
     try {
       return await this.prismaService.$transaction(async (tx) => {
         if (!request.work.employeeBranch) {
@@ -393,15 +393,15 @@ export class EmployeePrismaHelperService {
           }
         });
 
-        if (!request.work.empTeam) {
-        }
-        const team = await tx.team.findFirst({
-          where: {
-            organizationId: orgName.id,
-            departmentId: department.id,
-            name: request.work.empTeam
-          }
-        });
+        // if (!request.work.empTeam) {
+        // }
+        // const team = await tx.team.findFirst({
+        //   where: {
+        //     organizationId: orgName.id,
+        //     departmentId: department.id,
+        //     name: request.work.empTeam
+        //   }
+        // });
 
 
         const saved = await tx.employee.create({
@@ -420,7 +420,7 @@ export class EmployeePrismaHelperService {
             dateOfJoining: request.work.dateOfJoining,
             departmentId: department.id,
             designation: request.work.designation,
-            teamId: team.id,
+          //  teamId: team.id,
             org_BranchId: branch.id,
             role: request.work.employeeKrisRole,
             status: request.work.employeeStatus,

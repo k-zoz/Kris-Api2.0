@@ -84,12 +84,11 @@ export class OrgEmployeeService {
     request.basic.krisID = this.utilService.generateUUID(request.basic.firstName);
     const branch = await this.orgBranchHelperService.findBranchByName(request.work.employeeBranch, orgID);
     const department = await this.orgDepartmentHelperService.findDeptByNameAlone(request.work.department, orgID);
-    const client = await this.orgClientHelperService.findClientByName(request.work.employeeClient, orgID);
+  //  const client = await this.orgClientHelperService.findClientByName(request.work.employeeClient, orgID);
     await this.orgTeamHelperService.findTeamByName(department.id, orgID, request.work.empTeam);
     await this.utilService.checkIfRoleIsManagement(request.work.employeeKrisRole);
-    const employee = await this.employeeHelperService.createNewEmployeeAndSendWelcomeMail(request, newPassword, creatorMail, orgName, client);
+    const employee = await this.employeeHelperService.createNewEmployeeAndSendWelcomeMail(request, newPassword, creatorMail, orgName);
     // //TODO leave, onboarding, appraisals for new employee
-  //  console.log(employee);
     await this.leaveService.onboardLeaveForNewEmployee(orgID, employee);
   }
 
