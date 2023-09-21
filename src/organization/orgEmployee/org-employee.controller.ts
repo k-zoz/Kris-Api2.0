@@ -8,6 +8,7 @@ import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import {
+  ClientEmployeeOnboardRequest,
   CreateEmployeeDto,
   EditEmployeeDto,
   EmployeeOnboardRequest, EmployeeUpdateRequest, EmployeeWork,
@@ -68,6 +69,15 @@ export class OrgEmployeeController extends BaseController {
       message: "Created Successfully",
       payload: await this.orgEmployeeService.onboardEmpToMyOrg(request, orgID, payload.email)
     });
+  }
+
+  @Post("/:orgID/onboardToClient")
+  @EmpPermission(EmployeeRoleEnum.MANAGEMENT, EmployeeRoleEnum.HUMAN_RESOURCE)
+  async onboardEmployeeToClient(@GetUser() payload: AuthPayload,
+                                @Param("orgID") orgID: string,
+                                @Body(ValidationPipe) request: ClientEmployeeOnboardRequest
+  ) {
+    return this.response({ payload: await this.orgEmployeeService.onboardEmpToClient(request, orgID, payload.email) });
   }
 
 

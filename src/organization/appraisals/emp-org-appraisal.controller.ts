@@ -163,7 +163,7 @@ export class EmpOrgAppraisalController extends BaseController {
                              @Param("appraisalID") appraisalID: string,
                              @GetUser() payload: AuthPayload
   ) {
-    return this.response({ payload: await this.appraisalService.allMyAppraisalResponses(myAppraisalID,appraisalID, payload.email) });
+    return this.response({ payload: await this.appraisalService.allMyAppraisalResponses(myAppraisalID, appraisalID, payload.email) });
   }
 
 

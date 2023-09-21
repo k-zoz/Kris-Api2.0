@@ -11,6 +11,7 @@ import {
   OrgDeptPrismaHelperService
 } from "@organization/org-prisma-helper-services/organization/org-dept-prisma-helper.service";
 import {
+  ClientEmployeeOnboardRequest,
   CreateEmployeeDto,
   EmployeeOnboardRequest,
   EmployeeUpdateRequest,
@@ -89,6 +90,21 @@ export class OrgEmployeeService {
     const employee = await this.employeeHelperService.createNewEmployeeAndSendWelcomeMail(request, newPassword, creatorMail, orgName, client);
     // //TODO leave, onboarding, appraisals for new employee
     await this.leaveService.onboardLeaveForNewEmployee(orgID, employee);
+  }
+
+  async onboardEmpToClient(request: ClientEmployeeOnboardRequest, orgID: string, email: string) {
+    await this.orgEmployeeHelperService.validateRequest(request);
+    const orgName = await this.orgHelperService.findOrgByID(orgID);
+    const newPassword = this.utilService.generateRandomPassword();
+    request.basic.firstName = this.utilService.toUpperCase(request.basic.firstName);
+    request.basic.lastName = this.utilService.toUpperCase(request.basic.lastName);
+    request.work.employeeClient = this.utilService.toUpperCase(request.work.employeeClient);
+    request.work.dateOfConfirmation = this.utilService.convertDateAgain(request.work.dateOfConfirmation);
+    request.work.dateOfJoining = this.utilService.convertDateAgain(request.work.dateOfJoining);
+    request.basic.krisID = this.utilService.generateUUID(request.basic.firstName);
+    const client = await this.orgClientHelperService.findClientByName(request.work.employeeClient, orgID);
+    await this.utilService.checkIfRoleIsManagement(request.work.employeeKrisRole);
+    return await this.employeeHelperService.createNewEmployeeForClient(request, newPassword, email, orgName, client);
 
   }
 

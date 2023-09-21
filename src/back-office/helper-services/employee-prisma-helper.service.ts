@@ -8,7 +8,7 @@ import {
   Employee,
   EmployeeOnboardRequest,
   EmployeeWork,
-  UpdateEmployeeWork
+  UpdateEmployeeWork, ClientEmployeeOnboardRequest
 } from "@core/dto/global/employee.dto";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { LocaleService } from "@locale/locale.service";
@@ -523,6 +523,59 @@ export class EmployeePrismaHelperService {
     } catch (e) {
       this.logger.error(e);
       throw new AppException("Error updating employee profile");
+    }
+  }
+
+  async createNewEmployeeForClient(request: ClientEmployeeOnboardRequest, newPassword: string, email: string, orgName, client) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        const saved = await tx.employee.create({
+          data: {
+            email: request.basic.email,
+            password: await argon.hash(newPassword),
+            lastname: request.basic.lastName,
+            firstname: request.basic.firstName,
+            idNumber: request.basic.employeeID,
+            krisID: request.basic.krisID,
+            phoneNumber: request.contact.personalPhoneNumber,
+            workPhoneNumber: request.contact.workPhoneNumber,
+            personalPhoneNumber2: request.contact.personalPhoneNumber2,
+            personalEmail: request.contact.personalEmail,
+            dateOfConfirmation: request.work.dateOfConfirmation,
+            dateOfJoining: request.work.dateOfJoining,
+            role: request.work.employeeKrisRole,
+            status: request.work.employeeStatus,
+            employment_type: request.work.employmentType,
+            org_ClienteleId: client.id,
+            createdBy: email,
+            middleName: request.basic.middleName,
+            organizationId: orgName.id
+          }
+        });
+        try {
+          const html = await this.emailService.sendWelcomeEmployeeDetailMail({
+            email: saved.email,
+            password: newPassword,
+            firstname: saved.firstname,
+            organizationName: orgName.orgName
+          } as NewEmployeeEvent);
+          await this.resend.emails.send({
+            from: `${this.mailSource}`,
+            to: `${saved.email}`,
+            subject: `Welcome to ${orgName.orgName}`,
+            html: `${html}`
+          });
+          this.logger.log(`Employee ${saved.firstname} Saved. Welcome Email successfully sent`);
+          return `Employee ${saved.firstname}  Welcome Email successfully sent`;
+        } catch (e) {
+          this.logger.error(e, "Error sending email");
+          throw new AppException(e);
+        }
+      }, { maxWait: 5000, timeout: 10000 });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException(AppConst.error, { context: AuthMsg.ERROR_CREATING_EMPLOYEE });
+
     }
   }
 }

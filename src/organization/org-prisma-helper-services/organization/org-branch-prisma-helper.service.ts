@@ -3,6 +3,8 @@ import { PrismaService } from "@prisma/prisma.service";
 import { CreateBranchDto } from "@core/dto/global/branch.dto";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { SearchRequest } from "@core/model/search-request";
+import { AuthMsg } from "@core/const/security-msg-const";
+import { Employee, Org_Branch } from "@prisma/client";
 
 
 @Injectable()
@@ -173,6 +175,144 @@ export class OrgBranchPrismaHelperService {
     } catch (e) {
       this.logger.error(e);
       throw new AppException();
+    }
+  }
+
+  async findAllEmployees(branchID: string) {
+    try {
+      return await this.prismaService.employee.findMany({
+        where: { org_BranchId: branchID },
+        select: {
+          firstname: true,
+          lastname: true,
+          email: true,
+          idNumber: true
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException();
+    }
+  }
+
+  async isEmployeeABranchMember(employee: Employee, branchID: string, orgID: string) {
+    if (employee.org_BranchId !== branchID) {
+      throw new AppNotFoundException("Employee does not belong to branch!");
+    }
+  }
+
+  async makeEmployeeBranchManager(employee: Employee, branch: Org_Branch, orgID: string) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        this.prismaService.employee.update({
+          where: { id: employee.id },
+          data: {
+            hierarchy_position: "BRANCH_MANAGER",
+            managedBranch: {
+              connect: {
+                id: branch.id
+              }
+            }
+          }
+        });
+        this.prismaService.org_Branch.update({
+          where: { id: branch.id },
+          data: {
+            branchManagerId: employee.id
+          }
+        });
+      });
+
+      return `${employee.firstname} is now the branch manager`;
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error making employee branch manager");
+    }
+  }
+
+  async confirmIfEmployeeIsBranchManager(employee: Employee, branch: Org_Branch) {
+    if (branch.branchManagerId !== employee.id) {
+      throw new AppException("Employee is not the branch manager");
+    }
+  }
+
+  async removeEmployeeAsBranchManager(employee: Employee, branch: Org_Branch) {
+
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        // Update the employee to remove their managed branch
+        await this.prismaService.employee.update({
+          where: { id: employee.id },
+          data: {
+            hierarchy_position: null,
+            managedBranch: {
+              disconnect: true
+            }
+          }
+        });
+
+        // Update the branch to remove its branch manager
+        await this.prismaService.org_Branch.update({
+          where: { id: branch.id },
+          data: {
+            branchManagerId: null
+          }
+        });
+      });
+
+      return `${employee.firstname} is no longer the branch manager`;
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error removing employee as branch manager");
+    }
+  }
+
+  async allBranchManagers(orgID: string, searchRequest: SearchRequest) {
+    const { skip, take } = searchRequest;
+    try {
+      const [branchManagers, total] = await this.prismaService.$transaction([
+        this.prismaService.org_Branch.findMany({
+          where: {
+            branchManagerId: {
+              not: null
+            }
+          },
+          select: {
+            branchManager: {
+              select: {
+                firstname: true,
+                lastname: true,
+                email: true,
+                designation: true,
+                idNumber: true,
+                workPhoneNumber: true
+              }
+            }
+          },
+
+          skip,
+          take
+
+        }),
+        this.prismaService.org_Branch.count({
+          where: {
+            branchManagerId: {
+              not: null
+            }
+          }
+        })
+      ]);
+      const totalPage = Math.ceil(total / take) || 1;
+      return { total, totalPage, branchManagers };
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException();
+    }
+  }
+
+  async checkIfEmployeeBelongsToAnyBranch(employee: Employee) {
+    if (!employee.org_BranchId) {
+      throw new AppNotFoundException("Employee does not belong to any branch!");
     }
   }
 }

@@ -6,6 +6,7 @@ import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 import { UtilService } from "@core/utils/util.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
+import { log } from "winston";
 
 @Injectable()
 export class LeaveService {
@@ -41,7 +42,7 @@ export class LeaveService {
     await this.leaveHelperService.findOrgLeaveByName(dto.leaveName, orgID);
     const employee = await this.employeeHelperService.findEmpByEmail(userPayLoad.email);
     //date conversion based on how dates are entered or could be handled in the front end
-    dto.leaveDuration = this.utilService.getDifferenceInDays(dto.leaveStartDate, dto.leaveEndDate);
+    dto.leaveDuration = this.utilService.countWeekdays(dto.leaveStartDate, dto.leaveEndDate);
     dto.leaveEndDate = this.utilService.convertDateAgain(dto.leaveEndDate);
     dto.leaveStartDate = this.utilService.convertDateAgain(dto.leaveStartDate);
     await this.leaveHelperService.leaveDurationRequest(employee, dto);

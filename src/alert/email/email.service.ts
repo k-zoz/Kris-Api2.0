@@ -1,12 +1,12 @@
 import { Injectable, Logger } from "@nestjs/common";
 import {
+  HODConfirmationEvent,
   LeaveApprovalEvent,
   NewBackOfficerEvent,
   NewEmployeeEvent, NewEmployeePasswordResetEvent,
   NewOrganizationEvent,
-  PasswordChangeEvent, PayslipEmailEvent
+  PasswordChangeEvent, PayslipEmailEvent, TeamLeadConfirmationEvent
 } from "@core/event/back-office-event";
-
 import * as path from "path";
 
 const Handlebars = require("handlebars");
@@ -17,7 +17,6 @@ const fs = require("fs");
 export class EmailService {
 
   private readonly logger = new Logger(EmailService.name);
-
 
   constructor() {
   }
@@ -110,6 +109,32 @@ export class EmailService {
       firstname: event.employeeName,
       leaveStartDate: event.leaveStartDate,
       leaveEndDate: event.leaveEndDate
+    };
+    return template(data);
+  }
+
+  async sendHODConfirmationEmail(event: HODConfirmationEvent) {
+    const relativePath = "../../templates/hodConfirmation.hbs";
+    const absolutePath = path.join(__dirname, relativePath);
+    const sourceFile = fs.readFileSync(absolutePath, "utf-8");
+    const template = Handlebars.compile(sourceFile);
+    const data = {
+      employeeFirstName: event.employeeFirstName,
+      departmentName: event.departmentName,
+      organizationName: event.organizationName
+    };
+    return template(data);
+  }
+
+  async sendTeamLeadConfirmationEmail(event: TeamLeadConfirmationEvent) {
+    const relativePath = "../../templates/teamLeadConfirmation.hbs";
+    const absolutePath = path.join(__dirname, relativePath);
+    const sourceFile = fs.readFileSync(absolutePath, "utf-8");
+    const template = Handlebars.compile(sourceFile);
+    const data = {
+      employeeFirstName: event.employeeFirstName,
+      teamName: event.teamName,
+      organizationName: event.organizationName
     };
     return template(data);
   }

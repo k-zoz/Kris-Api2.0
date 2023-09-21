@@ -142,7 +142,10 @@ model Department {
   name String @unique
 
   teams     Team[]
-  employees Employee[]
+  employees Employee[] @relation("DepartmentMembers")
+
+  departmentManagerID String?   @unique
+  departmentManager   Employee? @relation(name: "departmentManager", fields: [departmentManagerID], references: [id])
 
   organizationId String
   Organization   Organization @relation(fields: [organizationId], references: [id])
@@ -164,8 +167,9 @@ model Team {
   teamMembers    Employee[]   @relation("teamEmplBelongsTo")
   createdDate    DateTime     @default(now()) @db.Date
   createdBy      String?
-  teamLeader     Employee?    @relation(name: "TeamLeading", fields: [teamLeaderId], references: [id])
-  teamLeaderId   String?      @unique
+
+  teamLeader   Employee? @relation(name: "TeamLeading", fields: [teamLeaderId], references: [id])
+  teamLeaderId String?   @unique
 }
 
 // model TeamLead {
@@ -185,6 +189,15 @@ enum Employee_Role {
   HUMAN_RESOURCE
   FINANCE
   REGULAR
+  BRANCH_MANAGER
+  HEAD_OF_DEPARTMENT
+  TEAM_LEAD
+}
+
+enum Employee_Hierarchy {
+  BRANCH_MANAGER
+  HEAD_OF_DEPARTMENT
+  TEAM_LEAD
 }
 
 enum Employee_Status {
@@ -253,6 +266,7 @@ model Employee {
   gua_relationship String?
   gua_email        String?
 
+  hierarchy_position Employee_Hierarchy?
   role               Employee_Role[]
   status             Employee_Status?
   employeeLeave      EmployeeLeave[]
@@ -271,7 +285,9 @@ model Employee {
   teamEmployeeLeads Team?       @relation(name: "TeamLeading")
 
   departmentId String?
-  Department   Department? @relation(fields: [departmentId], references: [id])
+  Department   Department? @relation(name: "DepartmentMembers", fields: [departmentId], references: [id])
+
+  departmentManaging Department? @relation(name: "departmentManager")
 
   Org_Clientele   Org_Clientele? @relation(fields: [org_ClienteleId], references: [id])
   org_ClienteleId String?
@@ -659,10 +675,11 @@ model EmployeeLeave {
 model LeaveApplication {
   id String @id @default(uuid())
 
-  startDate DateTime
-  endDate   DateTime
-  duration  Int
-  leaveName String
+  startDate     DateTime
+  endDate       DateTime
+  duration      Int
+  leaveName     String
+  reliefOfficer String?
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])

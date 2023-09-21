@@ -84,9 +84,23 @@ export class CreateDepartmentInBranchDto {
   @IsNotEmpty({ message: "Name of Department is required" })
   @IsString()
   name: string;
-  @IsNotEmpty({ message: "Branch code is required" })
-  branchCode: string;
 }
+
+export class HeadOFDepartmentDto {
+  @IsNotEmpty({ message: "HOD email is required" })
+  @IsString()
+  @IsEmail()
+  email: string;
+}
+
+
+export class TeamLeadDto {
+  @IsNotEmpty({ message: "Team Lead email is required" })
+  @IsString()
+  @IsEmail()
+  email: string;
+}
+
 
 
 export class DepartmentNameSearchDto {

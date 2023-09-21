@@ -4,7 +4,7 @@ import { LocaleService } from "@locale/locale.service";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { randomBytes } from "crypto";
 import { v4 as uuidV4 } from "uuid";
-
+import * as moment from "moment";
 const dayjs = require("dayjs");
 
 
@@ -61,6 +61,21 @@ export class UtilService {
     const end = dayjs(endDate);
     return end.diff(start, "days");
 
+  }
+
+  countWeekdays(startDate, endDate) {
+    let count = 0;
+    let currentDate = moment(startDate);
+
+    while (currentDate.isSameOrBefore(endDate)) {
+      // weekdays are from Monday (1) to Friday (5)
+      if (currentDate.isoWeekday() <= 5) {
+        count++;
+      }
+      currentDate = currentDate.add(1, 'days');
+    }
+
+    return count;
   }
 
   toUpperCase(str: any): string {

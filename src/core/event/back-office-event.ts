@@ -45,3 +45,19 @@ export class LeaveApprovalEvent {
   leaveStartDate:string
   leaveEndDate:string
 }
+
+
+export class HODConfirmationEvent{
+  employeeFirstName:string
+  departmentName:string
+  organizationName:string
+
+}
+
+export class TeamLeadConfirmationEvent{
+  employeeFirstName:string
+  departmentName?:string
+  teamName:string
+  organizationName:string
+
+}

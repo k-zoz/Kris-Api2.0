@@ -85,14 +85,6 @@ export class LeavePrismaHelperService {
           }
         );
 
-        //Employee's instance of his own leave
-        const employeeLeave = await tx.employeeLeave.findFirst({
-          where: {
-            employeeId: employee.id,
-            leaveId: leave.id
-          }
-        });
-
         const leaveApplication = await tx.leaveApplication.create({
           data: {
             leaveName: dto.leaveName,
@@ -100,6 +92,8 @@ export class LeavePrismaHelperService {
             startDate: dto.leaveStartDate,
             endDate: dto.leaveEndDate,
             employeeId: employee.id,
+            leaveStatus: "PENDING",
+            reliefOfficer: dto.reliefOfficer,
             leaveId: leave.id
           }
         });
@@ -127,6 +121,7 @@ export class LeavePrismaHelperService {
           await this.resend.emails.send({
             from: `${this.mailSource}`,
             to: `${employee.email}`,
+            cc: `${dto.reliefOfficer}`,
             subject: "Leave Status",
             html: `${html}`
           });
@@ -135,8 +130,8 @@ export class LeavePrismaHelperService {
           this.logger.error(e);
           throw new AppException("Error sending email");
         }
-      });
-      return "Applied Successfullly";
+      }, { maxWait: 5000, timeout: 10000 });
+      return "Applied Successfully";
     } catch (e) {
       this.logger.error(e);
       throw new AppException(AuthMsg.ERROR_APPLYING_LEAVE);
@@ -279,7 +274,7 @@ export class LeavePrismaHelperService {
         const currentDate = new Date();
         const leaveApp = await tx.leaveApplication.findMany({
           where: {
-            startDate: { lte: currentDate },
+            //    startDate: { lte: currentDate },
             endDate: { gte: currentDate },
             employee: {
               organizationId: orgID

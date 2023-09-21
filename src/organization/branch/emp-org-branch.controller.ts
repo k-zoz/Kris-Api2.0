@@ -32,9 +32,16 @@ export class EmpOrgBranchController extends BaseController {
   @Post("/:orgID/allBranchCodes")
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async allBranchCodes(@Param("orgID") orgID: string,
-                       @Body() searchRequest: SearchRequest,
-                       ) {
-    return this.response({ payload: await this.branchService.allBranchCodes(orgID,searchRequest) });
+                       @Body() searchRequest: SearchRequest
+  ) {
+    return this.response({ payload: await this.branchService.allBranchCodes(orgID, searchRequest) });
+  }
+
+  @Get("/:orgID/allBranchMembers")
+  async allMyBranchMembers(@Param("orgID") orgID: string,
+                           @GetUser() payload: AuthPayload
+  ) {
+    return this.response({ payload: await this.branchService.myBranchMembers(orgID, payload.email) });
   }
 
   @Post("/:orgID/allBranches")
@@ -54,5 +61,38 @@ export class EmpOrgBranchController extends BaseController {
     return this.response({ payload: await this.branchService.oneBranch(orgID, branchID) });
   }
 
+
+  @Get("/:orgID/branch/:branchID/allEmployees")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async allEmployeesInBranch(@Param("orgID") orgID: string,
+                             @Param("branchID") branchID: string) {
+    return this.response({ payload: await this.branchService.employeesInBranch(orgID, branchID) });
+  }
+
+  //TODO branch manager
+
+  @Get("/:orgID/branch/:branchID/branchManager/:empID")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async makeBranchManager(@Param("orgID") orgID: string,
+                          @Param("branchID") branchID: string,
+                          @Param("empID") empID: string
+  ) {
+    return this.response({ payload: await this.branchService.makeBranchManager(orgID, branchID, empID) });
+  }
+
+  @Get("/:orgID/branch/:branchID/removeBranchManager/:empID")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async removeBranchManager(@Param("orgID") orgID: string,
+                            @Param("branchID") branchID: string,
+                            @Param("empID") empID: string) {
+    return this.response({ payload: await this.branchService.removeAsBranchManger(orgID, branchID, empID) });
+  }
+
+  @Post("/:orgID/allBranchManagers")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async allBranchManagers(@Param("orgID") orgID: string,
+                          @Body() searchRequest: SearchRequest) {
+    return this.response({ payload: await this.branchService.allBranchManagers(orgID, searchRequest) });
+  }
 
 }

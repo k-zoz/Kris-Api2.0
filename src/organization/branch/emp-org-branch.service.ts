@@ -6,6 +6,7 @@ import {
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
 import { SearchRequest } from "@core/model/search-request";
 import { UtilService } from "@core/utils/util.service";
+import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 
 @Injectable()
 export class EmpOrgBranchService {
@@ -13,14 +14,15 @@ export class EmpOrgBranchService {
 
   constructor(private readonly branchHelperService: OrgBranchPrismaHelperService,
               private readonly organizationHelperService: OrganizationPrismaHelperService,
-              private readonly utilService:UtilService
+              private readonly employeeHelperService: EmployeePrismaHelperService,
+              private readonly utilService: UtilService
   ) {
   }
 
 
   async onboardBranchToOrg(dto: CreateBranchDto, orgID: string, creatorEmail: string) {
     await this.organizationHelperService.findOrgByID(orgID);
-    dto.name = this.utilService.toUpperCase(dto.name)
+    dto.name = this.utilService.toUpperCase(dto.name);
     await this.branchHelperService.validateDtoRequest(dto);
     return await this.branchHelperService.createBranch(dto, orgID, creatorEmail);
   }
@@ -36,8 +38,44 @@ export class EmpOrgBranchService {
     return await this.branchHelperService.findBranch(branchID, orgID);
   }
 
-  async allBranchCodes(orgID: string,searchRequest:SearchRequest) {
+  async allBranchCodes(orgID: string, searchRequest: SearchRequest) {
     await this.organizationHelperService.findOrgByID(orgID);
-    return await this.branchHelperService.findAllBranchCodes(orgID, searchRequest)
+    return await this.branchHelperService.findAllBranchCodes(orgID, searchRequest);
   }
+
+  async myBranchMembers(orgID: string, email: string) {
+    await this.organizationHelperService.findOrgByID(orgID);
+    const employee = await this.employeeHelperService.findEmpByEmail(email)
+    await this.branchHelperService.checkIfEmployeeBelongsToAnyBranch(employee)
+    return await this.branchHelperService.findAllEmployees(employee.org_BranchId)
+  }
+
+  async employeesInBranch(orgID: string, branchID: string) {
+    await this.organizationHelperService.findOrgByID(orgID);
+    await this.branchHelperService.findBranch(branchID, orgID);
+    return await this.branchHelperService.findAllEmployees(branchID);
+  }
+
+  async makeBranchManager(orgID: string, branchID: string, empID: string) {
+    const employee = await this.employeeHelperService.findEmpById(empID);
+    await this.organizationHelperService.findOrgByID(orgID);
+    const branch = await this.branchHelperService.findBranch(branchID, orgID);
+    await this.branchHelperService.isEmployeeABranchMember(employee, branchID, orgID);
+    return await this.branchHelperService.makeEmployeeBranchManager(employee, branch, orgID);
+  }
+
+  async removeAsBranchManger(orgID: string, branchID: string, empID: string) {
+    const employee = await this.employeeHelperService.findEmpById(empID);
+    await this.organizationHelperService.findOrgByID(orgID);
+    const branch = await this.branchHelperService.findBranch(branchID, orgID);
+    await this.branchHelperService.confirmIfEmployeeIsBranchManager(employee, branch);
+    return await this.branchHelperService.removeEmployeeAsBranchManager(employee, branch);
+  }
+
+  async allBranchManagers(orgID: string, searchRequest: SearchRequest) {
+    await this.organizationHelperService.findOrgByID(orgID);
+    return await this.branchHelperService.allBranchManagers(orgID, searchRequest)
+  }
+
+
 }
