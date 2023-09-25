@@ -10,6 +10,9 @@ import {
 } from "@organization/org-prisma-helper-services/organization/org-dept-prisma-helper.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
 import { CreateTeamInDepartmentDto, DepartmentNameSearchDto, TeamLeadDto } from "@core/dto/global/organization.dto";
+import {
+  OrgBranchPrismaHelperService
+} from "@organization/org-prisma-helper-services/organization/org-branch-prisma-helper.service";
 
 @Injectable()
 export class OrgTeamService {
@@ -19,23 +22,26 @@ export class OrgTeamService {
               private readonly orgHelperService: OrganizationPrismaHelperService,
               private readonly employeeService: EmployeePrismaHelperService,
               private readonly orgTeamHelperService: OrgTeamPrismaHelperService,
-              private readonly orgDeptHelperService: OrgDeptPrismaHelperService
+              private readonly orgDeptHelperService: OrgDeptPrismaHelperService,
+              private readonly orgBranchHelperService: OrgBranchPrismaHelperService
   ) {
   }
 
 
-  async addTeam(dto: CreateTeamInDepartmentDto, orgID, creatorEmail) {
+  async addTeam(dto: CreateTeamInDepartmentDto, orgID, branchID, creatorEmail) {
     await this.orgHelperService.findOrgByID(orgID);
     dto.teamName = this.utilService.toUpperCase(dto.teamName);
     dto.departmentName = this.utilService.toUpperCase(dto.departmentName);
+    const branch = await this.orgBranchHelperService.findBranch(branchID, orgID);
     const department = await this.orgDeptHelperService.findDeptByName(dto, orgID);
     await this.orgTeamHelperService.findTeamDuplicates(dto, department);
-    return await this.orgTeamHelperService.addTeamToDepartment(dto, orgID, department, creatorEmail);
+    return await this.orgTeamHelperService.addTeamToDepartment(dto, orgID, department, branch, creatorEmail);
   }
 
-  async allTeams(orgID, searchRequest) {
+  async allTeams(orgID, branchID, searchRequest) {
     await this.orgHelperService.findOrgByID(orgID);
-    return await this.orgTeamHelperService.findAllTeams(orgID, searchRequest);
+    await this.orgBranchHelperService.findBranch(branchID, orgID);
+    return await this.orgTeamHelperService.findAllTeams(orgID, branchID, searchRequest);
   }
 
   async allTeamLeads(orgID, searchRequest) {
@@ -87,5 +93,13 @@ export class OrgTeamService {
     const employee = await this.employeeService.findEmpByEmail(dto.email);
     await this.orgTeamHelperService.checkIfTeamLeadBelongsToTeam(employee, team);
     return await this.orgTeamHelperService.makeEmployeeTeamLead(team, employee, organization);
+  }
+
+  async teamRequests(email: string) {
+    const employee = await this.employeeService.findEmpByEmail(email);
+    await this.orgTeamHelperService.checkIfEmployeeHasATeam(employee);
+    const team = await this.orgTeamHelperService.findTeamByID(employee.organizationId, employee.teamId);
+    await this.orgTeamHelperService.confirmIfEmployeeIsTeamLead(team, employee);
+    return await this.orgTeamHelperService.allTeamRequests(employee, team);
   }
 }

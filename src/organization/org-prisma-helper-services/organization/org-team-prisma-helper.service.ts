@@ -21,15 +21,15 @@ export class OrgTeamPrismaHelperService {
   }
 
 
-  async addTeamToDepartment(dto, orgID, department, creatorEmail) {
+  async addTeamToDepartment(dto, orgID, department, branch, creatorEmail) {
     try {
-      return await this.prismaService.$transaction(async (tx) => {
-
-        const team = await tx.team.create({
+      await this.prismaService.$transaction(async (tx) => {
+        await tx.team.create({
           data: {
             name: dto.teamName,
             organizationId: orgID,
             departmentId: department.id,
+            org_BranchId: branch.id,
             createdBy: creatorEmail
           }
         });
@@ -54,13 +54,14 @@ export class OrgTeamPrismaHelperService {
     }
   }
 
-  async findAllTeams(orgID, request) {
+  async findAllTeams(orgID, branchID, request) {
     const { skip, take } = request;
     try {
       const [teams, total] = await this.prismaService.$transaction([
         this.prismaService.team.findMany({
           where: {
-            organizationId: orgID
+            organizationId: orgID,
+            org_BranchId: branchID
           },
           include: {
             Department: {
@@ -267,28 +268,19 @@ export class OrgTeamPrismaHelperService {
   async makeEmployeeTeamLead(team: Team, employee: Employee, organization?: Organization) {
     try {
       await this.prismaService.$transaction(async (tx) => {
-        // await tx.employee.update({
-        //   where: { id: employee.id },
-        //   data: {
-        //     teamEmployeeLeads: {
-        //       connect: {
-        //         id: team.id
-        //       }
-        //     }
-        //   }
-        // });
 
         await tx.team.update({
           where: { id: team.id },
           data: {
-            // teamLeaderId: employee.id
             teamLeader: {
               connect: {
                 id: employee.id
               }
             }
+
           }
         });
+
         try {
           const html = await this.emailService.sendTeamLeadConfirmationEmail({
             organizationName: organization.orgName,
@@ -347,6 +339,30 @@ export class OrgTeamPrismaHelperService {
   async checkIfTeamLeadBelongsToTeam(employee: Employee, team: Team) {
     if (employee.teamId !== team.id) {
       throw new AppNotFoundException("Employee does not belong to team!");
+    }
+  }
+
+  async checkIfEmployeeHasATeam(employee: Employee) {
+    if (!employee.teamId) {
+      throw new AppNotFoundException("Employee does not belong to team!");
+    }
+  }
+
+  async allTeamRequests(employee: Employee, team: Team) {
+    try {
+      return await this.prismaService.teamRequestsAndApproval.findMany({
+        where: {
+          Team: {
+            id: team.id
+          }
+        },
+        orderBy:{
+          createdDate:'desc'
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error getting all team requests");
     }
   }
 }

@@ -24,6 +24,9 @@
       "@config/*": [
         "config/*"
       ],
+      "@cloudinary/*": [
+        "cloudinary/*"
+      ],
       "@auth/*": [
         "auth/*"
       ],

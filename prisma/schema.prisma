@@ -114,6 +114,7 @@ model Org_Branch {
   branchManagerId String?   @unique
   createdBy       String?
   createdDate     DateTime  @default(now()) @db.Date
+  Team            Team[]
 
   @@index([organizationId])
 }
@@ -139,7 +140,7 @@ model Org_Clientele {
 
 model Department {
   id   String @id @default(uuid())
-  name String @unique
+  name String
 
   teams     Team[]
   employees Employee[] @relation("DepartmentMembers")
@@ -162,6 +163,8 @@ model Team {
 
   departmentId   String
   Department     Department   @relation(fields: [departmentId], references: [id])
+  Org_Branch     Org_Branch?  @relation(fields: [org_BranchId], references: [id])
+  org_BranchId   String?
   organizationId String
   Organization   Organization @relation(fields: [organizationId], references: [id])
   teamMembers    Employee[]   @relation("teamEmplBelongsTo")
@@ -170,6 +173,17 @@ model Team {
 
   teamLeader   Employee? @relation(name: "TeamLeading", fields: [teamLeaderId], references: [id])
   teamLeaderId String?   @unique
+
+  teamRequests TeamRequestsAndApproval[]
+}
+
+model TeamRequestsAndApproval {
+  id          String   @id @default(uuid())
+  name        String?
+  createdDate DateTime @default(now()) @db.Date
+  createdBy   String?
+  Team        Team?    @relation(fields: [teamId], references: [id])
+  teamId      String?
 }
 
 // model TeamLead {
@@ -617,6 +631,7 @@ model Leave {
   name             String
   duration         Float
   type             LeaveType?
+  leaveDocUrl      String?
   employeeLeave    EmployeeLeave[]
   leaveApplication LeaveApplication[]
 
@@ -657,12 +672,12 @@ model EmployeeOnboarding {
 }
 
 model EmployeeLeave {
-  id                String @id @default(uuid())
+  id                String   @id @default(uuid())
   remainingDuration Int
   leaveName         String
-
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id])
+  leaveDocUrl       String?
+  employeeId        String
+  employee          Employee @relation(fields: [employeeId], references: [id])
 
   leaveId     String
   leave       Leave    @relation(fields: [leaveId], references: [id])
@@ -675,11 +690,13 @@ model EmployeeLeave {
 model LeaveApplication {
   id String @id @default(uuid())
 
-  startDate     DateTime
-  endDate       DateTime
-  duration      Int
-  leaveName     String
-  reliefOfficer String?
+  startDate       DateTime
+  endDate         DateTime
+  duration        Int
+  leaveName       String
+  reliefOfficer   String?
+  supervisorEmail String?
+  leaveDocs       String?
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])

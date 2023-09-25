@@ -55,11 +55,11 @@ export class UtilService {
 
   convertDateAgain(date) {
     if (!date) {
-
+      const today = new Date();
+      return dayjs(today).toDate();
     } else {
       return dayjs(date).toDate();
     }
-
   }
 
   getDifferenceInDays(startDate, endDate): number {

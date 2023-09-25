@@ -23,7 +23,7 @@ export class EmpOrgBranchService {
   async onboardBranchToOrg(dto: CreateBranchDto, orgID: string, creatorEmail: string) {
     await this.organizationHelperService.findOrgByID(orgID);
     dto.name = this.utilService.toUpperCase(dto.name);
-    await this.branchHelperService.validateDtoRequest(dto);
+    await this.branchHelperService.validateDtoRequest(dto, orgID);
     return await this.branchHelperService.createBranch(dto, orgID, creatorEmail);
   }
 

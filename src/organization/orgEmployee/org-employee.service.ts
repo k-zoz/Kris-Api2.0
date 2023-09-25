@@ -84,7 +84,7 @@ export class OrgEmployeeService {
     request.basic.krisID = this.utilService.generateUUID(request.basic.firstName);
     const branch = await this.orgBranchHelperService.findBranchByName(request.work.employeeBranch, orgID);
     const department = await this.orgDepartmentHelperService.findDeptByNameAlone(request.work.department, orgID);
-  //  const client = await this.orgClientHelperService.findClientByName(request.work.employeeClient, orgID);
+    //  const client = await this.orgClientHelperService.findClientByName(request.work.employeeClient, orgID);
     await this.orgTeamHelperService.findTeamByName(department.id, orgID, request.work.empTeam);
     await this.utilService.checkIfRoleIsManagement(request.work.employeeKrisRole);
     const employee = await this.employeeHelperService.createNewEmployeeAndSendWelcomeMail(request, newPassword, creatorMail, orgName);
@@ -98,12 +98,12 @@ export class OrgEmployeeService {
     const newPassword = this.utilService.generateRandomPassword();
     request.basic.firstName = this.utilService.toUpperCase(request.basic.firstName);
     request.basic.lastName = this.utilService.toUpperCase(request.basic.lastName);
-    request.work.employeeClient = this.utilService.toUpperCase(request.work.employeeClient);
-    request.work.dateOfConfirmation = this.utilService.convertDateAgain(request.work.dateOfConfirmation);
-    request.work.dateOfJoining = this.utilService.convertDateAgain(request.work.dateOfJoining);
+    request.clientWork.employeeClient = this.utilService.toUpperCase(request.clientWork.employeeClient);
+    request.clientWork.dateOfConfirmation = this.utilService.convertDateAgain(request.clientWork.dateOfConfirmation);
+    request.clientWork.dateOfJoining = this.utilService.convertDateAgain(request.clientWork.dateOfJoining);
     request.basic.krisID = this.utilService.generateUUID(request.basic.firstName);
-    const client = await this.orgClientHelperService.findClientByName(request.work.employeeClient, orgID);
-    await this.utilService.checkIfRoleIsManagement(request.work.employeeKrisRole);
+    const client = await this.orgClientHelperService.findClientByName(request.clientWork.employeeClient, orgID);
+    await this.utilService.checkIfRoleIsManagement(request.clientWork.employeeKrisRole);
     return await this.employeeHelperService.createNewEmployeeForClient(request, newPassword, email, orgName, client);
 
   }
@@ -116,12 +116,12 @@ export class OrgEmployeeService {
     dto.employeeBranch = this.utilService.toUpperCase(dto.employeeBranch);
     dto.department = this.utilService.toUpperCase(dto.department);
     dto.empTeam = this.utilService.toUpperCase(dto.empTeam);
-    dto.employeeClient = this.utilService.toUpperCase(dto.employeeClient);
-    await this.orgBranchHelperService.findBranchByName(dto.employeeBranch, orgID);
-    const department = await this.orgDepartmentHelperService.findDeptByNameAlone(dto.department, orgID);
-    await this.orgTeamHelperService.findTeamByName(department.id, orgID, dto.empTeam);
-    const client = await this.orgClientHelperService.findClientByName(dto.employeeClient, orgID);
-    return await this.employeeHelperService.updateEmployeeWorkDetails(dto, empID, orgName, client, modifierMail);
+    // dto.employeeClient = this.utilService.toUpperCase(dto.employeeClient);
+    // await this.orgBranchHelperService.findBranchByName(dto.employeeBranch, orgID);
+    // const department = await this.orgDepartmentHelperService.findDeptByNameAlone(dto.department, orgID);
+    // await this.orgTeamHelperService.findTeamByName(department.id, orgID, dto.empTeam);
+    //  const client = await this.orgClientHelperService.findClientByName(dto.employeeClient, orgID);
+    return await this.employeeHelperService.updateEmployeeWorkDetails(dto, empID, orgName, modifierMail);
 
   }
 

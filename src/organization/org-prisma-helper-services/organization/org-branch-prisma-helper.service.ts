@@ -101,15 +101,18 @@ export class OrgBranchPrismaHelperService {
     }
   }
 
-  async validateDtoRequest(dto: CreateBranchDto) {
-    await this.checkOrgPropertyExists("branch_code", dto.branch_code, "");
-    await this.checkOrgPropertyExists("name", dto.name, "");
+  async validateDtoRequest(dto: CreateBranchDto, orgID) {
+    await this.checkOrgPropertyExists("branch_code", dto.branch_code, "", orgID);
+    await this.checkOrgPropertyExists("name", dto.name, "", orgID);
   }
 
-  async checkOrgPropertyExists(propertyName, propertyValue, propertyDescription) {
+  async checkOrgPropertyExists(propertyName, propertyValue, propertyDescription, orgID?: string) {
     if (propertyValue) {
-      const result = await this.prismaService.org_Branch.findUnique({
-        where: { [propertyName]: propertyValue }
+      const result = await this.prismaService.org_Branch.findFirst({
+        where: {
+          [propertyName]: propertyValue,
+          organizationId: orgID
+        }
       });
       if (result) {
         const errMsg = `${propertyDescription} ${result[propertyName]} already exists`;

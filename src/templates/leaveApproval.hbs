@@ -1,13 +1,23 @@
-{{!-- This is a Handlebars template --}}
-Dear {{employeeName}},
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Leave Approval</title>
+</head>
+<body>
+<p>Dear {{employeeName}},</p>
 
-We are pleased to inform you that your leave request has been approved.
+<p>We are pleased to inform you that your leave request has been approved.</p>
 
-Here are the details of your leave period:
-- Start Date: {{leaveStartDate}}
-- End Date: {{leaveEndDate}}
+<p>Here are the details of your leave period:</p>
+<ul>
+  <li>Start Date: {{leaveStartDate}}</li>
+  <li>End Date: {{leaveEndDate}}</li>
+</ul>
 
-We hope you have a restful and enjoyable time off. Please don't hesitate to reach out if you have any questions or concerns.
+<p>We hope you have a restful and enjoyable time off. Please don't hesitate to reach out if you have any questions or
+  concerns.</p>
 
-Best regards,
-[Your Name]
+<p>Best regards,</p>
+<p>[Your Name]</p>
+</body>
+</html>

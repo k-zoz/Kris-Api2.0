@@ -16,7 +16,8 @@ import { BackOfficeModule } from "@back-office/back-office.module";
 import { EmployeeOrganizationModule } from "@organization/employeeOrganization.module";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
-import { AlertModule } from "./alert/alert.module";
+import { AlertModule } from "@alert/alert.module";
+import { CloudinaryModule } from "./cloudinary/cloudinary.module";
 
 
 @Module({
@@ -56,7 +57,7 @@ import { AlertModule } from "./alert/alert.module";
       })
     }),
     EventEmitterModule.forRoot(),
-    BackOfficeModule, AuthModule, PrismaModule, EmployeeOrganizationModule, AlertModule],
+    BackOfficeModule, AuthModule, PrismaModule, EmployeeOrganizationModule, AlertModule, CloudinaryModule],
   controllers: [AppController],
   providers: [
     {
@@ -82,7 +83,8 @@ export class AppModule {
         { path: "employee/login", method: RequestMethod.POST },
         { path: "organization/jobOpening/:orgID/allJobs", method: RequestMethod.GET },
         { path: "organization/jobOpening/:orgID/allJobs/:orgKrisID", method: RequestMethod.GET },
-        { path: "organization/jobOpening/:orgID/applyForJob/:jobOpeningID", method: RequestMethod.POST }
+        { path: "organization/jobOpening/:orgID/applyForJob/:jobOpeningID", method: RequestMethod.POST },
+        { path: "organization/jobOpening/uploadCvAndResume", method: RequestMethod.POST }
       )
       .forRoutes({ path: "*", method: RequestMethod.ALL });
   }

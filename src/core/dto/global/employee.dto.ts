@@ -118,6 +118,7 @@ export class ClientEmployeeWork {
   @IsString()
   employmentType: string;
   idNumber:string
+  @IsOptional()
   @IsEmail()
   email:string
   workPhoneNumber:string
@@ -127,7 +128,7 @@ export class ClientEmployeeWork {
 export class UpdateEmployeeWork {
   @IsOptional()
   dateOfConfirmation: any;
-  @IsNotEmpty()
+  @IsOptional()
   dateOfJoining: any;
   @IsNotEmpty()
   @IsString()
@@ -135,7 +136,7 @@ export class UpdateEmployeeWork {
   @IsOptional()
   @IsString()
   designation: string;
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   empTeam: string;
   @IsNotEmpty()
@@ -152,6 +153,7 @@ export class UpdateEmployeeWork {
   @IsString()
   employmentType: string;
   idNumber:string
+  @IsOptional()
   @IsEmail()
   email:string
   workPhoneNumber:string
@@ -192,7 +194,7 @@ export class ClientEmployeeOnboardRequest extends BaseDto {
   basic: EmployeeBasic;
   @ValidateNested()
   @Type(()=>ClientEmployeeWork)
-  work: ClientEmployeeWork;
+  clientWork: ClientEmployeeWork;
   @ValidateNested()
   @Type(()=>EmployeeContact)
   contact: EmployeeContact;

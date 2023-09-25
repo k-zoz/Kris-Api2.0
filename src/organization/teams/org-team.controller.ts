@@ -26,25 +26,31 @@ export class OrgTeamController extends BaseController {
   }
 
 
-  @Post("/:orgID/addTeam")
+  @Post("/:orgID/addTeam/:branchID")
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async addTeamToDepartment(@Param("orgID") orgID: string,
+                            @Param("branchID") branchID: string,
                             @Body(ValidationPipe) dto: CreateTeamInDepartmentDto,
                             @GetUser() payload: AuthPayload
   ) {
     return this.response({
-      payload: await this.orgTeamService.addTeam(dto, orgID, payload.email),
+      payload: await this.orgTeamService.addTeam(dto, orgID, branchID, payload.email),
       message: "Added Successfully"
     });
   }
 
+  @Get("myTeamRequests")
+  async getMyTeamRequests(@GetUser() payload: AuthPayload) {
+    return this.response({ payload: await this.orgTeamService.teamRequests(payload.email) });
+  }
 
-  @Post("/:orgID/allTeams")
+  @Post("/:orgID/allTeams/:branchID")
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async getAllTeams(@Param("orgID") orgID: string,
+                    @Param("branchID") branchID: string,
                     @Body() searchRequest: SearchRequest
   ) {
-    return this.response({ payload: await this.orgTeamService.allTeams(orgID, searchRequest) });
+    return this.response({ payload: await this.orgTeamService.allTeams(orgID, branchID, searchRequest) });
   }
 
   @Post("/:orgID/allTeamsInDepartment")

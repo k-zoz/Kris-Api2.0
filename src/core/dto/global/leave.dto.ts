@@ -1,4 +1,4 @@
-import { IsDate, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsDate, IsDateString, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { IsEndDateValid } from "@core/validators/dto/leave-date-validator";
 
 export class CreateLeaveDto {
@@ -10,6 +10,8 @@ export class CreateLeaveDto {
   leaveDuration: number;
   @IsNotEmpty()
   leaveType: any;
+  @IsOptional()
+  leaveDocUrl:string
 }
 
 export class ApplyForLeave {
@@ -25,6 +27,10 @@ export class ApplyForLeave {
   leaveDuration: number;
   @IsOptional()
   reliefOfficer: string;
+  @IsOptional()
+  supervisorEmail: string;
+  @IsOptional()
+  leaveDocs: any;
 }
 
 

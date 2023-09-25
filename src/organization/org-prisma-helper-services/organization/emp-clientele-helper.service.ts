@@ -115,4 +115,26 @@ export class EmpClienteleHelperService {
 
 
   }
+
+  async findAllEmployeesInAClient(orgID: string, clienteleID: string) {
+    try {
+      return await this.prismaService.employee.findMany({
+        where: {
+          org_ClienteleId: clienteleID,
+          organizationId: orgID
+        },
+        select: {
+          email: true,
+          lastname: true,
+          designation: true,
+          firstname: true,
+          krisID: true,
+          idNumber: true
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException();
+    }
+  }
 }

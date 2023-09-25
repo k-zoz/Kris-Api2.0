@@ -420,7 +420,7 @@ export class EmployeePrismaHelperService {
             dateOfJoining: request.work.dateOfJoining,
             departmentId: department.id,
             designation: request.work.designation,
-          //  teamId: team.id,
+            //  teamId: team.id,
             org_BranchId: branch.id,
             role: request.work.employeeKrisRole,
             status: request.work.employeeStatus,
@@ -458,7 +458,7 @@ export class EmployeePrismaHelperService {
     }
   }
 
-  async updateEmployeeWorkDetails(dto: UpdateEmployeeWork, empID, orgName, client, modifierMail: string) {
+  async updateEmployeeWorkDetails(dto: UpdateEmployeeWork, empID, orgName, modifierMail: string) {
     try {
       await this.prismaService.$transaction(async (tx) => {
         if (!dto.employeeBranch) {
@@ -480,24 +480,24 @@ export class EmployeePrismaHelperService {
           }
         });
 
-        if (!dto.empTeam) {
-        }
-        const team = await tx.team.findFirst({
-          where: {
-            organizationId: orgName.id,
-            departmentId: department.id,
-            name: dto.empTeam
-          }
-        });
+        // if (!dto.empTeam) {
+        // }
+        // const team = await tx.team.findFirst({
+        //   where: {
+        //     organizationId: orgName.id,
+        //     departmentId: department.id,
+        //     name: dto.empTeam
+        //   }
+        // });
 
-        if (!dto.employeeClient) {
-        }
-        const org_client = await tx.org_Clientele.findFirst({
-          where: {
-            organizationId: orgName.id,
-            name: dto.employeeClient
-          }
-        });
+        // if (!dto.employeeClient) {
+        // }
+        // const org_client = await tx.org_Clientele.findFirst({
+        //   where: {
+        //     organizationId: orgName.id,
+        //     name: dto.employeeClient
+        //   }
+        // });
 
 
         const saved = await tx.employee.update({
@@ -513,9 +513,24 @@ export class EmployeePrismaHelperService {
             dateOfJoining: dto.dateOfJoining,
             dateOfConfirmation: dto.dateOfConfirmation,
             org_BranchId: branch.id,
-            departmentId: department.id,
-            teamId: team.id,
-            org_ClienteleId: org_client.id
+            //  org_Branch:{
+            //    connect:{
+            //      name:dto.employeeBranch
+            //    }
+            //  },
+            departmentId: department.id
+            //  Department:{
+            //    connect:{
+            //      name:dto.department
+            //    }
+            //  },
+            //  teamId: team.id,
+            //   Team:{
+            //     connect:{
+            //
+            //     }
+            //   }
+            // org_ClienteleId: org_client.id
           }
         });
       }, { maxWait: 5000, timeout: 10000 });
@@ -541,11 +556,11 @@ export class EmployeePrismaHelperService {
             workPhoneNumber: request.contact.workPhoneNumber,
             personalPhoneNumber2: request.contact.personalPhoneNumber2,
             personalEmail: request.contact.personalEmail,
-            dateOfConfirmation: request.work.dateOfConfirmation,
-            dateOfJoining: request.work.dateOfJoining,
-            role: request.work.employeeKrisRole,
-            status: request.work.employeeStatus,
-            employment_type: request.work.employmentType,
+            dateOfConfirmation: request.clientWork.dateOfConfirmation,
+            dateOfJoining: request.clientWork.dateOfJoining,
+            role: request.clientWork.employeeKrisRole,
+            status: request.clientWork.employeeStatus,
+            employment_type: request.clientWork.employmentType,
             org_ClienteleId: client.id,
             createdBy: email,
             middleName: request.basic.middleName,

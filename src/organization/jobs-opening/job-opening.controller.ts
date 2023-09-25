@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Post, UseGuards, ValidationPipe } from "@nestjs/common";
+import {
+  Body,
+  Controller, FileTypeValidator,
+  Get, MaxFileSizeValidator,
+  Param, ParseFilePipe,
+  Post,
+  UploadedFile, UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+  ValidationPipe
+} from "@nestjs/common";
 import { BaseController } from "@core/utils/base-controller.controller";
 import { JobOpeningService } from "@organization/jobs-opening/job-opening.service";
 import { AuthGuard } from "@nestjs/passport";
@@ -8,6 +18,8 @@ import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { ApplyForJobDto, CreateNewHireDto, PostJobDto } from "@core/dto/global/Jobs.dto";
+import { Express } from "express";
+import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 
 @Controller("organization/jobOpening")
 export class JobOpeningController extends BaseController {
@@ -37,6 +49,17 @@ export class JobOpeningController extends BaseController {
     return this.response({ payload: await this.jobOpeningService.allOrgJobs(orgID, orgKrisID) });
   }
 
+
+  @Post("uploadCvAndResume")
+  @UseInterceptors(FileInterceptor("file"))
+  async uploadDetails(@UploadedFile(new ParseFilePipe({
+    validators: [
+      new FileTypeValidator({ fileType: ".(pdf|doc|docx)" }),
+      new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2, message: "File size more than 2 mb" })
+    ]
+  })) file: Express.Multer.File) {
+    return this.response({ payload: await this.jobOpeningService.uploadCredentials(file) });
+  }
 
   @Post("/:orgID/applyForJob/:jobOpeningID")
   async applyForJob(@Param("orgID") orgID: string,

@@ -7,6 +7,7 @@ import { LeaveApprovalEvent, PasswordChangeEvent } from "@core/event/back-office
 import { EmailService } from "@alert/email/email.service";
 import { Resend } from "resend";
 import { ConfigService } from "@nestjs/config";
+import { Employee } from "@prisma/client";
 
 @Injectable()
 export class LeavePrismaHelperService {
@@ -30,6 +31,7 @@ export class LeavePrismaHelperService {
             name: dto.leaveName,
             duration: dto.leaveDuration,
             type: dto.leaveType,
+            leaveDocUrl: dto.leaveDocUrl,
             createdBy: creatorEmail,
             Organization: {
               connect: { id: orgID }
@@ -47,7 +49,8 @@ export class LeavePrismaHelperService {
           employeeId: employee.id,
           leaveId: leave.id,
           remainingDuration: dto.leaveDuration,
-          leaveName: dto.leaveName
+          leaveName: dto.leaveName,
+          leaveDocUrl: dto.leaveDocUrl
         }));
 
         await tx.employeeLeave.createMany({
@@ -73,7 +76,7 @@ export class LeavePrismaHelperService {
     }
   }
 
-  async applyLeave(dto, orgID, employee) {
+  async applyLeave(dto, orgID, employee: Employee) {
     try {
       await this.prismaService.$transaction(async (tx) => {
         const leave = await tx.leave.findFirst(
@@ -94,11 +97,25 @@ export class LeavePrismaHelperService {
             employeeId: employee.id,
             leaveStatus: "PENDING",
             reliefOfficer: dto.reliefOfficer,
+            supervisorEmail: dto.supervisorEmail,
+            leaveDocs: dto.leaveDocs,
             leaveId: leave.id
           }
         });
 
-        const updatedEmployeeLeave = await tx.employeeLeave.update({
+        await tx.teamRequestsAndApproval.create({
+          data: {
+            Team: {
+              connect: {
+                id: employee.teamId
+              }
+            },
+            name: "Leave Application Approval test",
+            createdBy: employee.email
+          }
+        });
+
+        await tx.employeeLeave.update({
           where: {
             employeeId_leaveId: {
               employeeId: employee.id,
@@ -113,6 +130,14 @@ export class LeavePrismaHelperService {
         });
 
         try {
+          let ccEmail = [];
+          if (dto.reliefOfficer) {
+            ccEmail.push(dto.reliefOfficer);
+          }
+
+          if (dto.supervisorEmail) {
+            ccEmail.push(dto.supervisorEmail);
+          }
           const html = await this.emailService.sendLeaveApprovalEmail({
             employeeName: employee.firstname,
             leaveEndDate: dto.leaveEndDate,
@@ -121,7 +146,7 @@ export class LeavePrismaHelperService {
           await this.resend.emails.send({
             from: `${this.mailSource}`,
             to: `${employee.email}`,
-            cc: `${dto.reliefOfficer}`,
+            cc: ccEmail,
             subject: "Leave Status",
             html: `${html}`
           });

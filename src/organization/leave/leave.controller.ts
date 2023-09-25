@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, UseGuards, ValidationPipe } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete, FileTypeValidator,
+  Get,
+  HttpStatus, MaxFileSizeValidator,
+  Param, ParseFilePipe,
+  Post, UploadedFile, UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+  ValidationPipe
+} from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { EmployeeRoleGuard } from "@core/guard/employee-role.guard";
 import { BaseController } from "@core/utils/base-controller.controller";
@@ -9,13 +20,19 @@ import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { ApplyForLeave, CreateLeaveDto } from "@core/dto/global/leave.dto";
 import { LeaveService } from "@organization/leave/leave.service";
 import { SkipThrottle } from "@nestjs/throttler";
+import { Express } from "express";
+import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
+import { CloudinaryService } from "@cloudinary/cloudinary.service";
+
 
 @SkipThrottle()
 @Controller("organization/leave")
 @UseGuards(AuthGuard())
 @UseGuards(EmployeeRoleGuard)
 export class LeaveController extends BaseController {
-  constructor(private readonly leaveService: LeaveService) {
+  constructor(private readonly leaveService: LeaveService,
+              private readonly cloudinaryService: CloudinaryService
+  ) {
     super();
   }
 
@@ -51,8 +68,6 @@ export class LeaveController extends BaseController {
   }
 
   // TODO leave goes  for approval to someone higher
-  // TODO email notifs
-
 
   // TODO delete employee leave
   @Delete("/:orgID/deleteLeave/:empID")
@@ -62,7 +77,7 @@ export class LeaveController extends BaseController {
   ) {
     return this.response({
       payload: await this.leaveService.deleteEmployeeLeavePlan(orgID, empID, payload.email),
-      message: "Successful",
+      message: "Successful"
 
     });
   }
@@ -84,25 +99,48 @@ export class LeaveController extends BaseController {
 
   @Get("/:orgID/allEmployeesOnLeave")
   async getAllEmployeesOnLeave(@Param("orgID") orgID: string
-  ){
-    return this.response({payload: await this.leaveService.allEmployeesOnLeave(orgID)})
+  ) {
+    return this.response({ payload: await this.leaveService.allEmployeesOnLeave(orgID) });
   }
 
   @Get("/:orgID/:leaveID/leave")
   async getOneLeave(@Param("orgID") orgID: string,
-                    @Param("leaveID")leaveID:string,
-                    @GetUser() payload:AuthPayload
-  ){
-    return this.response({payload:await this.leaveService.findOneLeave(orgID, leaveID,payload.email)})
+                    @Param("leaveID") leaveID: string,
+                    @GetUser() payload: AuthPayload
+  ) {
+    return this.response({ payload: await this.leaveService.findOneLeave(orgID, leaveID, payload.email) });
   }
 
-  //Testing
-  // @Get("onboarders")
-  // async getOnboarders(@GetUser() payload: AuthPayload,
-  //                     @Body(ValidationPipe) dto: MockLeaveDto
+  Testing;
+
+  // @Post("onboarders")
+  // @UseInterceptors(FilesInterceptor("files"))
+  // async getOnboard(@GetUser() payload: AuthPayload,
+  //                  @UploadedFiles(new ParseFilePipe({
+  //                    validators: [
+  //                      new FileTypeValidator({ fileType: ".(pdf|doc|docx)" }),
+  //                      new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2, message: "File size more than 2 mb" })
+  //                    ]
+  //                  })) files: Array<Express.Multer.File>
   // ) {
-  //   console.log(payload, dto,);
+  //   // console.log(payload, files);
+  //   try {
+  //     const url = await this.cloudinaryService.uploadManyFiles(files);
+  //     return this.response({ payload: url });
+  //   } catch (e) {
+  //     return this.response({ payload: e });
+  //   }
   // }
 
 
+  // @Get("onboarders/delete/:public_id")
+  // async deleteFileUploaded(@Param("public_id") public_id: string) {
+  //   try {
+  //     const msg = await this.cloudinaryService.deleteImage(public_id);
+  //     return this.response({ payload: msg });
+  //   } catch (e) {
+  //     return this.response({ payload: e });
+  //   }
+  //
+  // }
 }

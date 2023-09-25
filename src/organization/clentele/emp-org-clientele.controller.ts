@@ -15,16 +15,16 @@ import { SkipThrottle } from "@nestjs/throttler";
 @Controller("organization/clientele")
 @UseGuards(AuthGuard())
 @UseGuards(EmployeeRoleGuard)
-export class EmpOrgClienteleController extends BaseController{
-  constructor(private readonly clenteleService:EmpOrgClienteleService) {
+export class EmpOrgClienteleController extends BaseController {
+  constructor(private readonly clenteleService: EmpOrgClienteleService) {
     super();
   }
 
   @Post("/:orgID/addClientele")
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async addClienteleToOrg(@Param("orgID") orgID: string,
-                       @GetUser() payload: AuthPayload,
-                       @Body(ValidationPipe) dto: CreateClienteleDto
+                          @GetUser() payload: AuthPayload,
+                          @Body(ValidationPipe) dto: CreateClienteleDto
   ) {
     return this.response({ payload: await this.clenteleService.onboardClienteleToOrg(dto, orgID, payload.email) });
   }
@@ -32,7 +32,7 @@ export class EmpOrgClienteleController extends BaseController{
   @Post("/:orgID/allClientele")
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async findAllOrgClients(@Body() searchRequest: SearchRequest,
-                           @Param("orgID") orgID: string
+                          @Param("orgID") orgID: string
   ) {
     return this.response({ payload: await this.clenteleService.allClientele(orgID, searchRequest) });
   }
@@ -43,6 +43,13 @@ export class EmpOrgClienteleController extends BaseController{
                       @Param("clienteleID") clienteleID: string
   ) {
     return this.response({ payload: await this.clenteleService.oneClientele(orgID, clienteleID) });
+  }
+
+  @Get("/:orgID/clientele/:clienteleID/allEmployees")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async getAllEmployeesInAClient(@Param("orgID") orgID: string,
+                                 @Param("clienteleID") clienteleID: string) {
+    return this.response({ payload: await this.clenteleService.allEmployeesInClient(orgID, clienteleID) });
   }
 
 }

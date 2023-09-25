@@ -63,21 +63,20 @@ export class JobOpeningHelperService {
 
     const [jobOpenings, jobOpeningsResponses] = await this.prismaService.$transaction([
 
-       this.prismaService.jobOpening.findFirst({
+      this.prismaService.jobOpening.findFirst({
         where: {
           id: jobOpeningID,
           organizationID: orgID
         }
       }),
 
-       this.prismaService.jobOpeningResponses.findMany({
+      this.prismaService.jobOpeningResponses.findMany({
         where: {
           jobOpeningID: jobOpeningID,
           organizationID: orgID
-        },
+        }
       })
     ]);
-
 
 
     if (!jobOpenings) {
@@ -89,6 +88,7 @@ export class JobOpeningHelperService {
   }
 
   async applyForJobOpening(dto: ApplyForJobDto, orgID: string, jobOpeningID: string) {
+
     try {
       await this.prismaService.jobOpeningResponses.create({
         data: {
