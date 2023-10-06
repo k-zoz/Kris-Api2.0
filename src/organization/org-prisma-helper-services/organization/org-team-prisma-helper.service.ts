@@ -356,8 +356,11 @@ export class OrgTeamPrismaHelperService {
             id: team.id
           }
         },
-        orderBy:{
-          createdDate:'desc'
+        include: {
+          leaveApprovalRequest: true
+        },
+        orderBy: {
+          createdDate: "desc"
         }
       });
     } catch (e) {

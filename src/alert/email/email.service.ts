@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import {
   HODConfirmationEvent,
-  LeaveApprovalEvent,
+  LeaveApplicationEvent, LeaveApprovalEvent,
   NewBackOfficerEvent,
   NewEmployeeEvent, NewEmployeePasswordResetEvent,
   NewOrganizationEvent,
@@ -101,6 +101,32 @@ export class EmailService {
 
 
   async sendLeaveApprovalEmail(event: LeaveApprovalEvent) {
+    const relativePath = "../../templates/leaveApproval.hbs";
+    const absolutePath = path.join(__dirname, relativePath);
+    const sourceFile = fs.readFileSync(absolutePath, "utf-8");
+    const template = Handlebars.compile(sourceFile);
+    const data = {
+      firstname: event.employeeName,
+      leaveStartDate: event.leaveStartDate,
+      leaveEndDate: event.leaveEndDate
+    };
+    return template(data);
+  }
+
+  async sendLeaveApplicationEmail(event: LeaveApplicationEvent) {
+    const relativePath = "../../templates/leaveApproval.hbs";
+    const absolutePath = path.join(__dirname, relativePath);
+    const sourceFile = fs.readFileSync(absolutePath, "utf-8");
+    const template = Handlebars.compile(sourceFile);
+    const data = {
+      firstname: event.employeeName,
+      leaveStartDate: event.leaveStartDate,
+      leaveEndDate: event.leaveEndDate
+    };
+    return template(data);
+  }
+
+  async sendLeaveRejectionEmail(event: LeaveApplicationEvent) {
     const relativePath = "../../templates/leaveApproval.hbs";
     const absolutePath = path.join(__dirname, relativePath);
     const sourceFile = fs.readFileSync(absolutePath, "utf-8");

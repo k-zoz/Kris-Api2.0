@@ -143,4 +143,14 @@ export class LeaveController extends BaseController {
   //   }
   //
   // }
+
+  @Get("approveLeave/:teamRequestID")
+  async approveLeave(@Param("teamRequestID") teamRequestID: string) {
+    return this.response({ payload: await this.leaveService.approveEmployeeLeave(teamRequestID) });
+  }
+
+  @Get("declineLeave/:teamRequestID")
+  async declineLeave(@Param("teamRequestID") teamRequestID: string) {
+    return this.response({ payload: await this.leaveService.declineEmployeeLeave(teamRequestID) });
+  }
 }

@@ -1,5 +1,5 @@
 import { BaseDto } from "@core/dto/global/base.dto";
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class OnboardingDto extends BaseDto {
   @IsNotEmpty()
@@ -8,4 +8,6 @@ export class OnboardingDto extends BaseDto {
   @IsNotEmpty()
   @IsString()
   description: string;
+  @IsOptional()
+  contentUrl: any;
 }

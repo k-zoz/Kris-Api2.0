@@ -3,11 +3,11 @@ import { PrismaService } from "@prisma/prisma.service";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { CreateLeaveDto } from "@core/dto/global/leave.dto";
-import { LeaveApprovalEvent, PasswordChangeEvent } from "@core/event/back-office-event";
+import { LeaveApplicationEvent, PasswordChangeEvent } from "@core/event/back-office-event";
 import { EmailService } from "@alert/email/email.service";
 import { Resend } from "resend";
 import { ConfigService } from "@nestjs/config";
-import { Employee } from "@prisma/client";
+import { Employee, LeaveApplication } from "@prisma/client";
 
 @Injectable()
 export class LeavePrismaHelperService {
@@ -99,7 +99,8 @@ export class LeavePrismaHelperService {
             reliefOfficer: dto.reliefOfficer,
             supervisorEmail: dto.supervisorEmail,
             leaveDocs: dto.leaveDocs,
-            leaveId: leave.id
+            leaveId: leave.id,
+            createdBy: employee.email
           }
         });
 
@@ -110,7 +111,12 @@ export class LeavePrismaHelperService {
                 id: employee.teamId
               }
             },
-            name: "Leave Application Approval test",
+            leaveApprovalRequest: {
+              connect: {
+                id: leaveApplication.id
+              }
+            },
+            name: "Leave Application",
             createdBy: employee.email
           }
         });
@@ -138,11 +144,11 @@ export class LeavePrismaHelperService {
           if (dto.supervisorEmail) {
             ccEmail.push(dto.supervisorEmail);
           }
-          const html = await this.emailService.sendLeaveApprovalEmail({
+          const html = await this.emailService.sendLeaveApplicationEmail({
             employeeName: employee.firstname,
             leaveEndDate: dto.leaveEndDate,
             leaveStartDate: dto.leaveStartDate
-          } as LeaveApprovalEvent);
+          } as LeaveApplicationEvent);
           await this.resend.emails.send({
             from: `${this.mailSource}`,
             to: `${employee.email}`,
@@ -339,6 +345,124 @@ export class LeavePrismaHelperService {
       this.logger.error("Leave does not exist");
       throw new AppException();
     }
+  }
+
+  async approveLeaveAndSendApprovalMail(leaveApplication: LeaveApplication, employee:Employee) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        await tx.leaveApplication.update({
+          where: { id: leaveApplication.id },
+          data: { leaveStatus: "APPROVED" }
+        });
+
+        try {
+          let ccEmail = [];
+          if (leaveApplication.reliefOfficer) {
+            ccEmail.push(leaveApplication.reliefOfficer);
+          }
+          if (leaveApplication.supervisorEmail) {
+            ccEmail.push(leaveApplication.supervisorEmail);
+          }
+          const html = await this.emailService.sendLeaveApprovalEmail({
+            employeeName: employee.firstname,
+            leaveEndDate: leaveApplication.endDate,
+            leaveStartDate: leaveApplication.startDate
+          } as LeaveApplicationEvent);
+          await this.resend.emails.send({
+            from: `${this.mailSource}`,
+            to: `${employee.email}`,
+            cc: ccEmail,
+            subject: "Leave Status",
+            html: `${html}`
+          });
+          this.logger.log(`Email Successfully sent to ${employee.email}`);
+        } catch (e) {
+          this.logger.error(e);
+          throw new AppException("Error sending email");
+        }
+      }, { maxWait: 5000, timeout: 10000 });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error approving leave");
+    }
+  }
+
+  async declineLeaveAndSendDeclineMail(leaveApplicationID: string) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+
+        const leaveApplication = await tx.leaveApplication.findUnique({
+          where: { id: leaveApplicationID }
+        });
+
+        const employee = await tx.employee.findUnique({
+          where: { id: leaveApplication.employeeId }
+        });
+
+        await tx.leaveApplication.update({
+          where: { id: leaveApplicationID },
+          data: { leaveStatus: "DECLINED" }
+        });
+
+        try {
+          let ccEmail = [];
+          if (leaveApplication.reliefOfficer) {
+            ccEmail.push(leaveApplication.reliefOfficer);
+          }
+          if (leaveApplication.supervisorEmail) {
+            ccEmail.push(leaveApplication.supervisorEmail);
+          }
+          const html = await this.emailService.sendLeaveApprovalEmail({
+            employeeName: employee.firstname,
+            leaveEndDate: leaveApplication.endDate,
+            leaveStartDate: leaveApplication.startDate
+          } as LeaveApplicationEvent);
+          await this.resend.emails.send({
+            from: `${this.mailSource}`,
+            to: `${employee.email}`,
+            cc: ccEmail,
+            subject: "Leave Status",
+            html: `${html}`
+          });
+          this.logger.log(`Email Successfully sent to ${employee.email}`);
+        } catch (e) {
+          this.logger.error(e);
+          throw new AppException("Error sending email");
+        }
+      }, { maxWait: 5000, timeout: 10000 });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error approving leave");
+    }
+  }
+
+  async findTeamRequest(teamRequestID: string) {
+    const teamReq = await this.prismaService.teamRequestsAndApproval.findFirst({
+      where: {
+        id: teamRequestID
+      },
+      include: {
+        leaveApprovalRequest: true
+      }
+    });
+
+    if (!teamReq) {
+      throw  new AppNotFoundException("Request does not exist");
+    }
+    return teamReq;
+  }
+
+  async findLeaveApplication(leaveAppID) {
+    const leaveApplication = await this.prismaService.leaveApplication.findFirst({
+      where: {
+        id: leaveAppID
+      },
+    });
+
+    if (!leaveApplication) {
+      throw  new AppNotFoundException("Leave application does not exist");
+    }
+    return leaveApplication;
   }
 }
 

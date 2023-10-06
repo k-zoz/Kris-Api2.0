@@ -6,7 +6,6 @@ import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 import { UtilService } from "@core/utils/util.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
-import { log } from "winston";
 
 @Injectable()
 export class LeaveService {
@@ -19,6 +18,7 @@ export class LeaveService {
               private readonly utilService: UtilService
   ) {
   }
+
 
   async createLeavePlan(dto: CreateLeaveDto, orgID: string, creatorEmail: string) {
     await this.orgHelperService.findOrgByID(orgID);
@@ -81,6 +81,18 @@ export class LeaveService {
     await this.orgHelperService.findOrgByID(orgID);
     const employee = await this.employeeHelperService.findEmpByEmail(email);
     return await this.leaveHelperService.findOneLeave(orgID, leaveID, employee);
+  }
+
+
+  async approveEmployeeLeave(teamRequestID: string) {
+    const teamReq = await this.leaveHelperService.findTeamRequest(teamRequestID);
+    const employee = await this.employeeHelperService.findEmpById(teamReq.leaveApprovalRequest[0].employeeId);
+    const leaveApp = await this.leaveHelperService.findLeaveApplication(teamReq.leaveApprovalRequest[0].id);
+    return await this.leaveHelperService.approveLeaveAndSendApprovalMail(leaveApp, employee);
+  }
+
+  async declineEmployeeLeave(leaveApplicationID: string) {
+    return await this.leaveHelperService.declineLeaveAndSendDeclineMail(leaveApplicationID);
   }
 }
 

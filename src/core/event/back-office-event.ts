@@ -40,6 +40,12 @@ export class PayslipEmailEvent {
 }
 
 
+export class LeaveApplicationEvent {
+  employeeName:string
+  leaveStartDate:any
+  leaveEndDate:any
+}
+
 export class LeaveApprovalEvent {
   employeeName:string
   leaveStartDate:string

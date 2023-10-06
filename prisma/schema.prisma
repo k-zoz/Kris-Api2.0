@@ -97,12 +97,12 @@ model Organization {
 
 model Org_Branch {
   id          String @id @default(uuid())
-  name        String @unique
+  name        String
   location    String
   state       String
   city        String
   country     String
-  branch_code String @unique
+  branch_code String
 
   organizationId String
   Organization   Organization @relation(fields: [organizationId], references: [id])
@@ -178,12 +178,13 @@ model Team {
 }
 
 model TeamRequestsAndApproval {
-  id          String   @id @default(uuid())
-  name        String?
-  createdDate DateTime @default(now()) @db.Date
-  createdBy   String?
-  Team        Team?    @relation(fields: [teamId], references: [id])
-  teamId      String?
+  id                   String             @id @default(uuid())
+  name                 String?
+  leaveApprovalRequest LeaveApplication[]
+  createdDate          DateTime           @default(now()) @db.Date
+  createdBy            String?
+  Team                 Team?              @relation(fields: [teamId], references: [id])
+  teamId               String?
 }
 
 // model TeamLead {
@@ -651,6 +652,7 @@ model Onboarding {
   id              String               @id @default(uuid())
   name            String
   description     String
+  contentUrl      String?
   employeeOnboard EmployeeOnboarding[]
   organizationId  String
   Organization    Organization         @relation(fields: [organizationId], references: [id])
@@ -707,8 +709,12 @@ model LeaveApplication {
   leaveStatus    LeaveApplicationStatus?
   supervDesicion SupervisorDecision?
 
-  createdDate DateTime @default(now()) @db.Date
-  createdBy   String?
+  createdDate               DateTime                 @default(now()) @db.Date
+  createdBy                 String?
+  modifiedBy                String?
+  modifiedDate              DateTime?                @updatedAt
+  TeamRequestsAndApproval   TeamRequestsAndApproval? @relation(fields: [teamRequestsAndApprovalId], references: [id])
+  teamRequestsAndApprovalId String?
 }
 
 enum LeaveApplicationStatus {

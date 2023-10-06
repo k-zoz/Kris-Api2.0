@@ -17,7 +17,7 @@ import { EmployeeOrganizationModule } from "@organization/employeeOrganization.m
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { AlertModule } from "@alert/alert.module";
-import { CloudinaryModule } from "./cloudinary/cloudinary.module";
+import { CloudinaryModule } from "@cloudinary/cloudinary.module";
 
 
 @Module({
@@ -48,6 +48,7 @@ import { CloudinaryModule } from "./cloudinary/cloudinary.module";
     //     port: 6379,
     //   })
     // }),
+
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

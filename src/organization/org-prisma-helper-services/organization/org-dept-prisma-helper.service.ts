@@ -8,7 +8,7 @@ import {
 } from "@core/dto/global/organization.dto";
 import { Department, Employee, Org_Branch, Organization } from "@prisma/client";
 import { SearchRequest } from "@core/model/search-request";
-import { HODConfirmationEvent, LeaveApprovalEvent } from "@core/event/back-office-event";
+import { HODConfirmationEvent, LeaveApplicationEvent } from "@core/event/back-office-event";
 import { Resend } from "resend";
 import { ConfigService } from "@nestjs/config";
 import { EmailService } from "@alert/email/email.service";

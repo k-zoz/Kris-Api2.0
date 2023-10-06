@@ -322,7 +322,8 @@ export class EmployeePrismaHelperService {
   };
 
   async findAllEmployeesInOrg(request, orgID) {
-    const { skip, take } = request;
+    const { take, pageSize, pageIndex } = request;
+    const skip = (pageIndex - 1) * pageSize;
     try {
       const [employees, total] = await this.prismaService.$transaction([
           this.prismaService.organization.findFirst({
@@ -357,7 +358,7 @@ export class EmployeePrismaHelperService {
               }
             },
             skip,
-            take
+            take: pageSize
           }),
           this.prismaService.employee.count({ where: { organizationId: orgID } })
         ]
@@ -480,15 +481,15 @@ export class EmployeePrismaHelperService {
           }
         });
 
-        // if (!dto.empTeam) {
-        // }
-        // const team = await tx.team.findFirst({
-        //   where: {
-        //     organizationId: orgName.id,
-        //     departmentId: department.id,
-        //     name: dto.empTeam
-        //   }
-        // });
+        if (!dto.empTeam) {
+        }
+        const team = await tx.team.findFirst({
+          where: {
+            organizationId: orgName.id,
+            departmentId: department.id,
+            name: dto.empTeam
+          }
+        });
 
         // if (!dto.employeeClient) {
         // }
@@ -518,13 +519,13 @@ export class EmployeePrismaHelperService {
             //      name:dto.employeeBranch
             //    }
             //  },
-            departmentId: department.id
+            departmentId: department.id,
             //  Department:{
             //    connect:{
             //      name:dto.department
             //    }
             //  },
-            //  teamId: team.id,
+            teamId: team.id
             //   Team:{
             //     connect:{
             //

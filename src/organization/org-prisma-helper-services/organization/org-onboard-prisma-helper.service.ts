@@ -8,7 +8,8 @@ import { AuthMsg } from "@core/const/security-msg-const";
 export class OrgOnboardPrismaHelperService {
   private readonly logger = new Logger(OrgOnboardPrismaHelperService.name);
 
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {
+  }
 
   async createOnboardingDoc(dto: OnboardingDto, orgID: string, email: string) {
     try {
@@ -50,6 +51,7 @@ export class OrgOnboardPrismaHelperService {
         data: {
           name: dto.name,
           description: dto.description,
+          contentUrl: dto.contentUrl,
           createdBy: email,
           organizationId: orgID
         }
@@ -122,7 +124,12 @@ export class OrgOnboardPrismaHelperService {
               tx.onboarding.update({
                 where: { id: onboarding.id }, data: {
                   employeeOnboard: {
-                    create: { employeeId: employee.id, name: onboarding.name, description: onboarding.description, createdBy:email }
+                    create: {
+                      employeeId: employee.id,
+                      name: onboarding.name,
+                      description: onboarding.description,
+                      createdBy: email
+                    }
                   }
                 }
               })
