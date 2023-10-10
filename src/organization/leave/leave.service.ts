@@ -39,14 +39,15 @@ export class LeaveService {
   async leaveApplication(dto: ApplyForLeave, orgID: string, userPayLoad: AuthPayload) {
     await this.orgHelperService.findOrgByID(orgID);
     dto.leaveName = this.utilService.toUpperCase(dto.leaveName);
-    await this.leaveHelperService.findOrgLeaveByName(dto.leaveName, orgID);
     const employee = await this.employeeHelperService.findEmpByEmail(userPayLoad.email);
+    const leave = await this.leaveHelperService.findOrgLeaveByName(dto.leaveName, employee.organizationId);
     //date conversion based on how dates are entered or could be handled in the front end
     dto.leaveDuration = this.utilService.countWeekdays(dto.leaveStartDate, dto.leaveEndDate);
     dto.leaveEndDate = this.utilService.convertDateAgain(dto.leaveEndDate);
     dto.leaveStartDate = this.utilService.convertDateAgain(dto.leaveStartDate);
     await this.leaveHelperService.leaveDurationRequest(employee, dto);
-    return await this.leaveHelperService.applyLeave(dto, orgID, employee);
+    const leaveApplication = await this.leaveHelperService.applyLeave(dto, orgID, employee, leave);
+    return await this.leaveHelperService.updateRequests(employee, leaveApplication);
   }
 
 
@@ -84,11 +85,11 @@ export class LeaveService {
   }
 
 
-  async approveEmployeeLeave(teamRequestID: string) {
+  async approveEmployeeLeave(teamRequestID: string, approveMail: string) {
     const teamReq = await this.leaveHelperService.findTeamRequest(teamRequestID);
     const employee = await this.employeeHelperService.findEmpById(teamReq.leaveApprovalRequest[0].employeeId);
     const leaveApp = await this.leaveHelperService.findLeaveApplication(teamReq.leaveApprovalRequest[0].id);
-    return await this.leaveHelperService.approveLeaveAndSendApprovalMail(leaveApp, employee);
+    return await this.leaveHelperService.approveLeaveAndSendApprovalMail(leaveApp, employee, teamReq, approveMail);
   }
 
   async declineEmployeeLeave(leaveApplicationID: string) {

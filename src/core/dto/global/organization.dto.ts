@@ -37,6 +37,14 @@ export class CreateOrgDto extends BaseDto {
   orgKrisId: string;
 }
 
+export  class MakeAnnouncementsDto {
+  @IsNotEmpty()
+  @IsString()
+  title:string
+  @IsNotEmpty()
+  @IsString()
+  content:string
+}
 
 export class EditOrgDto extends BaseDto {
   @IsOptional()

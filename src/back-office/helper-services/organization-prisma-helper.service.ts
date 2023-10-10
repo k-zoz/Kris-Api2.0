@@ -2,12 +2,13 @@ import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { AppConst } from "@core/const/app.const";
-import { CreateOrgDto } from "@core/dto/global/organization.dto";
+import { CreateOrgDto, MakeAnnouncementsDto } from "@core/dto/global/organization.dto";
 import { EmailService } from "../../alert/email/email.service";
 import { ConfigService } from "@nestjs/config";
 import { Resend } from "resend";
 import { NewEmployeePasswordResetEvent, NewOrganizationEvent } from "@core/event/back-office-event";
 import * as argon from "argon2";
+import { Employee, Organization } from "@prisma/client";
 
 @Injectable()
 export class OrganizationPrismaHelperService {
@@ -250,5 +251,60 @@ export class OrganizationPrismaHelperService {
       throw new AppConflictException(AppConst.error, { context: msg });
     }
 
+  }
+
+  async makeAnnouncementPost(announcer: Employee, dto: MakeAnnouncementsDto) {
+    try {
+      return await this.prismaService.$transaction(async (tx) => {
+        const announcement = await tx.organizationAnnouncement.create({
+          data: {
+            title: dto.title,
+            content: dto.content,
+            organization: {
+              connect: {
+                id: announcer.organizationId
+              }
+            },
+            createdBy: announcer.email
+          }
+        });
+
+        const employees = await tx.employee.findMany({
+          where: {
+            organizationId: announcer.organizationId
+          }
+        });
+
+        const employeeAnnouncementData = employees.map((employee) => ({
+          employeeId: employee.id,
+          orgAnnouncementID: announcement.id,
+          content: dto.content,
+          title: dto.title,
+          createdBy: announcer.email
+        }));
+
+        await tx.employeeAnnouncement.createMany({
+          data: employeeAnnouncementData
+        });
+        return "Successfully posted";
+      }, { maxWait: 5000, timeout: 10000 });
+
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException("Error making announcement. Contact Support");
+    }
+  }
+
+  async allMyOrganizationAnnouncements(employee: Employee, organization: Organization) {
+    try {
+      return await this.prismaService.employeeAnnouncement.findMany({
+        where: {
+          employeeId: employee.id
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException("Error getting my announcements. Contact Support");
+    }
   }
 }

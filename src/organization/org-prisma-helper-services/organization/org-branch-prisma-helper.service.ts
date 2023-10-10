@@ -1,7 +1,12 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
 import { CreateBranchDto } from "@core/dto/global/branch.dto";
-import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
+import {
+  AppConflictException,
+  AppException,
+  AppNotFoundException,
+  AppUnauthorizedException
+} from "@core/exception/app-exception";
 import { SearchRequest } from "@core/model/search-request";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { Employee, Org_Branch } from "@prisma/client";
@@ -207,17 +212,7 @@ export class OrgBranchPrismaHelperService {
   async makeEmployeeBranchManager(employee: Employee, branch: Org_Branch, orgID: string) {
     try {
       await this.prismaService.$transaction(async (tx) => {
-        this.prismaService.employee.update({
-          where: { id: employee.id },
-          data: {
-            hierarchy_position: "BRANCH_MANAGER",
-            managedBranch: {
-              connect: {
-                id: branch.id
-              }
-            }
-          }
-        });
+
         this.prismaService.org_Branch.update({
           where: { id: branch.id },
           data: {
@@ -235,7 +230,7 @@ export class OrgBranchPrismaHelperService {
 
   async confirmIfEmployeeIsBranchManager(employee: Employee, branch: Org_Branch) {
     if (branch.branchManagerId !== employee.id) {
-      throw new AppException("Employee is not the branch manager");
+      throw new AppUnauthorizedException("Not the branch manager!");
     }
   }
 
@@ -316,6 +311,27 @@ export class OrgBranchPrismaHelperService {
   async checkIfEmployeeBelongsToAnyBranch(employee: Employee) {
     if (!employee.org_BranchId) {
       throw new AppNotFoundException("Employee does not belong to any branch!");
+    }
+  }
+
+  async allBranchRequests(branch: Org_Branch) {
+    try {
+      return await this.prismaService.branchRequestsAndApproval.findMany({
+        where: {
+          branch: {
+            id: branch.id
+          }
+        },
+        include: {
+          leaveApprovalRequest: true
+        },
+        orderBy: {
+          createdDate: "desc"
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error getting all branch requests");
     }
   }
 }

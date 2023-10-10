@@ -514,23 +514,8 @@ export class EmployeePrismaHelperService {
             dateOfJoining: dto.dateOfJoining,
             dateOfConfirmation: dto.dateOfConfirmation,
             org_BranchId: branch.id,
-            //  org_Branch:{
-            //    connect:{
-            //      name:dto.employeeBranch
-            //    }
-            //  },
             departmentId: department.id,
-            //  Department:{
-            //    connect:{
-            //      name:dto.department
-            //    }
-            //  },
             teamId: team.id
-            //   Team:{
-            //     connect:{
-            //
-            //     }
-            //   }
             // org_ClienteleId: org_client.id
           }
         });

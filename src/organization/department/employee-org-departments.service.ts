@@ -37,13 +37,6 @@ export class EmployeeOrgDepartmentsService {
   }
 
 
-  async forceRemoveDept(orgID, deptID) {
-    await this.orgHelperService.findOrgByID(orgID);
-    await this.departmentHelperService.findDept(deptID, orgID);
-    return await this.departmentHelperService.hardRemoveDeptFromOrg(orgID, deptID);
-  }
-
-
   async softRemoveDept(orgID, deptID) {
     await this.orgHelperService.findOrgByID(orgID);
     await this.departmentHelperService.findDept(deptID, orgID);
@@ -78,11 +71,11 @@ export class EmployeeOrgDepartmentsService {
   }
 
   async headOfDepartment(dto: HeadOFDepartmentDto, orgID: string, deptID: string) {
-  const organization =  await this.orgHelperService.findOrgByID(orgID);
+    const organization = await this.orgHelperService.findOrgByID(orgID);
     const employee = await this.employeeService.findEmpByEmail(dto.email);
     const department = await this.departmentHelperService.findDept(deptID, orgID);
     await this.departmentHelperService.isEmployeeAMemberOfDepartment(employee, department);
-    return await this.departmentHelperService.makeEmployeeHOD(employee, department,organization);
+    return await this.departmentHelperService.makeEmployeeHOD(employee, department, organization);
 
   }
 
@@ -107,4 +100,11 @@ export class EmployeeOrgDepartmentsService {
   }
 
 
+  async departmentRequests(email: string) {
+    const employee = await this.employeeService.findEmpByEmail(email);
+    await this.departmentHelperService.checkIfEmployeeHasADepartment(employee);
+    const department = await this.departmentHelperService.findDept(employee.departmentId, employee.organizationId);
+    await this.departmentHelperService.confirmIfEmployeeIsHeadOfDepartment(employee, department);
+    return await this.departmentHelperService.allDepartmentRequests(employee, department);
+  }
 }

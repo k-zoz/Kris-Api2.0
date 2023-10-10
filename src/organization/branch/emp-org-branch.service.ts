@@ -78,4 +78,13 @@ export class EmpOrgBranchService {
   }
 
 
+  async branchRequests(email: string) {
+    const employee = await this.employeeHelperService.findEmpByEmail(email)
+    await this.branchHelperService.checkIfEmployeeBelongsToAnyBranch(employee)
+    const branch = await this.branchHelperService.findBranch(employee.org_BranchId, employee.organizationId)
+    await this.branchHelperService.confirmIfEmployeeIsBranchManager(employee, branch)
+    return await this.branchHelperService.allBranchRequests(branch)
+
+
+  }
 }

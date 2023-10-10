@@ -25,6 +25,15 @@ export class EmployeeOrgDepartmentsController extends BaseController {
     super();
   }
 
+
+  
+
+
+  @Get("myDepartmentRequests")
+  async  getMyDepartmentRequests(@GetUser() payload: AuthPayload){
+    return this.response({payload:await this.departmentService.departmentRequests(payload.email)})
+  }
+
   @Post("/:orgID/addDepartment/:branchID")
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async addDeptToBranch(@Param("branchID") branchID: string,
@@ -39,17 +48,6 @@ export class EmployeeOrgDepartmentsController extends BaseController {
   }
 
 
-  // TODO  HARD DELETE DEPT-This will also remove the department from its associated organization,
-  //  as well as delete any associated Team and Employee records due to cascading delete behavior.
-  //  Note that this operation will permanently delete the department and all its associated data,
-  //  so it should be used with caution.
-  @Post("/:orgID/forceRemoveDepartment/:deptID")
-  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
-  async hardRemoveDepartment(@Param("orgID") orgID: string,
-                             @Param("deptID") deptID: string
-  ) {
-    return this.response({ payload: await this.departmentService.forceRemoveDept(orgID, deptID) });
-  }
 
 
   @Post("/:orgID/RemoveDepartment/:deptID")

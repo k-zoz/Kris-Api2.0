@@ -5,6 +5,7 @@ import { AuthMsg } from "@core/const/security-msg-const";
 import { randomBytes } from "crypto";
 import { v4 as uuidV4 } from "uuid";
 import * as moment from "moment";
+import { Department, Employee, Org_Branch, Team } from "@prisma/client";
 
 const dayjs = require("dayjs");
 

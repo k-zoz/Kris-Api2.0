@@ -1,6 +1,11 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
-import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
+import {
+  AppConflictException,
+  AppException,
+  AppNotFoundException,
+  AppUnauthorizedException
+} from "@core/exception/app-exception";
 import { Department, Employee, Org_Branch, Organization, Team } from "@prisma/client";
 import { HODConfirmationEvent, TeamLeadConfirmationEvent } from "@core/event/back-office-event";
 import { Resend } from "resend";
@@ -236,6 +241,7 @@ export class OrgTeamPrismaHelperService {
   }
 
   async allEmployeesInTeam(orgID: string, teamID: string) {
+
     try {
       return await this.prismaService.employee.findMany({
         where: { teamId: teamID },
@@ -268,7 +274,6 @@ export class OrgTeamPrismaHelperService {
   async makeEmployeeTeamLead(team: Team, employee: Employee, organization?: Organization) {
     try {
       await this.prismaService.$transaction(async (tx) => {
-
         await tx.team.update({
           where: { id: team.id },
           data: {
@@ -281,24 +286,7 @@ export class OrgTeamPrismaHelperService {
           }
         });
 
-        try {
-          const html = await this.emailService.sendTeamLeadConfirmationEmail({
-            organizationName: organization.orgName,
-            teamName: team.name,
-            employeeFirstName: employee.firstname
-          } as TeamLeadConfirmationEvent);
-          await this.resend.emails.send({
-            from: `${this.mailSource}`,
-            to: `${employee.email}`,
-            subject: "Team Lead Confirmation",
-            html: `${html}`
-          });
-          this.logger.log(`Email Successfully sent to ${employee.email}`);
-        } catch (e) {
-          this.logger.error(e);
-          throw new AppException("Error sending email");
-        }
-      }, { maxWait: 5000, timeout: 10000 });
+      });
       return `${employee.firstname} is now the team lead`;
     } catch (e) {
       this.logger.error(e);
@@ -308,7 +296,7 @@ export class OrgTeamPrismaHelperService {
 
   async confirmIfEmployeeIsTeamLead(team: Team, employee: Employee) {
     if (team.teamLeaderId !== employee.id) {
-      throw new AppException("Employee is not the team lead");
+      throw new AppUnauthorizedException("Not the team lead");
     }
   }
 
@@ -360,7 +348,7 @@ export class OrgTeamPrismaHelperService {
           leaveApprovalRequest: true
         },
         orderBy: {
-          createdDate: "desc"
+          createdDate: "asc"
         }
       });
     } catch (e) {

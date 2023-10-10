@@ -86,13 +86,48 @@ model Organization {
   createdBy  String?
   modifiedBy String?
 
-  createdDate         DateTime              @default(now()) @db.Date
-  modifiedDate        DateTime              @updatedAt @db.Date
-  OrganizationPayroll OrganizationPayroll[]
-  JobOpening          JobOpening[]
-  JobOpeningResponses JobOpeningResponses[]
+  createdDate              DateTime                   @default(now()) @db.Date
+  modifiedDate             DateTime                   @updatedAt @db.Date
+  OrganizationPayroll      OrganizationPayroll[]
+  JobOpening               JobOpening[]
+  JobOpeningResponses      JobOpeningResponses[]
+  OrganizationAnnouncement OrganizationAnnouncement[]
 
   @@unique([orgName, orgWebsite, orgEmail, orgNumber, orgRCnumber])
+}
+
+model OrganizationAnnouncement {
+  id             String       @id @default(uuid())
+  title          String
+  content        String
+  organizationID String
+  organization   Organization @relation(fields: [organizationID], references: [id])
+
+  createdBy  String?
+  modifiedBy String?
+
+  createdDate          DateTime               @default(now()) @db.Date
+  modifiedDate         DateTime               @updatedAt @db.Date
+  EmployeeAnnouncement EmployeeAnnouncement[]
+}
+
+model EmployeeAnnouncement {
+  id String @id @default(uuid())
+
+  title   String
+  content String
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  orgAnnouncementID String
+  announcement      OrganizationAnnouncement @relation(fields: [orgAnnouncementID], references: [id])
+
+  createdBy  String?
+  modifiedBy String?
+
+  createdDate  DateTime @default(now()) @db.Date
+  modifiedDate DateTime @updatedAt @db.Date
 }
 
 model Org_Branch {
@@ -110,11 +145,12 @@ model Org_Branch {
   department Department[]
   employees  Employee[]   @relation("Org_BranchToEmployees")
 
-  branchManager   Employee? @relation(name: "Org_BranchManaging", fields: [branchManagerId], references: [id])
-  branchManagerId String?   @unique
-  createdBy       String?
-  createdDate     DateTime  @default(now()) @db.Date
-  Team            Team[]
+  branchManager             Employee?                   @relation(name: "Org_BranchManaging", fields: [branchManagerId], references: [id])
+  branchManagerId           String?                     @unique
+  createdBy                 String?
+  createdDate               DateTime                    @default(now()) @db.Date
+  Team                      Team[]
+  BranchRequestsAndApproval BranchRequestsAndApproval[]
 
   @@index([organizationId])
 }
@@ -151,10 +187,11 @@ model Department {
   organizationId String
   Organization   Organization @relation(fields: [organizationId], references: [id])
 
-  Org_Branch   Org_Branch? @relation(fields: [org_BranchId], references: [id])
-  org_BranchId String?
-  createdDate  DateTime    @default(now()) @db.Date
-  createdBy    String?
+  Org_Branch              Org_Branch?               @relation(fields: [org_BranchId], references: [id])
+  org_BranchId            String?
+  createdDate             DateTime                  @default(now()) @db.Date
+  createdBy               String?
+  DeptRequestsAndApproval DeptRequestsAndApproval[]
 }
 
 model Team {
@@ -171,20 +208,48 @@ model Team {
   createdDate    DateTime     @default(now()) @db.Date
   createdBy      String?
 
-  teamLeader   Employee? @relation(name: "TeamLeading", fields: [teamLeaderId], references: [id])
-  teamLeaderId String?   @unique
-
+  teamLeader   Employee?                 @relation(name: "TeamLeading", fields: [teamLeaderId], references: [id])
+  teamLeaderId String?                   @unique
   teamRequests TeamRequestsAndApproval[]
 }
 
 model TeamRequestsAndApproval {
-  id                   String             @id @default(uuid())
+  id                   String              @id @default(uuid())
   name                 String?
   leaveApprovalRequest LeaveApplication[]
-  createdDate          DateTime           @default(now()) @db.Date
+  createdDate          DateTime            @default(now()) @db.Date
   createdBy            String?
-  Team                 Team?              @relation(fields: [teamId], references: [id])
+  Team                 Team?               @relation(fields: [teamId], references: [id])
   teamId               String?
+  decision             SupervisorDecision?
+  modifiedBy           String?
+  modifiedDate         DateTime?           @updatedAt
+}
+
+model DeptRequestsAndApproval {
+  id                   String              @id @default(uuid())
+  name                 String?
+  leaveApprovalRequest LeaveApplication[]
+  createdDate          DateTime            @default(now()) @db.Date
+  createdBy            String?
+  departmentID         String?
+  department           Department?         @relation(fields: [departmentID], references: [id])
+  decision             SupervisorDecision?
+  modifiedBy           String?
+  modifiedDate         DateTime?           @updatedAt
+}
+
+model BranchRequestsAndApproval {
+  id                   String              @id @default(uuid())
+  name                 String?
+  leaveApprovalRequest LeaveApplication[]
+  createdDate          DateTime            @default(now()) @db.Date
+  createdBy            String?
+  branchID             String?
+  branch               Org_Branch?         @relation(fields: [branchID], references: [id])
+  decision             SupervisorDecision?
+  modifiedBy           String?
+  modifiedDate         DateTime?           @updatedAt
 }
 
 // model TeamLead {
@@ -319,12 +384,13 @@ model Employee {
   Payroll_Preview   Payroll_Preview? @relation(fields: [payroll_PreviewId], references: [id])
   payroll_PreviewId String?
 
-  createdBy       String?
-  modifiedBy      String?
-  createdDate     DateTime          @default(now()) @db.Date
-  modifiedDate    DateTime          @updatedAt
-  EmployeePayroll EmployeePayroll[]
-  JobOpening      JobOpening[]
+  createdBy            String?
+  modifiedBy           String?
+  createdDate          DateTime               @default(now()) @db.Date
+  modifiedDate         DateTime               @updatedAt
+  EmployeePayroll      EmployeePayroll[]
+  JobOpening           JobOpening[]
+  EmployeeAnnouncement EmployeeAnnouncement[]
 
   @@unique([email, idNumber])
 }
@@ -709,12 +775,16 @@ model LeaveApplication {
   leaveStatus    LeaveApplicationStatus?
   supervDesicion SupervisorDecision?
 
-  createdDate               DateTime                 @default(now()) @db.Date
-  createdBy                 String?
-  modifiedBy                String?
-  modifiedDate              DateTime?                @updatedAt
-  TeamRequestsAndApproval   TeamRequestsAndApproval? @relation(fields: [teamRequestsAndApprovalId], references: [id])
-  teamRequestsAndApprovalId String?
+  createdDate                 DateTime                   @default(now()) @db.Date
+  createdBy                   String?
+  modifiedBy                  String?
+  modifiedDate                DateTime?                  @updatedAt
+  TeamRequestsAndApproval     TeamRequestsAndApproval?   @relation(fields: [teamRequestsAndApprovalId], references: [id])
+  teamRequestsAndApprovalId   String?
+  DeptRequestsAndApproval     DeptRequestsAndApproval?   @relation(fields: [deptRequestsAndApprovalId], references: [id])
+  deptRequestsAndApprovalId   String?
+  BranchRequestsAndApproval   BranchRequestsAndApproval? @relation(fields: [branchRequestsAndApprovalId], references: [id])
+  branchRequestsAndApprovalId String?
 }
 
 enum LeaveApplicationStatus {

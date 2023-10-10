@@ -7,7 +7,7 @@ import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
-import { EditOrgDto, ModifyOrg } from "@core/dto/global/organization.dto";
+import { EditOrgDto, MakeAnnouncementsDto, ModifyOrg } from "@core/dto/global/organization.dto";
 import { SearchRequest } from "@core/model/search-request";
 import { Permission } from "@core/decorator/roles.decorator";
 import { UserRoleEnum } from "@core/enum/user-role-enum";
@@ -20,8 +20,8 @@ import { SkipThrottle } from "@nestjs/throttler";
 @UseGuards(EmployeeRoleGuard)
 export class EmployeeOrganizationController extends BaseController {
   constructor(private readonly employeeOrganizationService: EmployeeOrganizationService,
-              private readonly organizationService: OrganizationService,
-              ) {
+              private readonly organizationService: OrganizationService
+  ) {
     super();
   }
 
@@ -41,6 +41,21 @@ export class EmployeeOrganizationController extends BaseController {
       message: "Changes saved Successfully",
       payload: await this.organizationService.editOrganization(request, orgID, payload.email)
     });
+  }
+
+  @Post("/:orgID/makeAnnouncements")
+  async postAnnouncement(@GetUser() payload: AuthPayload,
+                         @Param("orgID") orgID: string,
+                         @Body(ValidationPipe) dto: MakeAnnouncementsDto
+  ) {
+    return this.response({ payload: await this.organizationService.makeAnnouncements(dto, orgID, payload.email) });
+  }
+
+  @Get("announcements")
+  async myAnnouncements(@GetUser() payload: AuthPayload
+  ) {
+    return this.response({ payload: await this.organizationService.myAnnouncements(payload.email) });
+
   }
 
 }

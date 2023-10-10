@@ -7,7 +7,7 @@ import { LeaveApplicationEvent, PasswordChangeEvent } from "@core/event/back-off
 import { EmailService } from "@alert/email/email.service";
 import { Resend } from "resend";
 import { ConfigService } from "@nestjs/config";
-import { Employee, LeaveApplication } from "@prisma/client";
+import { Employee, Leave, LeaveApplication, TeamRequestsAndApproval } from "@prisma/client";
 
 @Injectable()
 export class LeavePrismaHelperService {
@@ -76,18 +76,9 @@ export class LeavePrismaHelperService {
     }
   }
 
-  async applyLeave(dto, orgID, employee: Employee) {
+  async applyLeave(dto, orgID, employee: Employee, leave: Leave) {
     try {
-      await this.prismaService.$transaction(async (tx) => {
-        const leave = await tx.leave.findFirst(
-          {
-            where: {
-              name: dto.leaveName,
-              organizationId: orgID
-            }
-          }
-        );
-
+      return await this.prismaService.$transaction(async (tx) => {
         const leaveApplication = await tx.leaveApplication.create({
           data: {
             leaveName: dto.leaveName,
@@ -104,22 +95,7 @@ export class LeavePrismaHelperService {
           }
         });
 
-        await tx.teamRequestsAndApproval.create({
-          data: {
-            Team: {
-              connect: {
-                id: employee.teamId
-              }
-            },
-            leaveApprovalRequest: {
-              connect: {
-                id: leaveApplication.id
-              }
-            },
-            name: "Leave Application",
-            createdBy: employee.email
-          }
-        });
+        // await this.updateRequests(employee, leaveApplication);
 
         await tx.employeeLeave.update({
           where: {
@@ -157,12 +133,12 @@ export class LeavePrismaHelperService {
             html: `${html}`
           });
           this.logger.log(`Email Successfully sent to ${employee.email}`);
+          return leaveApplication;
         } catch (e) {
           this.logger.error(e);
           throw new AppException("Error sending email");
         }
       }, { maxWait: 5000, timeout: 10000 });
-      return "Applied Successfully";
     } catch (e) {
       this.logger.error(e);
       throw new AppException(AuthMsg.ERROR_APPLYING_LEAVE);
@@ -207,7 +183,8 @@ export class LeavePrismaHelperService {
   async findOrgLeaveByName(leaveName, orgID) {
     const leave = await this.prismaService.leave.findFirst({
       where: {
-        name: leaveName
+        name: leaveName,
+        organizationId: orgID
       }
     });
 
@@ -289,15 +266,6 @@ export class LeavePrismaHelperService {
     }
   }
 
-  // async findAllEmpLeaveHistory(orgID: string) {
-  //   try {
-  //     const [leaveApplications]= await this.prismaService.organization.findMany({
-  //       where:{ }
-  //     })
-  //   }catch (e) {
-  //
-  //   }
-  // }
 
   async allEmployeeLeaveStatus(orgID: string) {
     try {
@@ -305,7 +273,6 @@ export class LeavePrismaHelperService {
         const currentDate = new Date();
         const leaveApp = await tx.leaveApplication.findMany({
           where: {
-            //    startDate: { lte: currentDate },
             endDate: { gte: currentDate },
             employee: {
               organizationId: orgID
@@ -322,9 +289,7 @@ export class LeavePrismaHelperService {
             duration: true,
             endDate: true
           }
-          // include: { employee: { select: { firstname: true, lastname: true } } }
         });
-        // return leaveApp.map((applications) => applications.employee);
         return leaveApp;
       });
     } catch (e) {
@@ -347,12 +312,18 @@ export class LeavePrismaHelperService {
     }
   }
 
-  async approveLeaveAndSendApprovalMail(leaveApplication: LeaveApplication, employee:Employee) {
+  async approveLeaveAndSendApprovalMail(leaveApplication: LeaveApplication, employee: Employee, request: TeamRequestsAndApproval, approveMail: string) {
     try {
       await this.prismaService.$transaction(async (tx) => {
         await tx.leaveApplication.update({
           where: { id: leaveApplication.id },
-          data: { leaveStatus: "APPROVED" }
+          data: { leaveStatus: "APPROVED", modifiedBy: approveMail }
+
+        });
+
+        await tx.teamRequestsAndApproval.update({
+          where: { id: request.id },
+          data: { decision: "APPROVED", modifiedBy: approveMail }
         });
 
         try {
@@ -456,13 +427,73 @@ export class LeavePrismaHelperService {
     const leaveApplication = await this.prismaService.leaveApplication.findFirst({
       where: {
         id: leaveAppID
-      },
+      }
     });
 
     if (!leaveApplication) {
       throw  new AppNotFoundException("Leave application does not exist");
     }
     return leaveApplication;
+  }
+
+  async updateRequests(employee: Employee, leaveApplication: LeaveApplication) {
+    try {
+      await this.prismaService.teamRequestsAndApproval.create({
+        data: {
+          Team: {
+            connect: {
+              id: employee.teamId
+            }
+          },
+          leaveApprovalRequest: {
+            connect: {
+              id: leaveApplication.id
+            }
+          },
+          name: "Leave Application",
+          createdBy: employee.email
+        }
+      });
+
+      await this.prismaService.branchRequestsAndApproval.create({
+        data: {
+          branch: {
+            connect: {
+              id: employee.org_BranchId
+            }
+          },
+          leaveApprovalRequest: {
+            connect: {
+              id: leaveApplication.id
+            }
+          },
+          name: "Leave Application",
+          createdBy: employee.email
+        }
+      });
+
+      await this.prismaService.deptRequestsAndApproval.create({
+        data: {
+          department: {
+            connect: {
+              id: employee.departmentId
+            }
+          },
+          leaveApprovalRequest: {
+            connect: {
+              id: leaveApplication.id
+            }
+          },
+          name: "Leave Application",
+          createdBy: employee.email
+        }
+      });
+      return "Operation successful";
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error applying for leave");
+    }
+
   }
 }
 

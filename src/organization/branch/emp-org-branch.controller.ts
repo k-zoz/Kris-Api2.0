@@ -20,6 +20,12 @@ export class EmpOrgBranchController extends BaseController {
     super();
   }
 
+
+  @Get("myBranchRequests")
+  async getMyBranchRequests(@GetUser() payload: AuthPayload) {
+    return this.response({ payload: await this.branchService.branchRequests(payload.email) });
+  }
+
   @Post("/:orgID/addBranch")
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async addBranchToOrg(@Param("orgID") orgID: string,

@@ -1,5 +1,10 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
+import {
+  AppConflictException,
+  AppException,
+  AppNotFoundException,
+  AppUnauthorizedException
+} from "@core/exception/app-exception";
 import { PrismaService } from "@prisma/prisma.service";
 import {
   CreateTeamInDepartmentDto,
@@ -75,19 +80,7 @@ export class OrgDeptPrismaHelperService {
     return department;
   }
 
-  async hardRemoveDeptFromOrg(orgID, deptID) {
-    try {
-      await this.prismaService.department.delete({
-        where: {
-          id: deptID
-        }
-      });
-      return "Action Successful";
-    } catch (e) {
-      this.logger.error(e);
-      throw new AppException();
-    }
-  }
+
 
   async softRemoveDeptFromOrg(orgID, deptID) {
     try {
@@ -229,17 +222,6 @@ export class OrgDeptPrismaHelperService {
   async makeEmployeeHOD(employee: Employee, department: Department, organization?: Organization) {
     try {
       await this.prismaService.$transaction(async (tx) => {
-        // await tx.employee.update({
-        //   where: { id: employee.id },
-        //   data: {
-        //     //   hierarchy_position: "HEAD_OF_DEPARTMENT",
-        //     departmentManaging: {
-        //       connect: {
-        //         id: department.id
-        //       }
-        //     }
-        //   }
-        // });
 
         await tx.department.update({
           where: { id: department.id },
@@ -280,7 +262,7 @@ export class OrgDeptPrismaHelperService {
 
   async confirmIfEmployeeIsHeadOfDepartment(employee: Employee, department: Department) {
     if (department.departmentManagerID !== employee.id) {
-      throw new AppException("Employee is not the head of department");
+      throw new AppUnauthorizedException("Not the head of department!");
     }
   }
 
@@ -396,6 +378,33 @@ export class OrgDeptPrismaHelperService {
     } catch (e) {
       this.logger.error(e);
       throw new AppException();
+    }
+  }
+
+  async checkIfEmployeeHasADepartment(employee: Employee) {
+    if (!employee.departmentId) {
+      throw new AppNotFoundException("Employee does not belong to department!");
+    }
+  }
+
+  async allDepartmentRequests(employee: Employee, department: Department) {
+    try {
+      return await this.prismaService.deptRequestsAndApproval.findMany({
+        where: {
+          department: {
+            id: department.id
+          }
+        },
+        include: {
+          leaveApprovalRequest: true
+        },
+        orderBy: {
+          createdDate: "desc"
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error getting all team requests");
     }
   }
 }
