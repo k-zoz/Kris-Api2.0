@@ -82,13 +82,9 @@ export class LeaveController extends BaseController {
     });
   }
 
-//TODO create leave for only one employee
+    //TODO create leave for only one employee
   // TODO all the leave history for all employees
 
-  // @Get("/:orgID/history/allEmployees")
-  // async allEmployeesLeaveHistory(@Param("orgID") orgID: string){
-  //   return this.response({payload:await this.leaveService.allEmployeesLeave(orgID)})
-  // }
 
   @Get("/:orgID/history")
   async myLeaveHistory(@GetUser() payload: AuthPayload,
@@ -111,38 +107,6 @@ export class LeaveController extends BaseController {
     return this.response({ payload: await this.leaveService.findOneLeave(orgID, leaveID, payload.email) });
   }
 
-  Testing;
-
-  // @Post("onboarders")
-  // @UseInterceptors(FilesInterceptor("files"))
-  // async getOnboard(@GetUser() payload: AuthPayload,
-  //                  @UploadedFiles(new ParseFilePipe({
-  //                    validators: [
-  //                      new FileTypeValidator({ fileType: ".(pdf|doc|docx)" }),
-  //                      new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2, message: "File size more than 2 mb" })
-  //                    ]
-  //                  })) files: Array<Express.Multer.File>
-  // ) {
-  //   // console.log(payload, files);
-  //   try {
-  //     const url = await this.cloudinaryService.uploadManyFiles(files);
-  //     return this.response({ payload: url });
-  //   } catch (e) {
-  //     return this.response({ payload: e });
-  //   }
-  // }
-
-
-  // @Get("onboarders/delete/:public_id")
-  // async deleteFileUploaded(@Param("public_id") public_id: string) {
-  //   try {
-  //     const msg = await this.cloudinaryService.deleteImage(public_id);
-  //     return this.response({ payload: msg });
-  //   } catch (e) {
-  //     return this.response({ payload: e });
-  //   }
-  //
-  // }
 
   @Get("approveLeave/:teamRequestID")
   async approveLeave(@GetUser() payload: AuthPayload,

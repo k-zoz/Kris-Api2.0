@@ -9,6 +9,7 @@ import { Resend } from "resend";
 import { NewEmployeePasswordResetEvent, NewOrganizationEvent } from "@core/event/back-office-event";
 import * as argon from "argon2";
 import { Employee, Organization } from "@prisma/client";
+import { EmployeeStatistics } from "@core/dto/global/employee.dto";
 
 @Injectable()
 export class OrganizationPrismaHelperService {
@@ -67,36 +68,6 @@ export class OrganizationPrismaHelperService {
     }
     return found;
   }
-
-  // async saveOrganizationAndSendWelcomeEmail(org:CreateOrgDto, creatorEmail:string) {
-  //   try {
-  //     const saved = await this.prismaService.organization.create({
-  //       data: {
-  //         orgName: org.orgName,
-  //         orgEmail: org.orgEmail,
-  //         orgNumber: org.orgNumber,
-  //         orgWebsite: org.orgWebsite,
-  //         orgRCnumber: org.orgRCnumber,
-  //         orgAddress: org.orgAddress,
-  //         orgAddress2: org.orgAddress2,
-  //         orgZipCode:org.orgZipCode,
-  //         orgCity:org.orgCity,
-  //         orgDateFounded:org.orgDateFounded,
-  //         orgType:org.orgType,
-  //         orgState: org.orgState,
-  //         orgCountry: org.orgCountry,
-  //         orgIndustry: org.orgIndustry,
-  //         createdBy: creatorEmail
-  //       }
-  //     });
-  //     this.logger.log(`Organization ${saved.orgName} saved successfully`);
-  //     return saved;
-  //   } catch (e) {
-  //     const msg = `Error creating Organization ${org.orgName}`;
-  //     this.logger.error(e);
-  //     throw new AppConflictException(AppConst.error, { context: msg });
-  //   }
-  // }
 
   async saveOrganizationAndSendWelcomeEmail(org: CreateOrgDto, creatorEmail: string) {
     try {
@@ -305,6 +276,186 @@ export class OrganizationPrismaHelperService {
     } catch (e) {
       this.logger.error(e);
       throw new AppConflictException("Error getting my announcements. Contact Support");
+    }
+  }
+
+  async employeesCount(organization: Organization) {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    try {
+      const [employees, newEmployees] = await this.prismaService.$transaction([
+        this.prismaService.employee.count({
+          where: { organizationId: organization.id }
+        }),
+
+        this.prismaService.employee.count({
+          where: {
+            organizationId: organization.id, createdDate: {
+              gte: oneMonthAgo
+            }
+          }
+        })
+      ]);
+      return { employees, newEmployees };
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException("Error getting employees. Contact Support");
+    }
+  }
+
+  async birthdays(organization: Organization) {
+    try {
+      const employeesBirthDateData = {};
+      const today = new Date();
+      const employees = await this.prismaService.employee.findMany({
+        where: { organizationId: organization.id },
+        select: {
+          firstname: true,
+          lastname: true,
+          middleName: true,
+          email: true,
+          dateOfBirth: true
+        }
+      });
+
+      employees.forEach(employee => {
+        if (employee.dateOfBirth) {
+          const month = employee.dateOfBirth.getMonth() + 1; // months are zero-based in JavaScript
+          const date = employee.dateOfBirth.getDate();
+
+          if (!employeesBirthDateData[`${month}-${date}`]) {
+            employeesBirthDateData[`${month}-${date}`] = [];
+          }
+          const type = (employee.dateOfBirth.getMonth() < today.getMonth() ||
+            (employee.dateOfBirth.getMonth() === today.getMonth() && date < today.getDate())) ? "success" : "warning";
+
+          employeesBirthDateData[`${month}-${date}`].push({
+            type: type,
+            content: `${employee.firstname} ${employee.lastname} ${employee.middleName}'s Birthday`
+          });
+        }
+      });
+
+      return employeesBirthDateData;
+
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException("Error getting birthdays. Contact Support");
+    }
+  }
+
+
+  async birthdaysInTheMonth(organization: Organization) {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+    try {
+      return await this.prismaService.employee.findMany({
+        where: {
+          organizationId: organization.id,
+          dateOfBirth: {
+            gte: new Date(currentYear, currentMonth, 1), // start of the current month
+            lt: new Date(currentYear, currentMonth + 1, 1) // start of the next month
+          }
+        },
+        select: { firstname: true, lastname: true, email: true, dateOfBirth: true }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException("Error getting birthdays. Contact Support");
+    }
+  }
+
+  async anniversaryInTheMonth(organization: Organization) {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+    try {
+      return await this.prismaService.employee.findMany({
+        where: {
+          organizationId: organization.id,
+          dateOfJoining: {
+            gte: new Date(currentYear, currentMonth, 1), // start of the current month
+            lt: new Date(currentYear, currentMonth + 1, 1) // start of the next month
+          }
+        },
+        select: { firstname: true, lastname: true, email: true, dateOfJoining: true }
+      });
+
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException("Error getting work anniversaries. Contact Support");
+    }
+  }
+
+  async anniversaries(organization: Organization) {
+    try {
+      const employeesWorkAnniversaryData = {};
+      const today = new Date();
+      const employees = await this.prismaService.employee.findMany({
+        where: { organizationId: organization.id },
+        select: {
+          firstname: true,
+          lastname: true,
+          middleName: true,
+          email: true,
+          dateOfJoining: true
+        }
+      });
+      employees.forEach(employee => {
+        if (employee.dateOfJoining) {
+          const month = employee.dateOfJoining.getMonth() + 1; // months are zero-based in JavaScript
+          const date = employee.dateOfJoining.getDate();
+
+          if (!employeesWorkAnniversaryData[`${month}-${date}`]) {
+            employeesWorkAnniversaryData[`${month}-${date}`] = [];
+          }
+          const type = (employee.dateOfJoining.getMonth() < today.getMonth() ||
+            (employee.dateOfJoining.getMonth() === today.getMonth() && date < today.getDate())) ? "success" : "warning";
+
+          employeesWorkAnniversaryData[`${month}-${date}`].push({
+            type: type,
+            content: `${employee.firstname} ${employee.lastname} ${employee.middleName}'s work anniversary`
+          });
+        }
+      });
+
+      return employeesWorkAnniversaryData;
+
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException("Error getting work anniversaries. Contact Support");
+    }
+  }
+
+  async employeeStatistics(organization: Organization) {
+    try {
+      const [male, female, others] = await this.prismaService.$transaction([
+        this.prismaService.employee.count({
+          where: {
+            organizationId: organization.id,
+            gender: "Male"
+          }
+        }),
+
+        this.prismaService.employee.count({
+          where: {
+            organizationId: organization.id,
+            gender: "Female"
+          }
+        }),
+
+        this.prismaService.employee.count({
+          where: {
+            organizationId: organization.id,
+            gender: "Others"
+          }
+        })
+      ]);
+      return { male, female, others } as EmployeeStatistics;
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException("Error getting statistics. Contact Support");
     }
   }
 }

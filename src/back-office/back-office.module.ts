@@ -13,10 +13,11 @@ import { EmployeeOrganizationModule } from "@organization/employeeOrganization.m
 import { AuthModule } from "@auth/auth.module";
 import { UtilService } from "@core/utils/util.service";
 import { UserService } from "@back-office/user/user.service";
+import { HttpModule } from "@nestjs/axios";
 
 @Global()
 @Module({
-  imports: [PassportModule.register({ defaultStrategy: "jwt", session: false })],
+  imports: [HttpModule,PassportModule.register({ defaultStrategy: "jwt", session: false })],
   exports: [OrganizationService, OrganizationPrismaHelperService, EmployeePrismaHelperService, UserPrismaHelperService, EmployeeService, UserService],
   controllers: [OrganizationController, EmployeeController, UserController],
   providers: [OrganizationService, OrganizationPrismaHelperService, EmployeePrismaHelperService, UserPrismaHelperService, EmployeeService, UserService, LocaleService, UtilService]

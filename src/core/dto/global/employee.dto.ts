@@ -325,3 +325,10 @@ export class EmployeeUpdateRequest {
   nok!:UpdateNokInformation
   gua!:UpdateGuarantorInformation
 }
+
+
+export interface EmployeeStatistics {
+  male:number,
+  female:number,
+  others:number
+}

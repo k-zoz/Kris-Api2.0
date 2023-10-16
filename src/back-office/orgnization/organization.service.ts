@@ -4,7 +4,10 @@ import { SearchRequest } from "@core/model/search-request";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
 import { UtilService } from "@core/utils/util.service";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
-
+import { HttpService } from "@nestjs/axios";
+import * as moment from "moment";
+import { ConfigService } from "@nestjs/config";
+import { AppConflictException } from "@core/exception/app-exception";
 
 @Injectable()
 export class OrganizationService {
@@ -12,7 +15,9 @@ export class OrganizationService {
 
   constructor(private readonly orgHelperService: OrganizationPrismaHelperService,
               private readonly utilService: UtilService,
-              private readonly employeeHelperService: EmployeePrismaHelperService
+              private readonly employeeHelperService: EmployeePrismaHelperService,
+              private readonly httpService: HttpService,
+              private readonly config: ConfigService
   ) {
   }
 
@@ -48,6 +53,55 @@ export class OrganizationService {
     const employee = await this.employeeHelperService.findEmpByEmail(email);
     const organization = await this.orgHelperService.findOrgByID(employee.organizationId);
     return await this.orgHelperService.allMyOrganizationAnnouncements(employee, organization);
+  }
+
+  async allEmployeesCount(orgID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.orgHelperService.employeesCount(organization);
+  }
+
+  async employeeBirthdays(orgID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.orgHelperService.birthdays(organization);
+
+  }
+
+  async orgMonthlyBirthDays(orgID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.orgHelperService.birthdaysInTheMonth(organization);
+  }
+
+  async orgMonthlyWorkAnniversary(orgID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.orgHelperService.anniversaryInTheMonth(organization);
+  }
+
+  async employeeWorkAnniversary(orgID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.orgHelperService.anniversaries(organization);
+  }
+
+  async wikiTodayInHistory() {
+    try {
+      const today = moment();
+      const month = today.format("MM");
+      const day = today.format("DD");
+      const wikiUrl = `https://api.wikimedia.org/feed/v1/wikipedia/en/onthisday/events/${month}/${day}`;
+      const token = `Bearer ${this.config.get<string>("wikiAccessToken")}`;
+      const response = await this.httpService.get(wikiUrl, {
+        headers: { Authorization: token, "User-Agent": "kris info@kimberly-ryan.net" }
+      }).toPromise();
+      return response.data;
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException("Something went wrong please try again");
+    }
+
+  }
+
+  async employeeStatistics(orgID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.orgHelperService.employeeStatistics(organization);
   }
 }
 

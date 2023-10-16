@@ -56,8 +56,7 @@ export class UtilService {
 
   convertDateAgain(date) {
     if (!date) {
-      const today = new Date();
-      return dayjs(today).toDate();
+      return null;
     } else {
       return dayjs(date).toDate();
     }

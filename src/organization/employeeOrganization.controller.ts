@@ -51,11 +51,44 @@ export class EmployeeOrganizationController extends BaseController {
     return this.response({ payload: await this.organizationService.makeAnnouncements(dto, orgID, payload.email) });
   }
 
+  @Get("/:orgID/employeesCount")
+  async getEmployeesCount(@Param("orgID") orgID: string) {
+    return this.response({ payload: await this.organizationService.allEmployeesCount(orgID) });
+  }
+
   @Get("announcements")
   async myAnnouncements(@GetUser() payload: AuthPayload
   ) {
     return this.response({ payload: await this.organizationService.myAnnouncements(payload.email) });
-
   }
 
+  @Get("/:orgID/birthdays")
+  async allEmployeeBirthdays(@Param("orgID") orgID: string) {
+    return this.response({ payload: await this.organizationService.employeeBirthdays(orgID) });
+  }
+
+  @Get("/:orgID/monthlyBirthdays")
+  async birthDayMonth(@Param("orgID") orgID: string) {
+    return this.response({ payload: await this.organizationService.orgMonthlyBirthDays(orgID) });
+  }
+
+  @Get("/:orgID/anniversaries")
+  async allEmployeeWorkAnniversary(@Param("orgID") orgID: string) {
+    return this.response({ payload: await this.organizationService.employeeWorkAnniversary(orgID) });
+  }
+
+  @Get("/:orgID/monthlyAnniversary")
+  async anniversariesMonth(@Param("orgID") orgID: string) {
+    return this.response({ payload: await this.organizationService.orgMonthlyWorkAnniversary(orgID) });
+  }
+
+  @Get("/wiki/todayInHistory")
+  async todayInHistory() {
+    return this.response({ payload: await this.organizationService.wikiTodayInHistory() });
+  }
+
+  @Get("/:orgID/employeeStatistics")
+  async employeeStatistics(@Param("orgID") orgID: string) {
+    return this.response({ payload: await this.organizationService.employeeStatistics(orgID) });
+  }
 }

@@ -38,6 +38,7 @@ import { CloudinaryModule } from "@cloudinary/cloudinary.module";
       ]
     }),
 
+
     // CacheModule.registerAsync<RedisClientOptions>({
     //   imports:[ConfigModule],
     //   inject: [ConfigService],
@@ -58,7 +59,7 @@ import { CloudinaryModule } from "@cloudinary/cloudinary.module";
       })
     }),
     EventEmitterModule.forRoot(),
-    BackOfficeModule, AuthModule, PrismaModule, EmployeeOrganizationModule, AlertModule, CloudinaryModule],
+    BackOfficeModule, AuthModule, PrismaModule, EmployeeOrganizationModule, AlertModule, CloudinaryModule,],
   controllers: [AppController],
   providers: [
     {
