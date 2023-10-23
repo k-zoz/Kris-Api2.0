@@ -4,7 +4,7 @@ import { AppException } from "@core/exception/app-exception";
 import { EmailService } from "../../../alert/email/email.service";
 import { Resend } from "resend";
 import { ConfigService } from "@nestjs/config";
-import { PdfService } from "../../../alert/pdf/pdf.service";
+import { PdfService } from "@cloudinary/pdf/pdf.service";
 import { v2 } from "cloudinary";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 

@@ -6,3 +6,5 @@ export class SearchRequest extends BaseDto {
   readonly pageSize?: number;
   readonly pageIndex?:number
 }
+
+

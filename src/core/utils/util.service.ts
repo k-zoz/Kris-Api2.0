@@ -5,7 +5,7 @@ import { AuthMsg } from "@core/const/security-msg-const";
 import { randomBytes } from "crypto";
 import { v4 as uuidV4 } from "uuid";
 import * as moment from "moment";
-import { Department, Employee, Org_Branch, Team } from "@prisma/client";
+import * as argon from "argon2";
 
 const dayjs = require("dayjs");
 
@@ -89,7 +89,13 @@ export class UtilService {
     } else {
       return str.toUpperCase();
     }
+  }
 
+  toLowerCase(str: any) {
+    if (!str) {
+    } else {
+      return str.toLowerCase();
+    }
   }
 
 
@@ -101,7 +107,7 @@ export class UtilService {
 
   generateRandomPassword(): string {
     const length = 10;
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&=";
     let password = "";
     let hasUpper = false;
     let hasLower = false;
@@ -136,5 +142,123 @@ export class UtilService {
     return `KRIS-${namePart}-${uuid}`;
   }
 
+  // generateIDNumber(name: string) {
+  //   const namePart = name.slice(0, 3).toUpperCase();
+  //   const uuid = uuidV4();
+  //   return `KRIS-${namePart}-${uuid}`;
+  // }
 
+
+  returnObjects(data) {
+    const [headers, ...rows] = data; // Destructure the headers and rows from the data
+    return rows.map(row => {
+      let obj = {};
+      headers.forEach((header, i) => {
+        if (header === "password") {
+          obj[header] = this.generateRandomPassword();
+        } else if (row[i] !== undefined && row[i] !== "") {
+          obj[header] = row[i];
+        }
+      });
+      return obj;
+    }).filter(obj => Object.keys(obj).length === headers.length);
+  }
+
+
+  async updateKeysInObject(data) {
+    const updatedData = [];
+    for (const obj of data) {
+      const hashedPassword = await argon.hash(obj.password);
+      const krisID = this.generateUUID(obj.firstname);
+
+      const updatedObj = {
+        ...obj,
+        hashPassword: hashedPassword,
+        krisID: krisID
+      };
+      updatedData.push(updatedObj);
+    }
+    return updatedData;
+  }
+
+
+  async assignProperties(employeeUploads: any[], orgID: string, creatorEmail: string) {
+    return employeeUploads.map(obj => {
+      return {
+        email: this.toLowerCase(obj.email),
+        firstname: this.toUpperCase(obj.firstname),
+        lastname: this.toUpperCase(obj.lastname),
+        password: obj.hashPassword,
+        idNumber: obj.idNumber,
+        krisID: obj.krisID,
+        role: obj.role,
+        status: obj.status,
+        middleName: null,
+        phoneNumber: null,
+        refreshToken: null,
+        personalEmail: null,
+        workPhoneNumber: null,
+        personalPhoneNumber2: null,
+        designation: null,
+        employment_type: null,
+        dateOfBirth: null,
+        gender: null,
+        maritalStatus: null,
+        taxes: null,
+        gross_pay: null,
+        deduction: null,
+        bonuses: null,
+        net_pay: null,
+        isEdit: null,
+        isSelected: null,
+        dateOfConfirmation: null,
+        dateOfJoining: null,
+        address1: null,
+        address2: null,
+        country: null,
+        state: null,
+        city: null,
+        zipCode: null,
+
+        accountName: null,
+        bankName: null,
+        accountNmumber: null,
+        pensionManager: null,
+        pensionNumber: null,
+        nok_legalName: null,
+        nok_address: null,
+        nok_occupation: null,
+        nok_phoneNumber: null,
+        nok_relationship: null,
+        nok_email: null,
+
+        gua_legalName: null,
+        gua_address: null,
+        gua_occupation: null,
+        gua_phoneNumber: null,
+        gua_relationship: null,
+        gua_email: null,
+
+        hierarchy_position: null,
+        organizationId: orgID,
+        org_BranchId: null,
+
+        departmentId: null,
+        org_ClienteleId: null,
+
+        teamId: null,
+        payGradeId: null,
+
+
+        payGroupId: null,
+        payroll_PreviewId: null,
+
+        createdBy: creatorEmail,
+        modifiedBy: null,
+
+        createdDate: new Date(), // Assuming current date
+        modifiedDate: new Date() // Assuming current date
+      };
+    });
+  }
 }

@@ -1,12 +1,18 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { UploadApiErrorResponse, UploadApiResponse, v2 } from "cloudinary";
 import toStream = require("buffer-to-stream");
 import * as path from "path";
 import { Express } from "express";
+import fs from "fs";
+import * as csv from "csv-parser";
+import * as Papa from "papaparse";
+import { AppException } from "@core/exception/app-exception";
 
 
 @Injectable()
 export class CloudinaryService {
+  private readonly logger = new Logger(CloudinaryService.name);
+
   async uploadFile(file: Express.Multer.File): Promise<UploadApiResponse | UploadApiErrorResponse> {
     const fileName = path.parse(file.originalname).name;
     return new Promise((resolve, reject) => {
@@ -24,6 +30,35 @@ export class CloudinaryService {
     });
   }
 
+  async uploadExcelFile(file: Express.Multer.File): Promise<UploadApiResponse | UploadApiErrorResponse> {
+    return new Promise((resolve, reject) => {
+      const upload = v2.uploader.upload_stream({
+        resource_type: "auto",
+        folder: "kris_employees",
+        upload_preset: "w6viwhuq"
+      }, (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      });
+
+      toStream(file.buffer).pipe(upload);
+    });
+  }
+
+
+  async readCSVFile(file: Express.Multer.File) {
+    return await new Promise((resolve, reject) => {
+      Papa.parse(file.buffer.toString(), {
+        complete: (results) => {
+          resolve(results.data);
+        },
+        error: (error) => {
+          this.logger.log(error);
+          reject(new AppException("Error reading CSV file"));
+        }
+      });
+    });
+  }
 
   async deleteImage(publicId: string): Promise<UploadApiResponse | UploadApiErrorResponse> {
     const url = new URL(publicId);

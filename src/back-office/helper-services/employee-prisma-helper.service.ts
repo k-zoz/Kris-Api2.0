@@ -17,7 +17,8 @@ import { Resend } from "resend";
 import { ConfigService } from "@nestjs/config";
 import { EmailService } from "@alert/email/email.service";
 import { NewEmployeeEvent } from "@core/event/back-office-event";
-import { Employee_Role } from "@prisma/client";
+import { Employee_Role, Organization } from "@prisma/client";
+import { SearchRequest } from "@core/model/search-request";
 
 
 @Injectable()
@@ -126,31 +127,6 @@ export class EmployeePrismaHelperService {
       }
     }
   }
-
-  // async createEmployee(orgEmp, orgID) {
-  //   try {
-  //     return await this.prismaService.employee.create({
-  //       data: {
-  //         email: orgEmp.empEmail,
-  //         firstname: orgEmp.empFirstName,
-  //         password:await argon.hash(orgEmp.empPassword),
-  //         lastname: orgEmp.empLastName,
-  //         phoneNumber: orgEmp.empPhoneNumber,
-  //         idNumber: orgEmp.empIDNumber,
-  //         role: orgEmp.employee_role,
-  //         createdBy: orgEmp.createdBy,
-  //         Organization: {
-  //           connect: {
-  //             id: orgID
-  //           }
-  //         }
-  //       }
-  //     });
-  //   } catch (e) {
-  //     this.logger.error(AuthMsg.ERROR_CREATING_EMPLOYEE);
-  //     throw new AppConflictException(AppConst.error, { context: AuthMsg.ERROR_CREATING_EMPLOYEE });
-  //   }
-  // }
 
 
   async createEmployeeAndSendWelcomeEmail(dto, orgID, orgName) {
@@ -576,7 +552,178 @@ export class EmployeePrismaHelperService {
     } catch (e) {
       this.logger.error(e);
       throw new AppConflictException(AppConst.error, { context: AuthMsg.ERROR_CREATING_EMPLOYEE });
+    }
+  }
 
+  async createManyEmployees(employeeObj: any[], employeeUploads: any[], organization: Organization) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        await tx.employee.createMany({
+          data: employeeObj
+        });
+      }, { maxWait: 5000, timeout: 10000 });
+
+      await this.sendBulkEmails(employeeUploads, organization);
+
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error adding bulk employees");
+    }
+  }
+
+
+  async sendBulkEmails(employeeUploads, organization) {
+    const emailPromises = employeeUploads.map(employee => {
+      return this.resend.emails.send({
+        from: `${this.mailSource}`,
+        to: `${employee.email}`,
+        subject: `Welcome to ${organization.orgName}`,
+        html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .footer {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px;
+    }
+
+    .button {
+      background-color: blue;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 15px;
+    }
+  </style>
+  <meta charset="UTF-8">
+  <title>Welcome</title>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Welcome to ${organization.orgName}</h1>
+  </div>
+  <div class="content">
+    <p>Dear ${employee.firstname},</p>
+    <p>We are thrilled to welcome you to ${organization.orgName}. We are excited to have you on board and look forward to
+      working with you.</p>
+    <p>As a new employee, you will have access to our online platform where you can find important information and
+      resources. To log in, please use the following credentials:</p>
+    <ul>
+      <li>Email: ${employee.email}</li>
+      <li>Password:</li>
+      <li style="font-weight: bold;"> ${employee.password}</li>
+    </ul>
+    <p>For security reasons, we recommend that you change your password after logging in for the first time.</p>
+    <p>If you have any questions or need assistance, please do not hesitate to contact us. We are here to support you
+      and help you succeed in your new role.</p>
+    <a href="https://kris-1d979.web.app/#/auth" target="_blank" class="button">Log In!</a>
+    <p>Once again, welcome to ${organization.orgName}. We are delighted to have you on our team!</p>
+    <p>Sincerely,</p>
+    <p>The ${organization.orgName} Team</p>
+  </div>
+  <div class="footer">
+
+    <p style="text-align:center;font-size:12px;font-family:arial,sans-serif;color:#ffffff">
+      Sent to you by
+      <a href="javascript:void(0);" style="color:#ffffff" target="_blank">kris.io</a>
+      <br>
+      <a href="javascript:void(0);" style="color:#ffffff" target="_blank">Privacy Policy</a> |
+      <a href="javascript:void(0);" style="color:#ffffff" target="_blank">FAQs</a> |
+      <a href="javascript:void(0);" style="color:#ffffff" target="_blank">support@kris.io</a>
+    </p>
+    <br>
+    <div style="text-align:center;">
+      <a href="javascript:void(0);" style="text-decoration: none; padding-right: 10px" target="_blank">
+        <img src="https://res.cloudinary.com/doughflip/image/upload/v1641723181/logo/Facebook_h7mtr1.png"
+             alt="Facebook" width="35">
+      </a>
+      <a href="javascript:void(0);" style="text-decoration: none; padding-right: 10px" target="_blank">
+        <img src="https://res.cloudinary.com/doughflip/image/upload/v1641723181/logo/Linkedin_eb8qkh.png"
+             alt="Linkedin" width="35">
+      </a>
+      <a href="javascript:void(0);" style="text-decoration: none; padding-right: 10px" target="_blank">
+        <img src="https://res.cloudinary.com/doughflip/image/upload/v1641723181/logo/Instagram_lcbyme.png"
+             alt="Instagram" width="35">
+      </a>
+      <a href="javascript:void(0);" style="text-decoration: none" target="_blank">
+        <img src=https://res.cloudinary.com/doughflip/image/upload/v1641723181/logo/Twitter_pyepek.png"
+             alt="Twitter" width="35">
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+
+</html>`
+      }).then(() => {
+        this.logger.log(`Welcome email successfully sent to ${employee.email}`);
+      }).catch(e => {
+        this.logger.error(`Error sending email to ${employee.email}`);
+        throw new AppException(e);
+      });
+    });
+
+    await Promise.all(emailPromises);
+  }
+
+  async allBulkCreatedEmployees(organization: Organization, dto: SearchRequest) {
+    const today = new Date();
+    const { skip, take } = dto;
+    try {
+
+      const [employees, total] = await this.prismaService.$transaction([
+        this.prismaService.employee.findMany({
+          where: {
+            organizationId: organization.id,
+            createdDate: today
+          }, select: {
+            email: true,
+            firstname: true,
+            lastname: true,
+            role: true,
+            idNumber: true
+          },
+          skip,
+          take
+        }),
+        this.prismaService.employee.count({
+          where: {
+            organizationId: organization.id
+          }
+        })
+      ]);
+      return { employees, total };
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException("Error getting statistics. Contact Support");
     }
   }
 }

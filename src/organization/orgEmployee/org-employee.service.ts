@@ -31,9 +31,10 @@ import {
   EmpClienteleHelperService
 } from "@organization/org-prisma-helper-services/organization/emp-clientele-helper.service";
 import { ConfirmInputPasswordDto } from "@core/dto/auth/user.dto";
-import { AppConflictException } from "@core/exception/app-exception";
-import { Employee } from "@prisma/client";
+import { AppConflictException, AppException } from "@core/exception/app-exception";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
+import { CloudinaryService } from "@cloudinary/cloudinary.service";
+import { SearchRequest } from "@core/model/search-request";
 
 @Injectable()
 export class OrgEmployeeService {
@@ -49,30 +50,18 @@ export class OrgEmployeeService {
               private readonly leaveService: LeaveService,
               private readonly orgBranchHelperService: OrgBranchPrismaHelperService,
               private readonly orgDepartmentHelperService: OrgDeptPrismaHelperService,
-              private readonly orgClientHelperService: EmpClienteleHelperService
+              private readonly orgClientHelperService: EmpClienteleHelperService,
+              private readonly cloudinaryService: CloudinaryService
   ) {
   }
 
 
-  // async onboardEmpToMyOrg(request: CreateEmployeeDto, orgID, creatorMail) {
-  //   await this.orgEmployeeHelperService.validateRequest(request);
-  //   const orgName = await this.orgHelperService.findOrgByID(orgID);
-  //   request.createdBy = creatorMail;
-  //   request.empPassword = this.utilService.generateRandomPassword();
-  //   request.empFirstName = this.utilService.toUpperCase(request.empFirstName);
-  //   request.empLastName = this.utilService.toUpperCase(request.empLastName);
-  //   await this.utilService.checkIfRoleIsManagement(request.employee_role);
-  //   const employee = await this.employeeHelperService.createEmployeeAndSendWelcomeEmail(request, orgID, orgName);
-  //   //TODO leave onboarding for new employee
-  //   await this.leaveService.onboardLeaveForNewEmployee(orgID, employee);
-  //   // return this.employeeHelperService.findAndExcludeFields(employee);
-  // }
-
-
+  //TODO turn email to small letters
   async onboardEmpToMyOrg(request: EmployeeOnboardRequest, orgID, creatorMail) {
     await this.orgEmployeeHelperService.validateRequest(request);
     const orgName = await this.orgHelperService.findOrgByID(orgID);
     const newPassword = this.utilService.generateRandomPassword();
+    request.basic.email = this.utilService.toLowerCase(request.basic.email);
     request.basic.firstName = this.utilService.toUpperCase(request.basic.firstName);
     request.basic.lastName = this.utilService.toUpperCase(request.basic.lastName);
     request.work.employeeBranch = this.utilService.toUpperCase(request.work.employeeBranch);
@@ -96,6 +85,7 @@ export class OrgEmployeeService {
     await this.orgEmployeeHelperService.validateRequest(request);
     const orgName = await this.orgHelperService.findOrgByID(orgID);
     const newPassword = this.utilService.generateRandomPassword();
+    request.basic.email = this.utilService.toLowerCase(request.basic.email);
     request.basic.firstName = this.utilService.toUpperCase(request.basic.firstName);
     request.basic.lastName = this.utilService.toUpperCase(request.basic.lastName);
     request.clientWork.employeeClient = this.utilService.toUpperCase(request.clientWork.employeeClient);
@@ -116,13 +106,7 @@ export class OrgEmployeeService {
     dto.employeeBranch = this.utilService.toUpperCase(dto.employeeBranch);
     dto.department = this.utilService.toUpperCase(dto.department);
     dto.empTeam = this.utilService.toUpperCase(dto.empTeam);
-    // dto.employeeClient = this.utilService.toUpperCase(dto.employeeClient);
-    // await this.orgBranchHelperService.findBranchByName(dto.employeeBranch, orgID);
-    // const department = await this.orgDepartmentHelperService.findDeptByNameAlone(dto.department, orgID);
-    // await this.orgTeamHelperService.findTeamByName(department.id, orgID, dto.empTeam);
-    //  const client = await this.orgClientHelperService.findClientByName(dto.employeeClient, orgID);
     return await this.employeeHelperService.updateEmployeeWorkDetails(dto, empID, orgName, modifierMail);
-
   }
 
 
@@ -142,28 +126,6 @@ export class OrgEmployeeService {
     return await this.orgEmployeeHelperService.addEmpToDept(empID, deptID);
   }
 
-  // async addEmployeeAsTeamLead(orgID, teamID, empID, deptID) {
-  //   await this.employeeService.findEmpById(empID);
-  //   await this.orgHelperService.findOrgByID(orgID);
-  //   await this.orgTeamHelperService.findTeamDept(teamID, deptID);
-  //   await this.orgEmployeeHelperService.findEmpDept(empID, deptID);
-  //   await this.orgTeamHelperService.findTeam(deptID, orgID, teamID);
-  //   await this.orgEmployeeHelperService.findEmpTeam(teamID, empID);
-  //   await this.orgEmployeeHelperService.isEmployeeTeamLeadValidation(empID, teamID);
-  //   return await this.orgEmployeeHelperService.makeEmpTeamLead(empID, teamID, orgID);
-  // }
-
-  // async removeEmployeeAsTeamLead(orgID, teamID, empID, deptID){
-  //   await this.orgHelperService.findOrgByID(orgID);
-  //   await this.employeeService.findEmpById(empID);
-  //   await this.orgEmployeeHelperService.findEmpDept(empID, deptID);
-  //   await this.orgTeamHelperService.findTeam(deptID, orgID, teamID);
-  //   await this.orgEmployeeHelperService.findEmpTeam(teamID, empID);
-  //   await this.orgTeamHelperService.findTeamDept(teamID, deptID);
-  //   await this.orgEmployeeHelperService.isEmployeeTeamLeadVerification(empID, teamID);
-  //   return await this.orgEmployeeHelperService.removeEmpTeamLead(empID, teamID, orgID);
-  // }
-
   async resetEmployeePassword(orgID, empID, modifierEmail) {
     await this.orgHelperService.findOrgByID(orgID);
     const employee = await this.employeeService.findEmpById(empID);
@@ -180,9 +142,6 @@ export class OrgEmployeeService {
     return EnumValues.getNamesAndValues(BoStatusEnum).map(value => CodeValue.of(value.name, value.value as string));
   }
 
-  async getEmployee(empID: string) {
-    return await this.employeeHelperService.findEmpById(empID);
-  }
 
   async changeMyPassword(dto: ConfirmInputPasswordDto, email: string) {
     const employee = await this.employeeService.findEmpByEmail(email);
@@ -200,6 +159,24 @@ export class OrgEmployeeService {
     const employee = await this.employeeService.findEmpByEmail(payload.email);
     dto.personal.dateOfBirth = this.utilService.convertDateAgain(dto.personal.dateOfBirth);
     return await this.orgEmployeeHelperService.updateMyProfile(dto, employee);
+  }
+
+
+  async bulkCreateEmployee(file: Express.Multer.File, creatorEmail: string) {
+    const creator = await this.employeeHelperService.findEmpByEmail(creatorEmail);
+    const organization = await this.orgHelperService.findOrgByID(creator.organizationId);
+    //  await this.cloudinaryService.uploadExcelFile(file);
+    const csvData = await this.cloudinaryService.readCSVFile(file);
+    const employeeObj = await this.utilService.returnObjects(csvData);
+    const employeeUploads = await this.utilService.updateKeysInObject(employeeObj);
+    const assignedProperties = await this.utilService.assignProperties(employeeUploads, organization.id, creator.email);
+    return await this.employeeHelperService.createManyEmployees(assignedProperties, employeeUploads, organization);
+
+  }
+
+  async allOnboardedEmployees(orgID: string, dto: SearchRequest) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.employeeHelperService.allBulkCreatedEmployees(organization, dto);
   }
 
 

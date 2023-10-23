@@ -3,15 +3,21 @@ import { PrismaService } from "@prisma/prisma.service";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { AppConst } from "@core/const/app.const";
 import { CreateOrgDto, MakeAnnouncementsDto } from "@core/dto/global/organization.dto";
-import { EmailService } from "../../alert/email/email.service";
+import { EmailService } from "@alert/email/email.service";
 import { ConfigService } from "@nestjs/config";
 import { Resend } from "resend";
 import { NewEmployeePasswordResetEvent, NewOrganizationEvent } from "@core/event/back-office-event";
 import * as argon from "argon2";
-import { Employee, Organization } from "@prisma/client";
+import { Employee, Organization, Prisma } from "@prisma/client";
 import { EmployeeStatistics } from "@core/dto/global/employee.dto";
+import { PaginatedResult, PaginateFunction, paginator } from "@prisma/pagination";
+import { SearchRequest } from "@core/model/search-request";
+
+const paginate: PaginateFunction = paginator({ perPage: 10 });
 
 @Injectable()
+
+
 export class OrganizationPrismaHelperService {
   private readonly logger = new Logger(OrganizationPrismaHelperService.name);
   private readonly mailSource = this.configService.get("mailSender");
@@ -458,4 +464,19 @@ export class OrganizationPrismaHelperService {
       throw new AppConflictException("Error getting statistics. Contact Support");
     }
   }
+
+
+
+  // async findMany({ where, orderBy, page, select }:{ where?: Prisma.UserWhereInput, orderBy?: Prisma.UserOrderByWithRelationInput, page?: number, select?:Prisma.DeductionSelect }): Promise<PaginatedResult<Employee>> {
+  //   return paginate(
+  //     this.prismaService.employee,
+  //     {
+  //       where,
+  //       orderBy,
+  //     },
+  //     {
+  //       page,
+  //     },
+  //   );
+  // }
 }

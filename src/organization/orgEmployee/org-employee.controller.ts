@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Post, UseGuards, ValidationPipe } from "@nestjs/common";
+import {
+  Body,
+  Controller, FileTypeValidator,
+  Get, HttpStatus, MaxFileSizeValidator,
+  Param, ParseFilePipe, ParseFilePipeBuilder,
+  Post,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+  ValidationPipe
+} from "@nestjs/common";
 import { BaseController } from "@core/utils/base-controller.controller";
 import { AuthGuard } from "@nestjs/passport";
 import { EmployeeRoleGuard } from "@core/guard/employee-role.guard";
@@ -21,6 +31,12 @@ import { Permission } from "@core/decorator/roles.decorator";
 import { UserRoleEnum } from "@core/enum/user-role-enum";
 import { SearchRequest } from "@core/model/search-request";
 import { ConfirmInputPasswordDto } from "@core/dto/auth/user.dto";
+import { FileInterceptor } from "@nestjs/platform-express";
+import {
+  MAX_EXCEL_FILE_SIZE_IN_BYTES,
+  VALID_FILE_TYPE_FOR_BULK_UPLOADS,
+  VALID_UPLOADS_MIME_TYPES
+} from "@core/const/app.const";
 
 @Controller("organization/employee")
 @UseGuards(AuthGuard())
@@ -58,6 +74,16 @@ export class OrgEmployeeController extends BaseController {
     });
   }
 
+  @Post("upload")
+  @UseInterceptors(FileInterceptor("file"))
+  async uploadFile(@GetUser() payload: AuthPayload, @UploadedFile(
+    new ParseFilePipeBuilder()
+      .addFileTypeValidator({ fileType: VALID_FILE_TYPE_FOR_BULK_UPLOADS })
+      .addMaxSizeValidator({ maxSize: MAX_EXCEL_FILE_SIZE_IN_BYTES, message: AuthMsg.FIlE_SIZE_MORE_THAN_5MB })
+      .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
+  ) file: Express.Multer.File) {
+    return this.response({ payload: await this.orgEmployeeService.bulkCreateEmployee(file, payload.email) });
+  }
 
   @Post("/:orgID/onboard")
   @EmpPermission(EmployeeRoleEnum.MANAGEMENT, EmployeeRoleEnum.HUMAN_RESOURCE)
@@ -158,26 +184,6 @@ export class OrgEmployeeController extends BaseController {
   }
 
 
-  // @Post("/:orgID/:deptID/addTeamLead/:empID/:teamID")
-  // @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
-  // async addTeamLead(@Param("orgID") orgID: string,
-  //                   @Param("teamID") teamID: string,
-  //                   @Param("empID") empID: string,
-  //                   @Param("deptID") deptID: string
-  // ) {
-  //   return this.response({ payload: await this.orgEmployeeService.addEmployeeAsTeamLead(orgID, teamID, empID, deptID) });
-  // }
-
-  // @Post("/:orgID/:deptID/removeTeamLead/:empID/:teamID")
-  // @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
-  // async removeTeamLead(@Param("orgID") orgID: string,
-  //                      @Param("teamID") teamID: string,
-  //                      @Param("empID") empID: string,
-  //                      @Param("deptID") deptID: string
-  // ) {
-  //   return this.response({ payload: await this.orgEmployeeService.removeEmployeeAsTeamLead(orgID, teamID, empID, deptID) });
-  // }
-
   @Post("/:orgID/allEmployees")
   @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
   async allEmployeesInMyOrg(@Body(ValidationPipe) searchRequest: SearchRequest,
@@ -223,6 +229,13 @@ export class OrgEmployeeController extends BaseController {
                         @Body() dto: EmployeeUpdateRequest
   ) {
     return this.response({ payload: await this.orgEmployeeService.updateMyProfile(dto, payload) });
+  }
+
+  @Post("/:orgID/allOnboardedEmployees")
+  async getAllOnboardedEmployees(@Param("orgID") orgID: string,
+                                 @Body() dto: SearchRequest
+                                 ) {
+    return this.response({ payload: await this.orgEmployeeService.allOnboardedEmployees(orgID, dto) });
   }
 
 }

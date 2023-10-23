@@ -31,7 +31,6 @@ export class OrgEmpPrismaHelperService {
   //Property name a.k.a first argument in the checkEmpPropertyExists function must tally with how the name is saved in the Employee model in prisma.
   async validateRequest(dto) {
     await this.checkEmpPropertyExists("email", dto.basic.email, "Email address");
-    await this.checkEmpPropertyExists("idNumber", dto.basic.employeeID, "ID Number");
   }
 
   async checkEmpPropertyExists(propertyName, propertyValue, propertyDescription) {
