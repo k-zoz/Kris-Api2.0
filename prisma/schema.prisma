@@ -827,15 +827,16 @@ model HireRequest {
 
 model JobOpening {
   id                  String                @id @default(uuid())
-  title               String
-  type                String
-  yoe                 String
-  qualification       String
-  skill_set           String
+  title               String?
+  type                String?
+  yoe                 String?
+  qualification       String?
+  skill_set           String?
   salary_range        String?
-  location            String
-  searchEndDate       DateTime              @db.Date
-  information         String
+  location            String?
+  searchEndDate       DateTime?             @db.Date
+  information         String?
+  jobDescription      String?
   employeeId          String?
   employee            Employee?             @relation(fields: [employeeId], references: [id])
   organizationID      String?
@@ -843,6 +844,17 @@ model JobOpening {
   createdDate         DateTime              @default(now()) @db.Date
   createdBy           String?
   JobOpeningResponses JobOpeningResponses[]
+  JobQuestions        JobQuestion[]
+}
+
+model JobQuestion {
+  id           String      @id @default(uuid())
+  question     String
+  jobOpeningId String // Add this line
+  JobOpening   JobOpening? @relation(fields: [jobOpeningId], references: [id]) // Add this line
+  createdDate  DateTime    @default(now()) @db.Date
+  createdBy    String?
+  // JobAnswer    JobAnswer[]
 }
 
 model JobOpeningResponses {
@@ -852,9 +864,22 @@ model JobOpeningResponses {
   resumeUrl      String
   coverLetterUrl String?
   jobOpeningID   String?
+  responses      Json?         @db.Json
   JobOpening     JobOpening?   @relation(fields: [jobOpeningID], references: [id])
   organizationID String?
   Organization   Organization? @relation(fields: [organizationID], references: [id])
   createdDate    DateTime      @default(now()) @db.Date
   createdBy      String?
+  // JobAnswers     JobAnswer[]
 }
+
+// model JobAnswer {
+//   id                   String               @id @default(uuid())
+//   answer               String
+//   jobQuestionId        String // Add this line
+//   JobQuestion          JobQuestion?         @relation(fields: [jobQuestionId], references: [id]) // Add this line
+//   jobOpeningResponseId String // Add this line
+//   JobOpeningResponses  JobOpeningResponses? @relation(fields: [jobOpeningResponseId], references: [id]) // Add this line
+//   createdDate          DateTime             @default(now()) @db.Date
+//   createdBy            String?
+// }

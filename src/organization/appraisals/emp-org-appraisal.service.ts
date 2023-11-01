@@ -95,7 +95,6 @@ export class EmpOrgAppraisalService {
   async myAppraisal(email: string) {
     const employee = await this.employeeHelperService.findEmpByEmail(email);
     return await this.empAppraisalHelperService.getAllMyAppraisals(employee);
-
   }
 
   async allMyAppraisal(orgID: string, myAppraisalID: string, email: string) {
@@ -115,7 +114,6 @@ export class EmpOrgAppraisalService {
   async commentAppraisal(dto: AppraisalResponseDto, myAppraisalID: string, sectionID: string, email: string) {
     const employee = await this.employeeHelperService.findEmpByEmail(email);
     await this.empAppraisalHelperService.findMyAppraisalById(myAppraisalID, employee.id);
-    dto.appraiserComment = JSON.stringify(dto.appraiserComment);
     return await this.empAppraisalHelperService.addCommentsToMyAppraisal(dto, sectionID, myAppraisalID, employee);
   }
 
@@ -123,13 +121,19 @@ export class EmpOrgAppraisalService {
     const employee = await this.employeeHelperService.findEmpByEmail(email);
     await this.empAppraisalHelperService.findMyAppraisalById(myAppraisalID, employee.id);
     return await this.empAppraisalHelperService.completeMyAppraisal(myAppraisalID, employee);
-
   }
 
-  async allMyAppraisalResponses(myAppraisalID: string, appraisalID: string, email: string) {
+  async allMyAppraisalResponses(myAppraisalID: string, email: string) {
     const employee = await this.employeeHelperService.findEmpByEmail(email);
-    await this.empAppraisalHelperService.findAppraisalByID(appraisalID, employee.organizationId);
-    await this.empAppraisalHelperService.findMyAppraisalById(myAppraisalID, employee.id);
-    return await this.empAppraisalHelperService.myResponses(myAppraisalID, appraisalID);
+    const myAppraisal = await this.empAppraisalHelperService.findMyAppraisalById(myAppraisalID, employee.id);
+    return await this.empAppraisalHelperService.myResponses(myAppraisalID, myAppraisal);
+  }
+
+  async sendAppraisalToEmployee(orgID: string, appraisalID: string, employeeID: string) {
+    const employee = await this.employeeHelperService.findEmpById(employeeID);
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    const appraisal = await this.empAppraisalHelperService.findAppraisalByID(appraisalID, orgID);
+    await this.empAppraisalHelperService.checkIfEmployeesHaveAppraisal(appraisalID, orgID);
+    return await this.empAppraisalHelperService.sendAppraisalToOneEmployee(employee, appraisal);
   }
 }

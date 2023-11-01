@@ -106,6 +106,7 @@ export class OrgEmployeeService {
     dto.employeeBranch = this.utilService.toUpperCase(dto.employeeBranch);
     dto.department = this.utilService.toUpperCase(dto.department);
     dto.empTeam = this.utilService.toUpperCase(dto.empTeam);
+    dto.payGroup = this.utilService.toUpperCase(dto.payGroup)
     return await this.employeeHelperService.updateEmployeeWorkDetails(dto, empID, orgName, modifierMail);
   }
 
@@ -180,4 +181,8 @@ export class OrgEmployeeService {
   }
 
 
+  async allEmployeesHrEmployees(orgID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.employeeHelperService.hrEmployees(organization)
+  }
 }

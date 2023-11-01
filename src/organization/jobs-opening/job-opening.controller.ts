@@ -1,6 +1,6 @@
 import {
   Body,
-  Controller, FileTypeValidator,
+  Controller, Delete, FileTypeValidator,
   Get, MaxFileSizeValidator,
   Param, ParseFilePipe,
   Post,
@@ -17,9 +17,17 @@ import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
-import { ApplyForJobDto, CreateNewHireDto, PostJobDto } from "@core/dto/global/Jobs.dto";
+import {
+  ApplyForJobDto,
+  CreateNewHireDto,
+  JobApplicationRequestAndResponse,
+  PostJobDto,
+  QuestionDto,
+  SearchEmail
+} from "@core/dto/global/Jobs.dto";
 import { Express } from "express";
 import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
+import { SearchRequest } from "@core/model/search-request";
 
 @Controller("organization/jobOpening")
 export class JobOpeningController extends BaseController {
@@ -35,6 +43,13 @@ export class JobOpeningController extends BaseController {
                        @Param("orgID") orgID: string,
                        @Body(ValidationPipe) dto: PostJobDto) {
     return this.response({ payload: await this.jobOpeningService.postAJob(dto, orgID, payload.email) });
+  }
+
+  @Post("/:jobOpeningID/updateJob/:orgID")
+  async updateJob(@Param("jobOpeningID") jobOpeningID: string,
+                  @Param("orgID") orgID: string,
+                  @Body(ValidationPipe) dto: PostJobDto) {
+    return this.response({ payload: await this.jobOpeningService.updateJob(jobOpeningID, orgID, dto) });
   }
 
   @Get("/:orgID/allJobs")
@@ -64,7 +79,7 @@ export class JobOpeningController extends BaseController {
   @Post("/:orgID/applyForJob/:jobOpeningID")
   async applyForJob(@Param("orgID") orgID: string,
                     @Param("jobOpeningID") jobOpeningID: string,
-                    @Body(ValidationPipe) dto: ApplyForJobDto
+                    @Body(ValidationPipe) dto: JobApplicationRequestAndResponse
   ) {
     return this.response({ payload: await this.jobOpeningService.jobApply(dto, orgID, jobOpeningID) });
   }
@@ -73,6 +88,38 @@ export class JobOpeningController extends BaseController {
   async getJobOpening(@Param("orgID") orgID: string,
                       @Param("jobOpeningID") jobOpeningID: string) {
     return this.response({ payload: await this.jobOpeningService.findOneJobOpening(orgID, jobOpeningID) });
+  }
+
+  @Get("/:orgID/oneJobOpening/:jobOpeningID")
+  async getAJobOpening(@Param("orgID") orgID: string,
+                       @Param("jobOpeningID") jobOpeningID: string) {
+    return this.response({ payload: await this.jobOpeningService.getOneJobOpening(orgID, jobOpeningID) });
+  }
+
+  @Post("/:jobOpeningID/addQuestion/:orgID")
+  async addQuestionToJob(@Param("jobOpeningID") jobOpeningID: string,
+                         @Param("orgID") orgID: string,
+                         @Body(ValidationPipe) dto: QuestionDto
+  ) {
+    return this.response({ payload: await this.jobOpeningService.addQuestionToJobOpening(orgID, jobOpeningID, dto) });
+  }
+
+  @Delete("/:jobQuestionID/removeQuestion")
+  async removeQuestion(@Param("jobQuestionID") jobQuestionID: string) {
+    return this.response({ payload: await this.jobOpeningService.removeQuestion(jobQuestionID) });
+  }
+
+  @Post("/:orgID/jobOpeningsByPoster")
+  async jobOpeningByPoster(@Body() dto: SearchEmail,
+                           @Param("orgID") orgID: string) {
+    return this.response({ payload: await this.jobOpeningService.jobOpeningByPoster(orgID, dto) });
+  }
+
+  @Get("/:orgID/:jobOpeningID/downloadExcelFile")
+  async downloadJobResponsesInExcel(@Param("orgID") orgID: string,
+                                    @Param("jobOpeningID") jobOpeningID: string
+  ) {
+    return this.response({ payload: await this.jobOpeningService.startExcelProcess(orgID, jobOpeningID) });
   }
 
 }

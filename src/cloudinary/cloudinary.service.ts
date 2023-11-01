@@ -7,7 +7,7 @@ import fs from "fs";
 import * as csv from "csv-parser";
 import * as Papa from "papaparse";
 import { AppException } from "@core/exception/app-exception";
-
+import * as ExcelJS from "exceljs";
 
 @Injectable()
 export class CloudinaryService {
@@ -95,5 +95,7 @@ export class CloudinaryService {
 
     return Promise.all(uploadPromises);
   }
+
+
 
 }

@@ -30,20 +30,38 @@ export class PayrollPreviewHelperService {
   }
 
 
+
+
   async createPayrollPreview(dto: CreatePayrollPreviewDto, orgID: string, email: string) {
     try {
-      await this.prismaService.payroll_Preview.create({
-        data: {
-          name: dto.name,
-          startDate: dto.startDate,
-          endDate: dto.endDate,
-          date: dto.date,
-          status: "PENDING",
-          organizationId: orgID,
-          createdBy: email
-        }
+      await this.prismaService.$transaction(async (tx) => {
+        const employees = await tx.employee.findMany({
+          where: {
+            organizationId: orgID,
+            OR: [
+              { status: "ACTIVE" },
+              { status: "LEAVE" }
+            ]
+          }
+        });
+
+        await tx.payroll_Preview.create({
+          data: {
+            name: dto.name,
+            startDate: dto.startDate,
+            endDate: dto.endDate,
+            date: dto.date,
+            status: "PENDING",
+            organizationId: orgID,
+            createdBy: email,
+            employees: {
+              connect: employees.map(employee => ({ id: employee.id }))
+            }
+          }
+        });
+
       });
-      return "Created successfully";
+
     } catch (e) {
       this.logger.log(e);
       throw new AppException("Error creating payroll");

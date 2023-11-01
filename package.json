@@ -51,6 +51,7 @@
     "csv-parser": "^3.0.0",
     "dayjs": "^1.11.9",
     "enum-values": "^1.2.1",
+    "exceljs": "^4.4.0",
     "file-type-mime": "^0.2.0",
     "generate-password": "^1.7.0",
     "google-libphonenumber": "^3.2.32",
@@ -71,6 +72,7 @@
     "resend": "^0.17.2",
     "rimraf": "^5.0.1",
     "rxjs": "^7.2.0",
+    "tmp": "^0.2.1",
     "uuid": "^9.0.0",
     "winston": "^3.9.0"
   },

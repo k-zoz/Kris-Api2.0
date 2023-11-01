@@ -1,9 +1,8 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
-import { connect, Observable } from "rxjs";
-import { AuthGuard } from "@nestjs/passport";
+
 import { Reflector } from "@nestjs/core";
 import { ROLE_KEY } from "@core/decorator/roles.decorator";
-import { AppTokenExpiredException, AppUnauthorizedException } from "@core/exception/app-exception";
+import {  AppUnauthorizedException } from "@core/exception/app-exception";
 import { UserRoleEnum } from "@core/enum/user-role-enum";
 
 @Injectable()

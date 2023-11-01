@@ -11,7 +11,6 @@ import { CreatePayrollPreviewDto, EmployeePayrollPreviewDto } from "@core/dto/gl
 import { SearchRequest } from "@core/model/search-request";
 import { Employee } from "@core/dto/global/employee.dto";
 import { SkipThrottle } from "@nestjs/throttler";
-
 @SkipThrottle()
 @Controller("organization/payrollPreview")
 @UseGuards(AuthGuard())

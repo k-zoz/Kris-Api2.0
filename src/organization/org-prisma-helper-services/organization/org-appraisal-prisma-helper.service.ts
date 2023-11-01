@@ -7,7 +7,7 @@ import {
   QuestionsDto
 } from "@core/dto/global/appraisal";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
-import { Appraisal } from "@prisma/client";
+import { Appraisal, Employee, Employee_Appraisal } from "@prisma/client";
 import { AuthMsg } from "@core/const/security-msg-const";
 
 @Injectable()
@@ -267,7 +267,7 @@ export class OrgAppraisalPrismaHelperService {
     });
 
     if (employees.length > 0) {
-      const msg = `Employees already have this appraisal appraisal`;
+      const msg = `Employees already have this appraisal`;
       this.logger.error(msg);
       throw new AppNotFoundException(msg);
     }
@@ -298,6 +298,22 @@ export class OrgAppraisalPrismaHelperService {
     }
   }
 
+  async sendAppraisalToOneEmployee(employee: Employee, appraisal: Appraisal) {
+    try {
+      await this.prismaService.employee_Appraisal.create({
+        data: {
+          appraisalId: appraisal.id,
+          status: "PENDING",
+          employeeId: employee.id
+        }
+      });
+      return "Successfully sent to employees";
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error sending appraisals to employee");
+    }
+  }
+
 
   async getAllMyAppraisals(employee) {
     try {
@@ -315,10 +331,10 @@ export class OrgAppraisalPrismaHelperService {
               }
             }
           }
-        },
-        orderBy: {
-          createdDate: "desc"
         }
+        // orderBy: {
+        //   createdDate: "desc"
+        // }
       });
 
     } catch (e) {
@@ -329,9 +345,10 @@ export class OrgAppraisalPrismaHelperService {
 
 
   async findMyAppraisalById(myAppraisalID: string, empID: any) {
-    const found = await this.prismaService.employee_Appraisal.findUnique({
+    const found = await this.prismaService.employee_Appraisal.findFirst({
       where: {
-        id: myAppraisalID
+        id: myAppraisalID,
+        employeeId:empID
       }
     });
     if (!found) {
@@ -428,12 +445,12 @@ export class OrgAppraisalPrismaHelperService {
     }
   }
 
-  async myResponses(myAppraisalID: string, appraisalID: string) {
+  async myResponses(myAppraisalID: string, myAppraisal: Employee_Appraisal) {
     try {
       const [myAppraisalSubmittedResponses] = await this.prismaService.$transaction([
         this.prismaService.appraisal.findUnique({
           where: {
-            id: appraisalID // replace with the actual appraisal ID
+            id: myAppraisal.appraisalId // replace with the actual appraisal ID
           },
           include: {
             section: {
@@ -476,12 +493,30 @@ export class OrgAppraisalPrismaHelperService {
           }
         })
       ]);
-      return { myAppraisalSubmittedResponses };
+      return  myAppraisalSubmittedResponses ;
     } catch (e) {
       this.logger.error(e);
       throw new AppException("Error getting appraisal responses");
     }
   }
 
+  // async myResponses(myAppraisalID: string, appraisalID: string) {
+  //   try {
+  //     const [myAppraisalSubmittedResponses] = await this.prismaService.$transaction([
+  //       this.prismaService.employee_Appraisal.findUnique({
+  //         where: {
+  //           id: myAppraisalID // replace with the actual appraisal ID
+  //         }, include: {
+  //           appraisal: true
+  //         }
+  //
+  //       })
+  //     ]);
+  //     return { myAppraisalSubmittedResponses };
+  //   } catch (e) {
+  //     this.logger.error(e);
+  //     throw new AppException("Error getting appraisal responses");
+  //   }
+  // }
 
 }

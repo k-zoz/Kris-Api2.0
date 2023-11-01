@@ -157,6 +157,7 @@ export class UpdateEmployeeWork {
   @IsEmail()
   email:string
   workPhoneNumber:string
+  payGroup?:string
 }
 
 

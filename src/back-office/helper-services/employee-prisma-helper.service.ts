@@ -65,7 +65,9 @@ export class EmployeePrismaHelperService {
           Department: true,
           org_Branch: true,
           managedBranch: true,
-          Org_Clientele: true
+          Org_Clientele: true,
+          PayGroup:true,
+
         }
       });
 
@@ -332,9 +334,9 @@ export class EmployeePrismaHelperService {
                   Department: true
                 }
               }
-            },
-            skip,
-            take: pageSize
+            }
+            // skip,
+            // take: pageSize
           }),
           this.prismaService.employee.count({ where: { organizationId: orgID } })
         ]
@@ -342,8 +344,8 @@ export class EmployeePrismaHelperService {
       const totalPage = Math.ceil(total / take) || 1;
       return { total, totalPage, employees };
     } catch (e) {
-      this.logger.error(AppException);
-      throw new AppException();
+      this.logger.error(e);
+      throw new AppException("Something went wrong, please try again.");
     }
   }
 
@@ -467,14 +469,14 @@ export class EmployeePrismaHelperService {
           }
         });
 
-        // if (!dto.employeeClient) {
-        // }
-        // const org_client = await tx.org_Clientele.findFirst({
-        //   where: {
-        //     organizationId: orgName.id,
-        //     name: dto.employeeClient
-        //   }
-        // });
+        if (!dto.payGroup) {
+        }
+        const payGroup = await tx.payGroup.findFirst({
+          where: {
+            organizationId: orgName.id,
+            name: dto.payGroup
+          }
+        });
 
 
         const saved = await tx.employee.update({
@@ -491,8 +493,8 @@ export class EmployeePrismaHelperService {
             dateOfConfirmation: dto.dateOfConfirmation,
             org_BranchId: branch.id,
             departmentId: department.id,
-            teamId: team.id
-            // org_ClienteleId: org_client.id
+            teamId: team.id,
+            payGroupId: payGroup.id
           }
         });
       }, { maxWait: 5000, timeout: 10000 });
@@ -724,6 +726,28 @@ export class EmployeePrismaHelperService {
     } catch (e) {
       this.logger.error(e);
       throw new AppConflictException("Error getting statistics. Contact Support");
+    }
+  }
+
+  async hrEmployees(organization: Organization) {
+    try {
+      return await this.prismaService.employee.findMany({
+        where: {
+          organizationId: organization.id,
+          role: {
+            hasSome: ["HUMAN_RESOURCE", "MANAGEMENT"]
+          }
+        },
+        select: {
+          role: true,
+          lastname: true,
+          firstname: true,
+          email: true
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw  new AppException();
     }
   }
 }

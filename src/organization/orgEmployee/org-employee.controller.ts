@@ -238,4 +238,11 @@ export class OrgEmployeeController extends BaseController {
     return this.response({ payload: await this.orgEmployeeService.allOnboardedEmployees(orgID, dto) });
   }
 
+  @Get("/:orgID/allEmployeesWithHRrole")
+  async getEmployeesWithHrRole(@Param("orgID") orgID: string,){
+    return this.response({payload:await this.orgEmployeeService.allEmployeesHrEmployees(orgID)})
+  }
+
+
+
 }

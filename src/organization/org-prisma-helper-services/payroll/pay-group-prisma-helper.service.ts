@@ -51,6 +51,9 @@ export class PayGroupPrismaHelperService {
       const [payGroups, total] = await this.prismaService.$transaction([
         this.prismaService.payGroup.findMany({
           where: { organizationId: orgID },
+          include:{
+            employees:true
+          },
           skip,
           take
         }),
@@ -69,6 +72,9 @@ export class PayGroupPrismaHelperService {
       where: {
         organizationId: orgID,
         id: payGroupID
+      },
+      include:{
+        employees:true
       }
     });
     if (!payGroup) {
@@ -82,6 +88,9 @@ export class PayGroupPrismaHelperService {
       where: {
         organizationId: orgID,
         name: dto.name
+      },
+      include:{
+        employees:true
       }
     });
     if (!payGroup) {

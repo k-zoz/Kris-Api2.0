@@ -1,4 +1,7 @@
-import { IsEmail, IsNotEmpty, IsOptional } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, ValidateNested } from "class-validator";
+import { BaseDto } from "@core/dto/global/base.dto";
+import { Type } from "class-transformer";
+import { EmployeeBasic } from "@core/dto/global/employee.dto";
 
 export class CreateNewHireDto {
   @IsNotEmpty({ message: "Job title is required!" })
@@ -19,24 +22,26 @@ export class CreateNewHireDto {
 
 
 export class PostJobDto {
-  @IsNotEmpty({ message: "Job title is required" })
+  @IsOptional()
   title: string;
-  @IsNotEmpty({ message: "Job type is required" })
+  @IsOptional()
   type: string;
-  @IsNotEmpty({ message: "Year of experience is required" })
+  @IsOptional()
   yoe: string;
-  @IsNotEmpty({ message: "Qualifications is required" })
+  @IsOptional()
   qualification: string;
-  @IsNotEmpty({ message: "Skill sets is required" })
+  @IsOptional()
   skill_set: string;
   @IsOptional()
   salary_range: string;
-  @IsNotEmpty({ message: "Job location is required" })
+  @IsOptional()
   location: string;
-  @IsNotEmpty({ message: "Job posting end date is required" })
+  @IsOptional()
   searchEndDate: any;
-  @IsNotEmpty({ message: "More job information is required" })
+  @IsOptional()
   information: string;
+  @IsOptional()
+  jobDescription: string;
 
 }
 
@@ -51,4 +56,23 @@ export class ApplyForJobDto {
   resumeUrl: string;
   @IsOptional()
   coverLetterUrl: string;
+}
+
+export class JobApplicationRequestAndResponse extends BaseDto {
+  @ValidateNested()
+  @Type(() => ApplyForJobDto)
+  profile: ApplyForJobDto;
+  @ValidateNested()
+  responses: { [key: string]: any };
+
+}
+
+export class QuestionDto {
+  @IsNotEmpty()
+  question: string;
+}
+
+export class SearchEmail {
+  @IsNotEmpty()
+  email: string;
 }

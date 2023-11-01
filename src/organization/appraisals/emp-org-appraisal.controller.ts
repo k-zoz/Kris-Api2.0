@@ -116,6 +116,15 @@ export class EmpOrgAppraisalController extends BaseController {
     return this.response({ payload: await this.appraisalService.sendToAllEmployees(dto, orgID, appraisalID, payload.email) });
   }
 
+  @Get("/:orgID/:appraisalID/sendToEmployee/:employeeID")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async shareToEmployee(@Param("orgID") orgID: string,
+                        @Param("appraisalID") appraisalID: string,
+                        @Param("employeeID") employeeID: string
+  ) {
+    return this.response({ payload: await this.appraisalService.sendAppraisalToEmployee(orgID, appraisalID, employeeID) });
+  }
+
   @Get("/myAppraisal")
   async getMyAppraisal(@GetUser() payload: AuthPayload
   ) {
@@ -158,12 +167,11 @@ export class EmpOrgAppraisalController extends BaseController {
     return this.response({ payload: await this.appraisalService.allMyAppraisal(orgID, myAppraisalID, payload.email) });
   }
 
-  @Get(":appraisalID/responses/:myAppraisalID")
+  @Get("responses/:myAppraisalID")
   async myAppraisalResponses(@Param("myAppraisalID") myAppraisalID: string,
-                             @Param("appraisalID") appraisalID: string,
                              @GetUser() payload: AuthPayload
   ) {
-    return this.response({ payload: await this.appraisalService.allMyAppraisalResponses(myAppraisalID, appraisalID, payload.email) });
+    return this.response({ payload: await this.appraisalService.allMyAppraisalResponses(myAppraisalID, payload.email) });
   }
 
 

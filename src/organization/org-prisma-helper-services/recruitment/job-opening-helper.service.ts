@@ -1,7 +1,14 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { ApplyForJobDto, PostJobDto } from "@core/dto/global/Jobs.dto";
+import {
+  ApplyForJobDto,
+  JobApplicationRequestAndResponse,
+  PostJobDto,
+  QuestionDto,
+  SearchEmail
+} from "@core/dto/global/Jobs.dto";
 import { AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { PrismaService } from "@prisma/prisma.service";
+import { JobOpening, Organization } from "@prisma/client";
 
 @Injectable()
 export class JobOpeningHelperService {
@@ -15,15 +22,10 @@ export class JobOpeningHelperService {
       await this.prismaService.jobOpening.create({
         data: {
           title: dto.title,
-          yoe: dto.yoe,
-          type: dto.type,
-          skill_set: dto.skill_set,
-          location: dto.location,
           information: dto.information,
+          jobDescription: dto.jobDescription,
           searchEndDate: dto.searchEndDate,
-          qualification: dto.qualification,
           createdBy: email,
-          salary_range: dto.salary_range,
           organizationID: orgID
         }
       });
@@ -45,10 +47,12 @@ export class JobOpeningHelperService {
             organizationID: orgID
           },
           include: {
-            Organization: true
+            Organization: true,
+            JobQuestions: true,
+            JobOpeningResponses: true
           },
           orderBy: {
-            createdDate: "desc"
+            createdDate: "asc"
           }
         })
       ]);
@@ -59,9 +63,9 @@ export class JobOpeningHelperService {
     }
   }
 
-  async findJobOpeningById(jobOpeningID: string, orgID: string) {
+  async findJobOpeningAndResponse(jobOpeningID: string, orgID: string) {
 
-    const [jobOpenings, jobOpeningsResponses] = await this.prismaService.$transaction([
+    const [jobOpenings, jobOpeningsResponses, applicants] = await this.prismaService.$transaction([
 
       this.prismaService.jobOpening.findFirst({
         where: {
@@ -75,27 +79,54 @@ export class JobOpeningHelperService {
           jobOpeningID: jobOpeningID,
           organizationID: orgID
         }
+      }),
+
+      this.prismaService.jobOpeningResponses.count({
+        where: {
+          jobOpeningID: jobOpeningID,
+          organizationID: orgID
+        }
       })
     ]);
 
 
     if (!jobOpenings) {
-      const msg = `Job opening with kris id ${jobOpeningID} does not exist`;
+      const msg = `Job opening with id ${jobOpeningID} does not exist`;
       this.logger.error(msg);
       throw new AppNotFoundException(msg);
     }
-    return { jobOpenings, jobOpeningsResponses };
+    return { jobOpenings, jobOpeningsResponses, applicants };
   }
 
-  async applyForJobOpening(dto: ApplyForJobDto, orgID: string, jobOpeningID: string) {
 
+  async findOneJobOpening(jobOpeningID: string, orgID: string) {
+    const found = await this.prismaService.jobOpening.findFirst({
+      where: {
+        id: jobOpeningID,
+        organizationID: orgID
+      },
+      include: {
+        JobQuestions: true
+      }
+    });
+
+    if (!found) {
+      const msg = `Job opening with ${jobOpeningID}  id  does not exist`;
+      this.logger.error(msg);
+      throw new AppNotFoundException(msg);
+    }
+    return found;
+  }
+
+  async applyForJobOpening(dto: JobApplicationRequestAndResponse, orgID: string, jobOpeningID: string) {
     try {
       await this.prismaService.jobOpeningResponses.create({
         data: {
-          fullname: dto.fullname,
-          email: dto.email,
-          resumeUrl: dto.resumeUrl,
-          coverLetterUrl: dto.coverLetterUrl,
+          fullname: dto.profile.fullname,
+          email: dto.profile.email,
+          resumeUrl: dto.profile.resumeUrl,
+          coverLetterUrl: dto.profile.coverLetterUrl,
+          responses: dto.responses,
           jobOpeningID: jobOpeningID,
           organizationID: orgID
         }
@@ -104,6 +135,81 @@ export class JobOpeningHelperService {
     } catch (e) {
       this.logger.log(e);
       throw new AppException();
+    }
+  }
+
+  async jobOpeningResponses(jobOpening: JobOpening, organization: Organization) {
+    return this.prismaService.jobOpeningResponses.findMany({
+      where: {
+        jobOpeningID: jobOpening.id,
+        organizationID: organization.id
+      },
+    });
+  }
+
+  async addQuestionToJobOpening(jobOpening: JobOpening, dto: QuestionDto) {
+    try {
+      await this.prismaService.jobQuestion.create({
+        data: {
+          question: dto.question,
+          JobOpening: {
+            connect: {
+              id: jobOpening.id
+            }
+          }
+        }
+      });
+    } catch (e) {
+      this.logger.log(e);
+      throw new AppException();
+    }
+  }
+
+  async removeQuestionFromJobOpening(jobQuestionID) {
+    try {
+      await this.prismaService.jobQuestion.delete({
+        where: { id: jobQuestionID }
+      });
+
+    } catch (e) {
+      this.logger.log(e);
+      throw new AppException();
+    }
+  }
+
+  async updateJobPost(jobOpening: JobOpening, organization: Organization, dto: PostJobDto) {
+    try {
+      await this.prismaService.jobOpening.update({
+        where: {
+          id: jobOpening.id
+        },
+        data: {
+          information: dto.information,
+          jobDescription: dto.jobDescription,
+          searchEndDate: dto.searchEndDate
+        }
+      });
+    } catch (e) {
+      this.logger.log(e);
+      throw new AppException("Error making changes!");
+    }
+  }
+
+  async jobOpeningANdResponse(dto: SearchEmail, organization: Organization) {
+    try {
+      return await this.prismaService.jobOpening.findMany({
+        where: {
+          organizationID: organization.id,
+          createdBy: dto.email
+        },
+        include: {
+          JobQuestions: true,
+          JobOpeningResponses: true
+        }
+      });
+    } catch (e) {
+      this.logger.log(e);
+      throw new AppException("Error getting job openings!");
     }
   }
 }

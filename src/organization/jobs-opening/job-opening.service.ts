@@ -2,10 +2,15 @@ import { Injectable } from "@nestjs/common";
 import {
   JobOpeningHelperService
 } from "@organization/org-prisma-helper-services/recruitment/job-opening-helper.service";
-import { ApplyForJobDto, PostJobDto } from "@core/dto/global/Jobs.dto";
+import {
+  ApplyForJobDto,
+  JobApplicationRequestAndResponse,
+  PostJobDto,
+  QuestionDto,
+  SearchEmail
+} from "@core/dto/global/Jobs.dto";
 import { UtilService } from "@core/utils/util.service";
 import { OrganizationPrismaHelperService } from "@back-office/helper-services/organization-prisma-helper.service";
-import { Express } from "express";
 import { CloudinaryService } from "@cloudinary/cloudinary.service";
 
 @Injectable()
@@ -34,16 +39,16 @@ export class JobOpeningService {
     return await this.jobOpeningPrismaHelper.findAllOrgPostedJobs(orgID);
   }
 
-  async jobApply(dto: ApplyForJobDto, orgID: string, jobOpeningID: string) {
+  async jobApply(dto: JobApplicationRequestAndResponse, orgID: string, jobOpeningID: string) {
     await this.orgHelperService.findOrgByID(orgID);
-    await this.jobOpeningPrismaHelper.findJobOpeningById(jobOpeningID, orgID);
-    dto.fullname = this.utilService.toUpperCase(dto.fullname);
+    await this.jobOpeningPrismaHelper.findJobOpeningAndResponse(jobOpeningID, orgID);
+    dto.profile.fullname = this.utilService.toUpperCase(dto.profile.fullname);
     return await this.jobOpeningPrismaHelper.applyForJobOpening(dto, orgID, jobOpeningID);
   }
 
   async findOneJobOpening(orgID: string, jobOpeningID: string) {
     await this.orgHelperService.findOrgByID(orgID);
-    return await this.jobOpeningPrismaHelper.findJobOpeningById(jobOpeningID, orgID);
+    return await this.jobOpeningPrismaHelper.findJobOpeningAndResponse(jobOpeningID, orgID);
   }
 
   async uploadCredentials(file) {
@@ -55,5 +60,38 @@ export class JobOpeningService {
     }
   }
 
+  async getOneJobOpening(orgID: any, jobOpeningId: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.jobOpeningPrismaHelper.findOneJobOpening(jobOpeningId, organization.id);
+  }
 
+
+  async addQuestionToJobOpening(orgID, jobOpeningID: string, dto: QuestionDto) {
+    const jobOpening = await this.jobOpeningPrismaHelper.findOneJobOpening(jobOpeningID, orgID);
+    return await this.jobOpeningPrismaHelper.addQuestionToJobOpening(jobOpening, dto);
+  }
+
+  async removeQuestion(jobQuestionID) {
+    return await this.jobOpeningPrismaHelper.removeQuestionFromJobOpening(jobQuestionID);
+  }
+
+  async updateJob(jobOpeningID: string, orgID: string, dto: PostJobDto) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    const jobOpening = await this.jobOpeningPrismaHelper.findOneJobOpening(jobOpeningID, orgID);
+    dto.searchEndDate = await this.utilService.convertDateAgain(dto.searchEndDate);
+    return await this.jobOpeningPrismaHelper.updateJobPost(jobOpening, organization, dto);
+  }
+
+  async jobOpeningByPoster(orgID: string, dto: SearchEmail) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.jobOpeningPrismaHelper.jobOpeningANdResponse(dto, organization);
+  }
+
+  async startExcelProcess(orgID: string, jobOpeningID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    const jobOpening = await this.jobOpeningPrismaHelper.findOneJobOpening(jobOpeningID, orgID);
+    const jobResponses = await this.jobOpeningPrismaHelper.jobOpeningResponses(jobOpening, organization);
+   // console.log(jobResponses);
+    return jobResponses
+  }
 }
