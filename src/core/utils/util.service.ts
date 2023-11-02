@@ -6,6 +6,7 @@ import { randomBytes } from "crypto";
 import { v4 as uuidV4 } from "uuid";
 import * as moment from "moment";
 import * as argon from "argon2";
+import { EmployeePayrollPreviewDto } from "@core/dto/global/Payroll.dto";
 
 const dayjs = require("dayjs");
 
@@ -260,5 +261,19 @@ export class UtilService {
         modifiedDate: new Date() // Assuming current date
       };
     });
+  }
+
+  calculateEmployeePension(dto: EmployeePayrollPreviewDto) {
+    let total = dto.basic_salary + dto.housing + dto.transportation;
+    return total * 0.08;
+  }
+
+  calculateEmployerPension(dto: EmployeePayrollPreviewDto) {
+    let total = dto.basic_salary + dto.housing + dto.transportation;
+    return total * 0.10;
+  }
+
+  calculateTotalDeductions(dto: EmployeePayrollPreviewDto) {
+    return dto.employer_Pension + dto.employee_Pension;
   }
 }

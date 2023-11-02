@@ -42,6 +42,13 @@ export class PayrollApprovePrismaHelperService {
               deduction: true,
               bonuses: true,
               net_pay: true,
+              employee_Pension:true,
+              employer_Pension:true,
+              utility:true,
+              housing:true,
+              transportation:true,
+              education:true,
+              location:true,
               designation: true
             }
           }

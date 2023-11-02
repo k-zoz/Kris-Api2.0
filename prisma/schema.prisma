@@ -309,15 +309,25 @@ model Employee {
   dateOfBirth          DateTime? @db.Date
   gender               String?
   maritalStatus        String?
-  taxes                Float?
-  gross_pay            Float?
-  deduction            Float?
-  bonuses              Float?
-  net_pay              Float?
-  isEdit               Boolean?
-  isSelected           Boolean?
-  dateOfConfirmation   DateTime? @db.Date
-  dateOfJoining        DateTime? @db.Date
+
+  taxes              Float?
+  gross_pay          Float?
+  deduction          Float?
+  bonuses            Float?
+  net_pay            Float?
+  isEdit             Boolean?
+  isSelected         Boolean?
+  basic_salary       Float?
+  housing            Float?
+  transportation     Float?
+  education          Float?
+  location           Float?
+  furniture          Float?
+  utility            Float?
+  employee_Pension   Float?
+  employer_Pension   Float?
+  dateOfConfirmation DateTime? @db.Date
+  dateOfJoining      DateTime? @db.Date
 
   address1 String?
   address2 String?
@@ -854,7 +864,6 @@ model JobQuestion {
   JobOpening   JobOpening? @relation(fields: [jobOpeningId], references: [id]) // Add this line
   createdDate  DateTime    @default(now()) @db.Date
   createdBy    String?
-  // JobAnswer    JobAnswer[]
 }
 
 model JobOpeningResponses {
@@ -870,16 +879,4 @@ model JobOpeningResponses {
   Organization   Organization? @relation(fields: [organizationID], references: [id])
   createdDate    DateTime      @default(now()) @db.Date
   createdBy      String?
-  // JobAnswers     JobAnswer[]
 }
-
-// model JobAnswer {
-//   id                   String               @id @default(uuid())
-//   answer               String
-//   jobQuestionId        String // Add this line
-//   JobQuestion          JobQuestion?         @relation(fields: [jobQuestionId], references: [id]) // Add this line
-//   jobOpeningResponseId String // Add this line
-//   JobOpeningResponses  JobOpeningResponses? @relation(fields: [jobOpeningResponseId], references: [id]) // Add this line
-//   createdDate          DateTime             @default(now()) @db.Date
-//   createdBy            String?
-// }

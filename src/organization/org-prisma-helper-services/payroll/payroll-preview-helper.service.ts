@@ -206,6 +206,13 @@ export class PayrollPreviewHelperService {
           bonuses: dto.bonuses,
           gross_pay: dto.gross_pay,
           deduction: dto.deduction,
+          basic_salary:dto.basic_salary,
+          housing:dto.housing,
+          transportation:dto.transportation,
+          education:dto.education,
+          location:dto.location,
+          furniture:dto.furniture,
+          utility:dto.utility,
           modifiedBy: email
         }
       });

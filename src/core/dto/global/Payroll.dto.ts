@@ -132,7 +132,7 @@ export class CreatePayrollPreviewDto {
 
 
 export class EmployeePayrollPreviewDto {
-  id:string
+  id: string;
   @IsOptional()
   taxes: any;
   @IsOptional()
@@ -141,4 +141,22 @@ export class EmployeePayrollPreviewDto {
   deduction: any;
   @IsOptional()
   gross_pay: any;
+  @IsOptional()
+  net_pay?: any;
+  @IsOptional()
+  basic_salary?: any;
+  @IsOptional()
+  housing?: any;
+  @IsOptional()
+  transportation?: any;
+  @IsOptional()
+  education?: any;
+  @IsOptional()
+  location?: any;
+  @IsOptional()
+  furniture?: any;
+  @IsOptional()
+  utility?: any;
+  employee_Pension: any;
+  employer_Pension: any;
 }
