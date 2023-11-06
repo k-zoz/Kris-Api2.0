@@ -8,7 +8,7 @@ import {
   Employee,
   EmployeeOnboardRequest,
   EmployeeWork,
-  UpdateEmployeeWork, ClientEmployeeOnboardRequest
+  UpdateEmployeeWork, ClientEmployeeOnboardRequest, UpdateCertificateDto
 } from "@core/dto/global/employee.dto";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { LocaleService } from "@locale/locale.service";
@@ -66,7 +66,10 @@ export class EmployeePrismaHelperService {
           org_Branch: true,
           managedBranch: true,
           Org_Clientele: true,
-          PayGroup:true,
+          PayGroup: true,
+          EmployeeCertificate: true,
+          Employee_Appraisal: true,
+          EmployeePayroll: true
 
         }
       });
@@ -748,6 +751,45 @@ export class EmployeePrismaHelperService {
     } catch (e) {
       this.logger.error(e);
       throw  new AppException();
+    }
+  }
+
+  async uploadCert(employee: Employee, dto: UpdateCertificateDto) {
+    try {
+      return await this.prismaService.employeeCertificate.create({
+        data: {
+          employeeId: employee.id,
+          certUrl: dto.certUrl,
+          certName: dto.certName
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw  new AppException("Unable to save upload. Try again!");
+    }
+  }
+
+  async certificatesAll(employee: Employee) {
+    try {
+      return await this.prismaService.employeeCertificate.findMany({
+        where: {
+          employeeId: employee.id
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw  new AppException("Unable to save upload. Try again!");
+    }
+  }
+
+  async deleteCert(certificateID: string) {
+    try {
+      return await this.prismaService.employeeCertificate.delete({
+        where: { id: certificateID }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw  new AppException("Unable to save upload. Try again!");
     }
   }
 }

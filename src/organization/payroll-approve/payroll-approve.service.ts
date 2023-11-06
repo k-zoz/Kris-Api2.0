@@ -34,9 +34,4 @@ export class PayrollApproveService {
     return await this.payrollApproveHelperService.startPayrollApproval(orgID, payrollPreviewID, email, payrollTotal.totals);
   }
 
-  // async sendPayslipsToEmployees(orgID: string, payrollPreviewID: string, email) {
-  //   await this.organizationHelperService.findOrgByID(orgID);
-  //   await this.payrollPreviewPrismaHelper.findPayrollPreviewById(orgID, payrollPreviewID);
-  //   return await  this.payrollApproveHelperService.sendPaySlips(orgID, payrollPreviewID)
-  // }
 }

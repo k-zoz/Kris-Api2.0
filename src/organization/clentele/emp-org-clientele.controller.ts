@@ -52,4 +52,11 @@ export class EmpOrgClienteleController extends BaseController {
     return this.response({ payload: await this.clenteleService.allEmployeesInClient(orgID, clienteleID) });
   }
 
+  @Get("/:orgID/clientele/:clienteleID/employeeGender")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async getEmployeesGender(@Param("orgID") orgID: string,
+                           @Param("clienteleID") clienteleID: string) {
+    return this.response({ payload: await this.clenteleService.allTheGenderOfEmployeesInClient(orgID, clienteleID) });
+  }
+
 }

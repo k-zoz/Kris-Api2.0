@@ -30,8 +30,6 @@ export class PayrollPreviewHelperService {
   }
 
 
-
-
   async createPayrollPreview(dto: CreatePayrollPreviewDto, orgID: string, email: string) {
     try {
       await this.prismaService.$transaction(async (tx) => {
@@ -107,7 +105,16 @@ export class PayrollPreviewHelperService {
             deduction: true,
             taxes: true,
             gross_pay: true,
-            net_pay: true
+            net_pay: true,
+            basic_salary: true,
+            housing: true,
+            transportation: true,
+            education: true,
+            location: true,
+            furniture: true,
+            utility: true,
+            employee_Pension: true,
+            employer_Pension: true
           }
         }
       }
@@ -206,13 +213,16 @@ export class PayrollPreviewHelperService {
           bonuses: dto.bonuses,
           gross_pay: dto.gross_pay,
           deduction: dto.deduction,
-          basic_salary:dto.basic_salary,
-          housing:dto.housing,
-          transportation:dto.transportation,
-          education:dto.education,
-          location:dto.location,
-          furniture:dto.furniture,
-          utility:dto.utility,
+          basic_salary: dto.basic_salary,
+          housing: dto.housing,
+          transportation: dto.transportation,
+          education: dto.education,
+          location: dto.location,
+          furniture: dto.furniture,
+          utility: dto.utility,
+          empNHF: dto.empNHF,
+          empNSITF: dto.empNSITF,
+          empITF: dto.empITF,
           modifiedBy: email
         }
       });

@@ -52,6 +52,14 @@ export class OrgBranchPrismaHelperService {
       where: {
         id: branchID,
         organizationId: orgID
+      },
+      include: {
+        department: {
+          include: {
+            employees: true,
+            teams: true
+          }
+        }
       }
     });
 

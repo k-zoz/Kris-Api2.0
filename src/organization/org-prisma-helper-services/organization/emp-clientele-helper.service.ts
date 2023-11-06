@@ -3,6 +3,8 @@ import { PrismaService } from "@prisma/prisma.service";
 import { CreateBranchDto, CreateClienteleDto } from "@core/dto/global/branch.dto";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { SearchRequest } from "@core/model/search-request";
+import { Org_Clientele, Organization } from "@prisma/client";
+import { EmployeeStatistics } from "@core/dto/global/employee.dto";
 
 @Injectable()
 export class EmpClienteleHelperService {
@@ -132,6 +134,38 @@ export class EmpClienteleHelperService {
           idNumber: true
         }
       });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException();
+    }
+  }
+
+  async allTheGenderOfEmployeeClients(organization: Organization, client: Org_Clientele) {
+    try {
+      const [male, female, others] = await this.prismaService.$transaction([
+        this.prismaService.employee.count({
+          where: {
+            organizationId: organization.id,
+            org_ClienteleId: client.id,
+            gender: "Male"
+          }
+        }),
+        this.prismaService.employee.count({
+          where: {
+            organizationId: organization.id,
+            org_ClienteleId: client.id,
+            gender: "Female"
+          }
+        }),
+        this.prismaService.employee.count({
+          where: {
+            organizationId: organization.id,
+            org_ClienteleId: client.id,
+            gender: "Others"
+          }
+        })
+      ]);
+      return { male, female, others } as EmployeeStatistics;
     } catch (e) {
       this.logger.error(e);
       throw new AppException();

@@ -60,11 +60,14 @@ export class PayrollPreviewService {
   async updateEmployeePayrollPreviewInformation(dto: EmployeePayrollPreviewDto, orgID: string, payrollPreviewID: string, empID: string, email: string) {
     await this.organizationHelperService.findOrgByID(orgID);
 
-    dto.employee_Pension = parseFloat(dto.employee_Pension);
-    dto.employer_Pension = parseFloat(dto.employer_Pension);
+    // dto.employee_Pension = parseFloat(dto.employee_Pension);
+    // dto.employer_Pension = parseFloat(dto.employer_Pension);
     dto.employee_Pension = this.utilService.calculateEmployeePension(dto);
-    dto.employer_Pension = this.utilService.calculateEmployerPension(dto);
+    dto.employer_Pension = parseFloat(dto.employer_Pension);
     dto.deduction = this.utilService.calculateTotalDeductions(dto);
+    dto.empITF = this.utilService.calculateITF(dto);
+    dto.empNHF = this.utilService.calculateNHF(dto);
+    dto.empNSITF = this.utilService.calculateNSITF(dto);
     dto.gross_pay = parseFloat(dto.gross_pay);
     dto.bonuses = parseFloat(dto.bonuses);
     dto.taxes = parseFloat(dto.taxes);
@@ -76,6 +79,8 @@ export class PayrollPreviewService {
     dto.transportation = parseFloat(dto.transportation);
     dto.utility = parseFloat(dto.utility);
     dto.location = parseFloat(dto.location);
+    // console.log(dto);
+
     await this.payrollPreviewPrismaHelper.findPayrollPreviewById(orgID, payrollPreviewID);
     const employee = await this.employeeHelperPrismaService.findEmpById(empID);
     await this.payrollPreviewPrismaHelper.findEmployeeInPayrollPreview(employee.id, payrollPreviewID, orgID);

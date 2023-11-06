@@ -274,6 +274,21 @@ export class UtilService {
   }
 
   calculateTotalDeductions(dto: EmployeePayrollPreviewDto) {
+    //deduction is employers pension + employee pension plus
     return dto.employer_Pension + dto.employee_Pension;
   }
+
+  calculateNHF(dto: EmployeePayrollPreviewDto) {
+    return dto.basic_salary * 0.025;
+  }
+
+  calculateNSITF(dto: EmployeePayrollPreviewDto){
+    return dto.gross_pay * 0.01
+  }
+
+  calculateITF(dto: EmployeePayrollPreviewDto){
+    return dto.gross_pay * 0.01
+  }
+
+
 }

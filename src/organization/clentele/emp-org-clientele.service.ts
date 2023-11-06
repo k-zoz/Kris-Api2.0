@@ -40,4 +40,10 @@ export class EmpOrgClienteleService {
     await this.clienteleHelperService.findClient(clienteleID, orgID);
     return await this.clienteleHelperService.findAllEmployeesInAClient(orgID, clienteleID);
   }
+
+  async allTheGenderOfEmployeesInClient(orgID: string, clienteleID: string) {
+    const organization = await this.organizationHelperService.findOrgByID(orgID);
+    const client = await this.clienteleHelperService.findClient(clienteleID, orgID);
+    return await this.clienteleHelperService.allTheGenderOfEmployeeClients(organization, client);
+  }
 }

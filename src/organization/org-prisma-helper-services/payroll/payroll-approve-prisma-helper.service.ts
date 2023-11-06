@@ -1,15 +1,13 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
 import { AppException } from "@core/exception/app-exception";
-import { EmailService } from "../../../alert/email/email.service";
+import { EmailService } from "@alert/email/email.service";
 import { Resend } from "resend";
 import { ConfigService } from "@nestjs/config";
 import { PdfService } from "@cloudinary/pdf/pdf.service";
-import { v2 } from "cloudinary";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 
-const PDFDocument = require("pdfkit");
-const fs = require("fs");
+
 
 @Injectable()
 export class PayrollApprovePrismaHelperService {
@@ -42,18 +40,19 @@ export class PayrollApprovePrismaHelperService {
               deduction: true,
               bonuses: true,
               net_pay: true,
-              employee_Pension:true,
-              employer_Pension:true,
-              utility:true,
-              housing:true,
-              transportation:true,
-              education:true,
-              location:true,
+              employee_Pension: true,
+              employer_Pension: true,
+              utility: true,
+              housing: true,
+              transportation: true,
+              education: true,
+              location: true,
               designation: true
             }
           }
         }
       });
+
 
       const totals = result.employees.reduce(
         (acc, employee) => {
@@ -78,6 +77,7 @@ export class PayrollApprovePrismaHelperService {
       throw new AppException();
     }
   }
+
 
   async startPayrollApproval(orgID: string, payrollPreviewID: string, email, totalsPayroll) {
     try {
@@ -111,6 +111,16 @@ export class PayrollApprovePrismaHelperService {
                 deduction: employee.deduction,
                 gross_pay: employee.gross_pay,
                 net_pay: employee.net_pay,
+                basic_salary: employee.basic_salary,
+                housing: employee.housing,
+                transportation: employee.transportation,
+                education: employee.education,
+                location: employee.location,
+                furniture: employee.furniture,
+                utility: employee.utility,
+                empNHF: employee.empNHF,
+                empNSITF: employee.empNSITF,
+                empITF: employee.empITF,
                 createdBy: email
               }))
             },
@@ -129,40 +139,6 @@ export class PayrollApprovePrismaHelperService {
       throw new AppException();
     }
   }
-
-
-  // async sendPaySlips(orgID: string, payrollPreviewID: string) {
-  //   try {
-  //     const payrollPreview = await this.prismaService.payroll_Preview.findUnique({
-  //       where: { id: payrollPreviewID },
-  //       include: {
-  //         employees: true,
-  //         Organization: true
-  //       }
-  //     });
-  //
-  //     for (const employee of payrollPreview.employees) {
-  //       const html = await this.emailService.sendPayrollEmail({
-  //         organizationName: payrollPreview.Organization.orgName,
-  //         employeeFirstName: employee.firstname,
-  //         employeeLastName: employee.lastname,
-  //         payslipEndDate: payrollPreview.endDate,
-  //         payslipStartDate: payrollPreview.startDate
-  //       });
-  //
-  //       await this.resend.emails.send({
-  //         from: `${this.mailSource}`,
-  //         to: `${employee.email}`,
-  //         subject: "PAYSLIP",
-  //         html: `${html}`
-  //       });
-  //     }
-  //     return "Successfully sent";
-  //   } catch (e) {
-  //     this.logger.log(e);
-  //     throw new AppException();
-  //   }
-  // }
 
 
 }

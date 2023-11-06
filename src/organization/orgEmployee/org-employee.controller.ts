@@ -23,7 +23,7 @@ import {
   EditEmployeeDto,
   EmployeeOnboardRequest, EmployeeUpdateRequest, EmployeeWork,
 
-  RoleToEmployee, UpdateEmployeeWork
+  RoleToEmployee, UpdateCertificateDto, UpdateEmployeeWork
 } from "@core/dto/global/employee.dto";
 import { EmployeeService } from "@back-office/employee/employee.service";
 import { AuthMsg } from "@core/const/security-msg-const";
@@ -234,15 +234,32 @@ export class OrgEmployeeController extends BaseController {
   @Post("/:orgID/allOnboardedEmployees")
   async getAllOnboardedEmployees(@Param("orgID") orgID: string,
                                  @Body() dto: SearchRequest
-                                 ) {
+  ) {
     return this.response({ payload: await this.orgEmployeeService.allOnboardedEmployees(orgID, dto) });
   }
 
   @Get("/:orgID/allEmployeesWithHRrole")
-  async getEmployeesWithHrRole(@Param("orgID") orgID: string,){
-    return this.response({payload:await this.orgEmployeeService.allEmployeesHrEmployees(orgID)})
+  async getEmployeesWithHrRole(@Param("orgID") orgID: string) {
+    return this.response({ payload: await this.orgEmployeeService.allEmployeesHrEmployees(orgID) });
   }
 
+  @Post("uploadCertificate")
+  async uploadMyCertificate(@GetUser() payload: AuthPayload,
+                            @Body() dto: UpdateCertificateDto
+  ) {
+    return this.response({ payload: await this.orgEmployeeService.uploadCertificate(dto, payload.email) });
+  }
+
+  @Get("myCertificates")
+  async myCertificates(@GetUser() payload: AuthPayload) {
+    return this.response({ payload: await this.orgEmployeeService.myCertificates(payload.email) });
+  }
+
+  @Get("/:certificateID/delete")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async deleteCertificate(@Param("certificateID") certificateID: string) {
+    return this.response({ payload: await this.orgEmployeeService.deleteEmployeeCertificate(certificateID) });
+  }
 
 
 }

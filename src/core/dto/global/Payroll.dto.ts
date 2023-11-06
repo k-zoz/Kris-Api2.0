@@ -159,4 +159,7 @@ export class EmployeePayrollPreviewDto {
   utility?: any;
   employee_Pension: any;
   employer_Pension: any;
+  empNHF:any
+  empNSITF:any
+  empITF:any
 }

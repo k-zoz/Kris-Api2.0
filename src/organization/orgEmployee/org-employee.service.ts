@@ -15,7 +15,7 @@ import {
   CreateEmployeeDto,
   EmployeeOnboardRequest,
   EmployeeUpdateRequest,
-  EmployeeWork, UpdateEmployeeWork
+  EmployeeWork, UpdateCertificateDto, UpdateEmployeeWork
 } from "@core/dto/global/employee.dto";
 import * as argon from "argon2";
 import { LeaveService } from "@organization/leave/leave.service";
@@ -106,7 +106,7 @@ export class OrgEmployeeService {
     dto.employeeBranch = this.utilService.toUpperCase(dto.employeeBranch);
     dto.department = this.utilService.toUpperCase(dto.department);
     dto.empTeam = this.utilService.toUpperCase(dto.empTeam);
-    dto.payGroup = this.utilService.toUpperCase(dto.payGroup)
+    dto.payGroup = this.utilService.toUpperCase(dto.payGroup);
     return await this.employeeHelperService.updateEmployeeWorkDetails(dto, empID, orgName, modifierMail);
   }
 
@@ -183,6 +183,20 @@ export class OrgEmployeeService {
 
   async allEmployeesHrEmployees(orgID: string) {
     const organization = await this.orgHelperService.findOrgByID(orgID);
-    return await this.employeeHelperService.hrEmployees(organization)
+    return await this.employeeHelperService.hrEmployees(organization);
+  }
+
+  async uploadCertificate(dto: UpdateCertificateDto, email: string) {
+    const employee = await this.employeeService.findEmpByEmail(email);
+    return await this.employeeHelperService.uploadCert(employee, dto);
+  }
+
+  async myCertificates(email: string) {
+    const employee = await this.employeeService.findEmpByEmail(email);
+    return await this.employeeHelperService.certificatesAll(employee);
+  }
+
+  async deleteEmployeeCertificate(certificateID: string) {
+    return await this.employeeHelperService.deleteCert(certificateID)
   }
 }
