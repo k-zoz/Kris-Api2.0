@@ -1,20 +1,28 @@
 import { Injectable, Logger } from "@nestjs/common";
-import {
-  ApplyForJobDto,
-  JobApplicationRequestAndResponse,
-  PostJobDto,
-  QuestionDto,
-  SearchEmail
-} from "@core/dto/global/Jobs.dto";
+import { JobApplicationRequestAndResponse, PostJobDto, QuestionDto, SearchEmail } from "@core/dto/global/Jobs.dto";
 import { AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { PrismaService } from "@prisma/prisma.service";
 import { JobOpening, Organization } from "@prisma/client";
+import { Resend } from "resend";
+import { ConfigService } from "@nestjs/config";
+import { EmailService } from "@alert/email/email.service";
+import { UtilService } from "@core/utils/util.service";
+import { JobApplicationConfirmationEmail } from "@core/event/back-office-event";
+
 
 @Injectable()
 export class JobOpeningHelperService {
   private readonly logger = new Logger(JobOpeningHelperService.name);
+  private readonly mailSource = this.configService.get("mailSender");
+  private resend: Resend;
 
-  constructor(private readonly prismaService: PrismaService) {
+  constructor(private readonly prismaService: PrismaService,
+              private readonly configService: ConfigService,
+              private readonly emailService: EmailService,
+              private readonly utilService: UtilService
+  ) {
+    const resendKey = this.configService.get("resendApiKey");
+    this.resend = new Resend(resendKey);
   }
 
   async postAJob(dto: PostJobDto, orgID: string, email: string) {
@@ -44,7 +52,17 @@ export class JobOpeningHelperService {
         }),
         this.prismaService.jobOpening.findMany({
           where: {
-            organizationID: orgID
+            organizationID: orgID,
+            OR: [
+              {
+                searchEndDate: {
+                  lte: new Date() // only include job openings where the searchEndDate is less than or equal to today's date
+                }
+              },
+              {
+                searchEndDate: null // also include job openings where the searchEndDate is not set
+              }
+            ]
           },
           include: {
             Organization: true,
@@ -52,7 +70,7 @@ export class JobOpeningHelperService {
             JobOpeningResponses: true
           },
           orderBy: {
-            createdDate: "asc"
+            createdDate: "desc"
           }
         })
       ]);
@@ -62,6 +80,7 @@ export class JobOpeningHelperService {
       throw new AppException();
     }
   }
+
 
   async findJobOpeningAndResponse(jobOpeningID: string, orgID: string) {
 
@@ -118,20 +137,42 @@ export class JobOpeningHelperService {
     return found;
   }
 
-  async applyForJobOpening(dto: JobApplicationRequestAndResponse, orgID: string, jobOpeningID: string) {
+  async applyForJobOpening(dto: JobApplicationRequestAndResponse, org: Organization, jobOpening: JobOpening) {
     try {
-      await this.prismaService.jobOpeningResponses.create({
-        data: {
-          fullname: dto.profile.fullname,
-          email: dto.profile.email,
-          resumeUrl: dto.profile.resumeUrl,
-          coverLetterUrl: dto.profile.coverLetterUrl,
-          responses: dto.responses,
-          jobOpeningID: jobOpeningID,
-          organizationID: orgID
+      await this.prismaService.$transaction(async (tx) => {
+
+        await tx.jobOpeningResponses.create({
+          data: {
+            fullname: dto.profile.fullname,
+            email: dto.profile.email,
+            resumeUrl: dto.profile.resumeUrl,
+            coverLetterUrl: dto.profile.coverLetterUrl,
+            responses: dto.responses,
+            jobOpeningID: jobOpening.id,
+            organizationID: org.id
+          }
+        });
+
+        try {
+          const html = await this.emailService.jobApplicationConfirmationEmail({
+            job_title: jobOpening.title,
+            company_name: org.orgName,
+            applicant_name: dto.profile.fullname
+          } as JobApplicationConfirmationEmail);
+          await this.resend.emails.send({
+            from: `${this.mailSource}`,
+            to: `${dto.profile.email}`,
+            subject: "Job Application Confirmation",
+            html: `${html}`
+          });
+          this.logger.log(`Email Successfully sent to ${dto.profile.email}`);
+          return "Job application sent successfully";
+        } catch (e) {
+          this.logger.error(e);
+          throw new AppException("Error sending email");
         }
       });
-      return "Job application sent successfully";
+
     } catch (e) {
       this.logger.log(e);
       throw new AppException();
@@ -143,7 +184,7 @@ export class JobOpeningHelperService {
       where: {
         jobOpeningID: jobOpening.id,
         organizationID: organization.id
-      },
+      }
     });
   }
 
@@ -186,7 +227,9 @@ export class JobOpeningHelperService {
         data: {
           information: dto.information,
           jobDescription: dto.jobDescription,
-          searchEndDate: dto.searchEndDate
+          searchEndDate: dto.searchEndDate,
+          location: dto.location,
+          salary_range: dto.salary_range
         }
       });
     } catch (e) {
@@ -212,4 +255,6 @@ export class JobOpeningHelperService {
       throw new AppException("Error getting job openings!");
     }
   }
+
+
 }

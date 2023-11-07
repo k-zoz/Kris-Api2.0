@@ -57,7 +57,12 @@ export class HODConfirmationEvent{
   employeeFirstName:string
   departmentName:string
   organizationName:string
+}
 
+export class JobApplicationConfirmationEmail {
+  applicant_name:string
+  company_name:string
+  job_title:string
 }
 
 export class TeamLeadConfirmationEvent{

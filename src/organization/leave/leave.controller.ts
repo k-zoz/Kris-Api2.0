@@ -1,15 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete, FileTypeValidator,
-  Get,
-  HttpStatus, MaxFileSizeValidator,
-  Param, ParseFilePipe,
-  Post, UploadedFile, UploadedFiles,
-  UseGuards,
-  UseInterceptors,
-  ValidationPipe
-} from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, UseGuards, ValidationPipe } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { EmployeeRoleGuard } from "@core/guard/employee-role.guard";
 import { BaseController } from "@core/utils/base-controller.controller";
@@ -20,8 +9,6 @@ import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { ApplyForLeave, CreateLeaveDto } from "@core/dto/global/leave.dto";
 import { LeaveService } from "@organization/leave/leave.service";
 import { SkipThrottle } from "@nestjs/throttler";
-import { Express } from "express";
-import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { CloudinaryService } from "@cloudinary/cloudinary.service";
 
 
@@ -82,7 +69,7 @@ export class LeaveController extends BaseController {
     });
   }
 
-    //TODO create leave for only one employee
+  //TODO create leave for only one employee
   // TODO all the leave history for all employees
 
 
@@ -115,7 +102,9 @@ export class LeaveController extends BaseController {
   }
 
   @Get("declineLeave/:teamRequestID")
-  async declineLeave(@Param("teamRequestID") teamRequestID: string) {
-    return this.response({ payload: await this.leaveService.declineEmployeeLeave(teamRequestID) });
+  async declineLeave(@Param("teamRequestID") teamRequestID: string,
+                     @GetUser() payload: AuthPayload
+  ) {
+    return this.response({ payload: await this.leaveService.declineEmployeeLeave(teamRequestID, payload.email) });
   }
 }

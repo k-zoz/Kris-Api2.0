@@ -8,6 +8,7 @@ import { EmailService } from "@alert/email/email.service";
 import { Resend } from "resend";
 import { ConfigService } from "@nestjs/config";
 import { Employee, Leave, LeaveApplication, TeamRequestsAndApproval } from "@prisma/client";
+import { UtilService } from "@core/utils/util.service";
 
 @Injectable()
 export class LeavePrismaHelperService {
@@ -17,7 +18,8 @@ export class LeavePrismaHelperService {
 
   constructor(private readonly prismaService: PrismaService,
               private readonly configService: ConfigService,
-              private readonly emailService: EmailService
+              private readonly emailService: EmailService,
+              private readonly utilService: UtilService
   ) {
     const resendKey = this.configService.get("resendApiKey");
     this.resend = new Resend(resendKey);
@@ -95,7 +97,6 @@ export class LeavePrismaHelperService {
           }
         });
 
-        // await this.updateRequests(employee, leaveApplication);
 
         await tx.employeeLeave.update({
           where: {
@@ -106,7 +107,7 @@ export class LeavePrismaHelperService {
           },
           data: {
             remainingDuration: {
-              decrement: dto.leaveDuration
+              decrement: 0
             }
           }
         });
@@ -314,16 +315,37 @@ export class LeavePrismaHelperService {
 
   async approveLeaveAndSendApprovalMail(leaveApplication: LeaveApplication, employee: Employee, request: TeamRequestsAndApproval, approveMail: string) {
     try {
+      const leaveEndDate = this.utilService.convertDateAgain(leaveApplication.endDate);
+      const leaveStartDate = this.utilService.convertDateAgain(leaveApplication.startDate);
+      const leaveDuration = this.utilService.countWeekdays(leaveStartDate, leaveEndDate);
       await this.prismaService.$transaction(async (tx) => {
         await tx.leaveApplication.update({
           where: { id: leaveApplication.id },
-          data: { leaveStatus: "APPROVED", modifiedBy: approveMail }
+          data: {
+            leaveStatus: "APPROVED",
+            modifiedBy: approveMail,
+            duration: leaveDuration
+          }
 
         });
 
         await tx.teamRequestsAndApproval.update({
           where: { id: request.id },
           data: { decision: "APPROVED", modifiedBy: approveMail }
+        });
+
+        await tx.employeeLeave.update({
+          where: {
+            employeeId_leaveId: {
+              employeeId: employee.id,
+              leaveId: leaveApplication.leaveId
+            }
+          },
+          data: {
+            remainingDuration: {
+              decrement: leaveDuration
+            }
+          }
         });
 
         try {
@@ -358,21 +380,17 @@ export class LeavePrismaHelperService {
     }
   }
 
-  async declineLeaveAndSendDeclineMail(leaveApplicationID: string) {
+  async declineLeaveAndSendDeclineMail(leaveApplication: LeaveApplication, employee: Employee, request: TeamRequestsAndApproval, approveMail) {
     try {
       await this.prismaService.$transaction(async (tx) => {
-
-        const leaveApplication = await tx.leaveApplication.findUnique({
-          where: { id: leaveApplicationID }
-        });
-
-        const employee = await tx.employee.findUnique({
-          where: { id: leaveApplication.employeeId }
+        await tx.teamRequestsAndApproval.update({
+          where: { id: request.id },
+          data: { decision: "DECLINED", modifiedBy: approveMail }
         });
 
         await tx.leaveApplication.update({
-          where: { id: leaveApplicationID },
-          data: { leaveStatus: "DECLINED" }
+          where: { id: leaveApplication.id },
+          data: { leaveStatus: "DECLINED", modifiedBy: approveMail }
         });
 
         try {
@@ -403,7 +421,7 @@ export class LeavePrismaHelperService {
       }, { maxWait: 5000, timeout: 10000 });
     } catch (e) {
       this.logger.error(e);
-      throw new AppException("Error approving leave");
+      throw new AppException("Error declining leave");
     }
   }
 

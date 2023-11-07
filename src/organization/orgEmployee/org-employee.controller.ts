@@ -1,8 +1,10 @@
 import {
   Body,
-  Controller, FileTypeValidator,
-  Get, HttpStatus, MaxFileSizeValidator,
-  Param, ParseFilePipe, ParseFilePipeBuilder,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  ParseFilePipeBuilder,
   Post,
   UploadedFile,
   UseGuards,
@@ -19,11 +21,12 @@ import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import {
   ClientEmployeeOnboardRequest,
-  CreateEmployeeDto,
   EditEmployeeDto,
-  EmployeeOnboardRequest, EmployeeUpdateRequest, EmployeeWork,
-
-  RoleToEmployee, UpdateCertificateDto, UpdateEmployeeWork
+  EmployeeOnboardRequest,
+  EmployeeUpdateRequest,
+  RoleToEmployee,
+  UpdateCertificateDto,
+  UpdateEmployeeWork
 } from "@core/dto/global/employee.dto";
 import { EmployeeService } from "@back-office/employee/employee.service";
 import { AuthMsg } from "@core/const/security-msg-const";
@@ -32,11 +35,7 @@ import { UserRoleEnum } from "@core/enum/user-role-enum";
 import { SearchRequest } from "@core/model/search-request";
 import { ConfirmInputPasswordDto } from "@core/dto/auth/user.dto";
 import { FileInterceptor } from "@nestjs/platform-express";
-import {
-  MAX_EXCEL_FILE_SIZE_IN_BYTES,
-  VALID_FILE_TYPE_FOR_BULK_UPLOADS,
-  VALID_UPLOADS_MIME_TYPES
-} from "@core/const/app.const";
+import { MAX_EXCEL_FILE_SIZE_IN_BYTES, VALID_FILE_TYPE_FOR_BULK_UPLOADS } from "@core/const/app.const";
 
 @Controller("organization/employee")
 @UseGuards(AuthGuard())

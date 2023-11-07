@@ -92,8 +92,11 @@ export class LeaveService {
     return await this.leaveHelperService.approveLeaveAndSendApprovalMail(leaveApp, employee, teamReq, approveMail);
   }
 
-  async declineEmployeeLeave(leaveApplicationID: string) {
-    return await this.leaveHelperService.declineLeaveAndSendDeclineMail(leaveApplicationID);
+  async declineEmployeeLeave(leaveApplicationID: string,approveMail: string) {
+    const teamReq = await this.leaveHelperService.findTeamRequest(leaveApplicationID);
+    const employee = await this.employeeHelperService.findEmpById(teamReq.leaveApprovalRequest[0].employeeId);
+    const leaveApp = await this.leaveHelperService.findLeaveApplication(teamReq.leaveApprovalRequest[0].id);
+    return await this.leaveHelperService.declineLeaveAndSendDeclineMail(leaveApp, employee, teamReq,approveMail);
   }
 }
 

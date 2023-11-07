@@ -40,10 +40,10 @@ export class JobOpeningService {
   }
 
   async jobApply(dto: JobApplicationRequestAndResponse, orgID: string, jobOpeningID: string) {
-    await this.orgHelperService.findOrgByID(orgID);
-    await this.jobOpeningPrismaHelper.findJobOpeningAndResponse(jobOpeningID, orgID);
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    const jobOpening = await this.jobOpeningPrismaHelper.findOneJobOpening(jobOpeningID, orgID);
     dto.profile.fullname = this.utilService.toUpperCase(dto.profile.fullname);
-    return await this.jobOpeningPrismaHelper.applyForJobOpening(dto, orgID, jobOpeningID);
+    return await this.jobOpeningPrismaHelper.applyForJobOpening(dto, organization, jobOpening);
   }
 
   async findOneJobOpening(orgID: string, jobOpeningID: string) {
@@ -87,11 +87,12 @@ export class JobOpeningService {
     return await this.jobOpeningPrismaHelper.jobOpeningANdResponse(dto, organization);
   }
 
+
   async startExcelProcess(orgID: string, jobOpeningID: string) {
     const organization = await this.orgHelperService.findOrgByID(orgID);
     const jobOpening = await this.jobOpeningPrismaHelper.findOneJobOpening(jobOpeningID, orgID);
-    const jobResponses = await this.jobOpeningPrismaHelper.jobOpeningResponses(jobOpening, organization);
-   // console.log(jobResponses);
-    return jobResponses
+    return this.jobOpeningPrismaHelper.jobOpeningResponses(jobOpening, organization);
   }
+
+
 }

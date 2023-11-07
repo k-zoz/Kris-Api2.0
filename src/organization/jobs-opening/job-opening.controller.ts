@@ -1,10 +1,14 @@
 import {
   Body,
-  Controller, Delete, FileTypeValidator,
-  Get, MaxFileSizeValidator,
-  Param, ParseFilePipe,
+  Controller,
+  Delete,
+  FileTypeValidator,
+  Get,
+  MaxFileSizeValidator,
+  Param,
+  ParseFilePipe,
   Post,
-  UploadedFile, UploadedFiles,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
   ValidationPipe
@@ -17,21 +21,16 @@ import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
-import {
-  ApplyForJobDto,
-  CreateNewHireDto,
-  JobApplicationRequestAndResponse,
-  PostJobDto,
-  QuestionDto,
-  SearchEmail
-} from "@core/dto/global/Jobs.dto";
+import { JobApplicationRequestAndResponse, PostJobDto, QuestionDto, SearchEmail } from "@core/dto/global/Jobs.dto";
 import { Express } from "express";
-import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
-import { SearchRequest } from "@core/model/search-request";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { CloudinaryService } from "@cloudinary/cloudinary.service";
 
 @Controller("organization/jobOpening")
 export class JobOpeningController extends BaseController {
-  constructor(private readonly jobOpeningService: JobOpeningService) {
+  constructor(private readonly jobOpeningService: JobOpeningService,
+              private readonly cloudinaryService: CloudinaryService
+  ) {
     super();
   }
 
@@ -115,11 +114,13 @@ export class JobOpeningController extends BaseController {
     return this.response({ payload: await this.jobOpeningService.jobOpeningByPoster(orgID, dto) });
   }
 
+
   @Get("/:orgID/:jobOpeningID/downloadExcelFile")
   async downloadJobResponsesInExcel(@Param("orgID") orgID: string,
                                     @Param("jobOpeningID") jobOpeningID: string
   ) {
     return this.response({ payload: await this.jobOpeningService.startExcelProcess(orgID, jobOpeningID) });
   }
+
 
 }

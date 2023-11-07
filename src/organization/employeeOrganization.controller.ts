@@ -7,10 +7,7 @@ import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
-import { EditOrgDto, MakeAnnouncementsDto, ModifyOrg } from "@core/dto/global/organization.dto";
-import { SearchRequest } from "@core/model/search-request";
-import { Permission } from "@core/decorator/roles.decorator";
-import { UserRoleEnum } from "@core/enum/user-role-enum";
+import { EditOrgDto, MakeAnnouncementsDto } from "@core/dto/global/organization.dto";
 import { OrganizationService } from "@back-office/orgnization/organization.service";
 import { SkipThrottle } from "@nestjs/throttler";
 

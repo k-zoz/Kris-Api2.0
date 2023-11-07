@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import {
-  HODConfirmationEvent,
+  HODConfirmationEvent, JobApplicationConfirmationEmail,
   LeaveApplicationEvent, LeaveApprovalEvent,
   NewBackOfficerEvent,
   NewEmployeeEvent, NewEmployeePasswordResetEvent,
@@ -148,6 +148,19 @@ export class EmailService {
       employeeFirstName: event.employeeFirstName,
       departmentName: event.departmentName,
       organizationName: event.organizationName
+    };
+    return template(data);
+  }
+
+  async jobApplicationConfirmationEmail(event: JobApplicationConfirmationEmail) {
+    const relativePath = "../../templates/jobApplication.hbs";
+    const absolutePath = path.join(__dirname, relativePath);
+    const sourceFile = fs.readFileSync(absolutePath, "utf-8");
+    const template = Handlebars.compile(sourceFile);
+    const data = {
+      company_name: event.company_name,
+      applicant_name: event.applicant_name,
+      job_title: event.job_title
     };
     return template(data);
   }
