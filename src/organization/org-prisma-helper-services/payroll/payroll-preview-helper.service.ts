@@ -114,7 +114,10 @@ export class PayrollPreviewHelperService {
             furniture: true,
             utility: true,
             employee_Pension: true,
-            employer_Pension: true
+            employer_Pension: true,
+            empNSITF:true,
+            empNHF:true,
+            empITF:true
           }
         }
       }
@@ -212,6 +215,7 @@ export class PayrollPreviewHelperService {
           taxes: dto.taxes,
           bonuses: dto.bonuses,
           gross_pay: dto.gross_pay,
+          net_pay:dto.net_pay,
           deduction: dto.deduction,
           basic_salary: dto.basic_salary,
           housing: dto.housing,
@@ -223,6 +227,8 @@ export class PayrollPreviewHelperService {
           empNHF: dto.empNHF,
           empNSITF: dto.empNSITF,
           empITF: dto.empITF,
+          employer_Pension:dto.employer_Pension,
+          employee_Pension:dto.employee_Pension,
           modifiedBy: email
         }
       });

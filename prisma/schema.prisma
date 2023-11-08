@@ -421,22 +421,23 @@ model EmployeeCertificate {
 }
 
 model OrganizationPayroll {
-  id               String            @id @default(uuid())
-  date             DateTime          @default(now())
-  totalTaxes       Float?
-  totalBonuses     Float?
-  totalDeduction   Float?
-  totalGross_pay   Float?
-  totalNet_pay     Float?
-  payrollPreview   Payroll_Preview   @relation(fields: [payrollPreviewId], references: [id])
-  payrollPreviewId String
-  organizationId   String?
-  Organization     Organization?     @relation(fields: [organizationId], references: [id])
-  employees        EmployeePayroll[]
-  createdBy        String?
-  modifiedBy       String?
-  createdDate      DateTime          @default(now()) @db.Date
-  modifiedDate     DateTime          @updatedAt
+  id                   String            @id @default(uuid())
+  date                 DateTime          @default(now())
+  totalTaxes           Float?
+  totalBonuses         Float?
+  totalDeduction       Float?
+  totalGross_pay       Float?
+  totalNet_pay         Float?
+  totalEmployerPension Float?
+  payrollPreview       Payroll_Preview   @relation(fields: [payrollPreviewId], references: [id])
+  payrollPreviewId     String
+  organizationId       String?
+  Organization         Organization?     @relation(fields: [organizationId], references: [id])
+  employees            EmployeePayroll[]
+  createdBy            String?
+  modifiedBy           String?
+  createdDate          DateTime          @default(now()) @db.Date
+  modifiedDate         DateTime          @updatedAt
 }
 
 model EmployeePayroll {

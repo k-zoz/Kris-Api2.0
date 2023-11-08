@@ -61,6 +61,7 @@ export class PayrollApprovePrismaHelperService {
           acc.deduction += employee.deduction || 0;
           acc.bonuses += employee.bonuses || 0;
           acc.net_pay += employee.net_pay || 0;
+          acc.employer_Pension += employee.employer_Pension || 0;
           return acc;
         },
         {
@@ -68,7 +69,8 @@ export class PayrollApprovePrismaHelperService {
           gross_pay: 0,
           deduction: 0,
           bonuses: 0,
-          net_pay: 0
+          net_pay: 0,
+          employer_Pension:0
         }
       );
       return { payrollPreview: result, totals };
@@ -121,6 +123,8 @@ export class PayrollApprovePrismaHelperService {
                 empNHF: employee.empNHF,
                 empNSITF: employee.empNSITF,
                 empITF: employee.empITF,
+                employer_Pension: employee.employer_Pension,
+                employee_Pension: employee.employee_Pension,
                 createdBy: email
               }))
             },
@@ -129,6 +133,7 @@ export class PayrollApprovePrismaHelperService {
             totalBonuses: totalsPayroll.bonuses,
             totalDeduction: totalsPayroll.deduction,
             totalGross_pay: totalsPayroll.gross_pay,
+            totalEmployerPension: totalsPayroll.employer_Pension,
             createdBy: email
           }
         });

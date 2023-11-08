@@ -275,19 +275,31 @@ export class UtilService {
 
   calculateTotalDeductions(dto: EmployeePayrollPreviewDto) {
     //deduction is employers pension + employee pension plus
-    return dto.employer_Pension + dto.employee_Pension;
+    return dto.employee_Pension + dto.empNHF + dto.empITF + dto.empNSITF;
   }
 
   calculateNHF(dto: EmployeePayrollPreviewDto) {
     return dto.basic_salary * 0.025;
   }
 
-  calculateNSITF(dto: EmployeePayrollPreviewDto){
-    return dto.gross_pay * 0.01
+  calculateNSITF(dto: EmployeePayrollPreviewDto) {
+    return dto.gross_pay * 0.01;
   }
 
-  calculateITF(dto: EmployeePayrollPreviewDto){
-    return dto.gross_pay * 0.01
+  calculateITF(dto: EmployeePayrollPreviewDto) {
+    return dto.gross_pay * 0.01;
+  }
+
+  calculateEmpGrossPay(dto: EmployeePayrollPreviewDto) {
+    return dto.basic_salary + dto.housing + dto.transportation + dto.education + dto.location + dto.furniture + dto.utility;
+  }
+
+  calculateEmpNetPay(dto: EmployeePayrollPreviewDto) {
+    return dto.gross_pay - dto.deduction;
+  }
+
+  useToReturnNull(){
+    return null
   }
 
 
