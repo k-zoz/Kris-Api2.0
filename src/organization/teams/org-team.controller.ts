@@ -5,12 +5,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { EmployeeRoleGuard } from "@core/guard/employee-role.guard";
 import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
-import {
-  CreateTeamInDepartmentDto,
-  DepartmentNameSearchDto,
-  ModifyOrg,
-  TeamLeadDto
-} from "@core/dto/global/organization.dto";
+import { CreateTeamInDepartmentDto, DepartmentNameSearchDto, TeamLeadDto } from "@core/dto/global/organization.dto";
 import { SearchRequest } from "@core/model/search-request";
 import { SkipThrottle } from "@nestjs/throttler";
 import { GetUser } from "@auth/decorators/get-user.decorator";
@@ -112,6 +107,12 @@ export class OrgTeamController extends BaseController {
     return this.response({ payload: await this.orgTeamService.removeEmployeeAsTeamLead(orgID, empID, teamID) });
   }
 
+
+  @Get("/:orgID/hideTeamRequest/:teamRequestID")
+  async hideTeamRequest(@Param("orgID") orgID: string,
+                        @Param("teamRequestID") teamRequestID: string) {
+    return this.response({ payload: await this.orgTeamService.hideTeamRequest(orgID, teamRequestID) });
+  }
 
   // TODO remove team
   // TODO number of team and members

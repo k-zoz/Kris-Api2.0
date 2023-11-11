@@ -102,4 +102,10 @@ export class OrgTeamService {
     await this.orgTeamHelperService.confirmIfEmployeeIsTeamLead(team, employee);
     return await this.orgTeamHelperService.allTeamRequests(employee, team);
   }
+
+  async hideTeamRequest(orgID: string, teamRequestID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    const teamRequest = await this.orgTeamHelperService.findTeamRequestID(teamRequestID);
+    return await this.orgTeamHelperService.hideTeamRequest(teamRequest);
+  }
 }

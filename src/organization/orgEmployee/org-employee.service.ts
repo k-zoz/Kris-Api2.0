@@ -166,13 +166,25 @@ export class OrgEmployeeService {
   async bulkCreateEmployee(file: Express.Multer.File, creatorEmail: string) {
     const creator = await this.employeeHelperService.findEmpByEmail(creatorEmail);
     const organization = await this.orgHelperService.findOrgByID(creator.organizationId);
-    //  await this.cloudinaryService.uploadExcelFile(file);
     const csvData = await this.cloudinaryService.readCSVFile(file);
     const employeeObj = await this.utilService.returnObjects(csvData);
     const employeeUploads = await this.utilService.updateKeysInObject(employeeObj);
     const assignedProperties = await this.utilService.assignProperties(employeeUploads, organization.id, creator.email);
     return await this.employeeHelperService.createManyEmployees(assignedProperties, employeeUploads, organization);
 
+  }
+
+  async bulkCreateClientEmployee(file: Express.Multer.File, creatorEmail: string) {
+    const creator = await this.employeeHelperService.findEmpByEmail(creatorEmail);
+    const organization = await this.orgHelperService.findOrgByID(creator.organizationId);
+    const csvData = await this.cloudinaryService.readCSVFile(file);
+    const employeeObj = await this.utilService.returnObjects(csvData);
+    const employeeUploads = await this.utilService.updateKeysInObject(employeeObj);
+    const clientName = employeeUploads[0].client;
+    const clientNameUppercase = this.utilService.toUpperCase(clientName);
+    const client = await this.orgClientHelperService.findClientByName(clientNameUppercase, organization.id);
+    const assignedProperties = await this.utilService.assignClientEmployeeProperties(employeeUploads, organization.id, client.id, creator.email);
+    return await this.employeeHelperService.createManyEmployees(assignedProperties, employeeUploads, organization);
   }
 
   async allOnboardedEmployees(orgID: string, dto: SearchRequest) {
@@ -197,6 +209,8 @@ export class OrgEmployeeService {
   }
 
   async deleteEmployeeCertificate(certificateID: string) {
-    return await this.employeeHelperService.deleteCert(certificateID)
+    return await this.employeeHelperService.deleteCert(certificateID);
   }
+
+
 }

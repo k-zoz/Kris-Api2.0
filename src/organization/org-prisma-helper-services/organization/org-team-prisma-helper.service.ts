@@ -6,7 +6,7 @@ import {
   AppNotFoundException,
   AppUnauthorizedException
 } from "@core/exception/app-exception";
-import { Department, Employee, Org_Branch, Organization, Team } from "@prisma/client";
+import { Department, Employee, Org_Branch, Organization, Team, TeamRequestsAndApproval } from "@prisma/client";
 import { HODConfirmationEvent, TeamLeadConfirmationEvent } from "@core/event/back-office-event";
 import { Resend } from "resend";
 import { ConfigService } from "@nestjs/config";
@@ -82,7 +82,6 @@ export class OrgTeamPrismaHelperService {
           },
           skip,
           take
-
         }),
         this.prismaService.team.count({
           where: {
@@ -342,7 +341,11 @@ export class OrgTeamPrismaHelperService {
         where: {
           Team: {
             id: team.id
-          }
+          },
+          OR: [
+            { viewedRequest: { equals: false } },
+            { viewedRequest: null }
+          ]
         },
         include: {
           leaveApprovalRequest: true
@@ -354,6 +357,32 @@ export class OrgTeamPrismaHelperService {
     } catch (e) {
       this.logger.error(e);
       throw new AppException("Error getting all team requests");
+    }
+  }
+
+
+  async findTeamRequestID(teamRequestID) {
+    const teamRequest = await this.prismaService.teamRequestsAndApproval.findFirst({
+      where: {
+        id: teamRequestID
+      }
+    });
+    if (!teamRequest) {
+      throw  new AppNotFoundException(`Team with id ${teamRequestID} does not belong to department `);
+    }
+    return teamRequest;
+  }
+
+
+  async hideTeamRequest(teamRequest: TeamRequestsAndApproval) {
+    try {
+      return await this.prismaService.teamRequestsAndApproval.update({
+        where: { id: teamRequest.id },
+        data: { viewedRequest: true }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException();
     }
   }
 }

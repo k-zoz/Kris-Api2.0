@@ -221,6 +221,7 @@ model TeamRequestsAndApproval {
   createdBy            String?
   Team                 Team?               @relation(fields: [teamId], references: [id])
   teamId               String?
+  viewedRequest        Boolean?
   decision             SupervisorDecision?
   modifiedBy           String?
   modifiedDate         DateTime?           @updatedAt

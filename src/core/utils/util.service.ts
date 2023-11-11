@@ -263,6 +263,86 @@ export class UtilService {
     });
   }
 
+  async assignClientEmployeeProperties(employeeUploads: any[], orgID: string, clientID:string, creatorEmail: string) {
+    return employeeUploads.map(obj => {
+      return {
+        email: this.toLowerCase(obj.email),
+        firstname: this.toUpperCase(obj.firstname),
+        lastname: this.toUpperCase(obj.lastname),
+        password: obj.hashPassword,
+        idNumber: obj.idNumber,
+        krisID: obj.krisID,
+        role: obj.role,
+        status: obj.status,
+        middleName: null,
+        phoneNumber: null,
+        refreshToken: null,
+        personalEmail: null,
+        workPhoneNumber: null,
+        personalPhoneNumber2: null,
+        designation: null,
+        employment_type: null,
+        dateOfBirth: null,
+        gender: null,
+        maritalStatus: null,
+        taxes: null,
+        gross_pay: null,
+        deduction: null,
+        bonuses: null,
+        net_pay: null,
+        isEdit: null,
+        isSelected: null,
+        dateOfConfirmation: null,
+        dateOfJoining: null,
+        address1: null,
+        address2: null,
+        country: null,
+        state: null,
+        city: null,
+        zipCode: null,
+
+        accountName: null,
+        bankName: null,
+        accountNmumber: null,
+        pensionManager: null,
+        pensionNumber: null,
+        nok_legalName: null,
+        nok_address: null,
+        nok_occupation: null,
+        nok_phoneNumber: null,
+        nok_relationship: null,
+        nok_email: null,
+
+        gua_legalName: null,
+        gua_address: null,
+        gua_occupation: null,
+        gua_phoneNumber: null,
+        gua_relationship: null,
+        gua_email: null,
+
+        hierarchy_position: null,
+        organizationId: orgID,
+        org_BranchId: null,
+
+        departmentId: null,
+        org_ClienteleId: clientID,
+
+        teamId: null,
+        payGradeId: null,
+
+
+        payGroupId: null,
+        payroll_PreviewId: null,
+
+        createdBy: creatorEmail,
+        modifiedBy: null,
+
+        createdDate: new Date(), // Assuming current date
+        modifiedDate: new Date() // Assuming current date
+      };
+    });
+  }
+
   calculateEmployeePension(dto: EmployeePayrollPreviewDto) {
     let total = dto.basic_salary + dto.housing + dto.transportation;
     return total * 0.08;

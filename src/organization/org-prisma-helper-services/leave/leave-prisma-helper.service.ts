@@ -469,6 +469,7 @@ export class LeavePrismaHelperService {
             }
           },
           name: "Leave Application",
+          viewedRequest: false,
           createdBy: employee.email
         }
       });

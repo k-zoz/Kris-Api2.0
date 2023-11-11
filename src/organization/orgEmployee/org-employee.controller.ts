@@ -84,6 +84,18 @@ export class OrgEmployeeController extends BaseController {
     return this.response({ payload: await this.orgEmployeeService.bulkCreateEmployee(file, payload.email) });
   }
 
+
+  @Post("clientUpload")
+  @UseInterceptors(FileInterceptor("file"))
+  async uploadForClient(@GetUser() payload: AuthPayload, @UploadedFile(
+    new ParseFilePipeBuilder()
+      .addFileTypeValidator({ fileType: VALID_FILE_TYPE_FOR_BULK_UPLOADS })
+      .addMaxSizeValidator({ maxSize: MAX_EXCEL_FILE_SIZE_IN_BYTES, message: AuthMsg.FIlE_SIZE_MORE_THAN_5MB })
+      .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
+  ) file: Express.Multer.File) {
+    return this.response({ payload: await this.orgEmployeeService.bulkCreateClientEmployee(file, payload.email) });
+  }
+
   @Post("/:orgID/onboard")
   @EmpPermission(EmployeeRoleEnum.MANAGEMENT, EmployeeRoleEnum.HUMAN_RESOURCE)
   async onboardEmployeeToMyOrg(@GetUser() payload: AuthPayload,
