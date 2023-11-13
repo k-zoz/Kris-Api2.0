@@ -66,6 +66,7 @@ export class PayrollPreviewService {
     dto.location = parseFloat(dto.location);
     dto.furniture = parseFloat(dto.furniture);
     dto.utility = parseFloat(dto.utility);
+    dto.taxes = parseFloat(dto.taxes);
     dto.gross_pay = this.utilService.calculateEmpGrossPay(dto);
     dto.gross_pay = parseFloat(dto.gross_pay);
     dto.employee_Pension = this.utilService.calculateEmployeePension(dto);
@@ -83,7 +84,6 @@ export class PayrollPreviewService {
     dto.net_pay = this.utilService.calculateEmpNetPay(dto);
     dto.net_pay = parseFloat(dto.net_pay);
     dto.bonuses = this.utilService.useToReturnNull();
-    dto.taxes = this.utilService.useToReturnNull();
     await this.payrollPreviewPrismaHelper.findPayrollPreviewById(orgID, payrollPreviewID);
     const employee = await this.employeeHelperPrismaService.findEmpById(empID);
     await this.payrollPreviewPrismaHelper.findEmployeeInPayrollPreview(employee.id, payrollPreviewID, orgID);
