@@ -22,6 +22,9 @@ export class PaysSlipsPrismaHelperService {
               payrollPreview: true
             }
           }
+        },
+        orderBy: {
+          createdDate: "desc"
         }
       });
     } catch (e) {

@@ -263,7 +263,7 @@ export class UtilService {
     });
   }
 
-  async assignClientEmployeeProperties(employeeUploads: any[], orgID: string, clientID:string, creatorEmail: string) {
+  async assignClientEmployeeProperties(employeeUploads: any[], orgID: string, clientID: string, creatorEmail: string) {
     return employeeUploads.map(obj => {
       return {
         email: this.toLowerCase(obj.email),
@@ -354,21 +354,20 @@ export class UtilService {
   }
 
   calculateTotalDeductions(dto: EmployeePayrollPreviewDto) {
-    //deduction is employers pension + employee pension plus
-    return dto.employee_Pension + dto.empNHF + dto.empITF + dto.empNSITF;
+    return dto.employee_Pension + dto.empNHF; //tax is deducted
   }
 
   calculateNHF(dto: EmployeePayrollPreviewDto) {
-    return dto.basic_salary * 0.025;
+    return dto.basic_salary as number * .025;
   }
 
   calculateNSITF(dto: EmployeePayrollPreviewDto) {
-    return dto.gross_pay * 0.01;
+    return dto.gross_pay as number * 0.01;
   }
 
   calculateITF(dto: EmployeePayrollPreviewDto) {
     return dto.gross_pay * 0.01;
-  }
+  };
 
   calculateEmpGrossPay(dto: EmployeePayrollPreviewDto) {
     return dto.basic_salary + dto.housing + dto.transportation + dto.education + dto.location + dto.furniture + dto.utility;
@@ -378,8 +377,8 @@ export class UtilService {
     return dto.gross_pay - dto.deduction;
   }
 
-  useToReturnNull(){
-    return null
+  useToReturnNull() {
+    return null;
   }
 
 

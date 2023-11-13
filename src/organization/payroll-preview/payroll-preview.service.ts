@@ -59,29 +59,31 @@ export class PayrollPreviewService {
 
   async updateEmployeePayrollPreviewInformation(dto: EmployeePayrollPreviewDto, orgID: string, payrollPreviewID: string, empID: string, email: string) {
     await this.organizationHelperService.findOrgByID(orgID);
-
-    // dto.employee_Pension = parseFloat(dto.employee_Pension);
-    // dto.employer_Pension = parseFloat(dto.employer_Pension);
-    dto.employee_Pension = this.utilService.calculateEmployeePension(dto);
-    dto.employer_Pension = this.utilService.calculateEmployerPension(dto);
-    dto.deduction = this.utilService.calculateTotalDeductions(dto);
-    dto.empITF = this.utilService.calculateITF(dto);
-    dto.empNHF = this.utilService.calculateNHF(dto);
-    dto.empNSITF = this.utilService.calculateNSITF(dto);
-    dto.gross_pay = this.utilService.calculateEmpGrossPay(dto);
-    dto.gross_pay = parseFloat(dto.gross_pay);
-    dto.bonuses = this.utilService.useToReturnNull();
-    dto.taxes = this.utilService.useToReturnNull();
-    dto.education = parseFloat(dto.education);
-    dto.net_pay = this.utilService.calculateEmpNetPay(dto);
     dto.basic_salary = parseFloat(dto.basic_salary);
-    dto.furniture = parseFloat(dto.furniture);
     dto.housing = parseFloat(dto.housing);
     dto.transportation = parseFloat(dto.transportation);
-    dto.utility = parseFloat(dto.utility);
+    dto.education = parseFloat(dto.education);
     dto.location = parseFloat(dto.location);
+    dto.furniture = parseFloat(dto.furniture);
+    dto.utility = parseFloat(dto.utility);
+    dto.gross_pay = this.utilService.calculateEmpGrossPay(dto);
+    dto.gross_pay = parseFloat(dto.gross_pay);
+    dto.employee_Pension = this.utilService.calculateEmployeePension(dto);
     dto.employee_Pension = parseFloat(dto.employee_Pension);
+    dto.employer_Pension = this.utilService.calculateEmployerPension(dto);
     dto.employer_Pension = parseFloat(dto.employer_Pension);
+    dto.empITF = this.utilService.calculateITF(dto);
+    dto.empITF = parseFloat(dto.empITF);
+    dto.empNHF = this.utilService.calculateNHF(dto);
+    dto.empNHF = parseFloat(dto.empNHF);
+    dto.empNSITF = this.utilService.calculateNSITF(dto);
+    dto.empNSITF = parseFloat(dto.empNSITF);
+    dto.deduction = this.utilService.calculateTotalDeductions(dto);
+    dto.deduction = parseFloat(dto.deduction);
+    dto.net_pay = this.utilService.calculateEmpNetPay(dto);
+    dto.net_pay = parseFloat(dto.net_pay);
+    dto.bonuses = this.utilService.useToReturnNull();
+    dto.taxes = this.utilService.useToReturnNull();
     await this.payrollPreviewPrismaHelper.findPayrollPreviewById(orgID, payrollPreviewID);
     const employee = await this.employeeHelperPrismaService.findEmpById(empID);
     await this.payrollPreviewPrismaHelper.findEmployeeInPayrollPreview(employee.id, payrollPreviewID, orgID);
