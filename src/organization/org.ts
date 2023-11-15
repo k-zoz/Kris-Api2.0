@@ -88,6 +88,11 @@ import { EmployeeOrgDepartmentsController } from "@organization/department/emplo
 import { OrgTeamController } from "@organization/teams/org-team.controller";
 import { OrgEmployeeController } from "@organization/orgEmployee/org-employee.controller";
 import { EmpOrgBranchController } from "@organization/branch/emp-org-branch.controller";
+import {
+  WorkToolsPrismaHelperService
+} from "@organization/org-prisma-helper-services/work-tools/work-tools-prisma-helper.service";
+import { WorkToolsController } from "@organization/work-tools/work-tools.controller";
+import { WorkToolsService } from "@organization/work-tools/work-tools.service";
 
 export const providers:Array<Type<any>> = [
   LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService, EmpOrgAppraisalService,JobOpeningHelperService,
@@ -97,7 +102,7 @@ export const providers:Array<Type<any>> = [
   PayrollPrismaHelperService, EmpPayrollService, AllowancesService, BonusesService, DeductionsService, PayGradeService, AllowancesHelperService,
   BonusHelperService, DeductionsHelperService, PaygradeHelperService, BonusesService, BonusHelperService, PayGroupService, PayGroupPrismaHelperService,
   OrgTeamPrismaHelperService, OrgTeamService, OrgEmpPrismaHelperService, OrgEmployeeService, EmpOrgOnboardingService, OrgAppraisalPrismaHelperService,
-  LocaleService, UtilService, EmployeeOrganizationService, OrgBranchPrismaHelperService, EmpJobsPrismaHelperService
+  LocaleService, UtilService, EmployeeOrganizationService, OrgBranchPrismaHelperService, EmpJobsPrismaHelperService,WorkToolsPrismaHelperService,WorkToolsService
 ]
 
 
@@ -105,5 +110,5 @@ export const controllers:Array<Type<any>> = [
   LeaveController, EmployeeOrganizationController, EmpOrgClienteleController, EmpOrgOnboardingController, EmpOrgAppraisalController,
   EmpJobsController, AllowancesController, BonusesController, DeductionsController, PayGradeController, BonusesController, PayGroupController,
   PayrollPreviewController, PayrollApproveController, PaysSlipsController, JobOpeningController,
-  EmployeeOrgDepartmentsController, OrgTeamController, OrgEmployeeController, EmpOrgBranchController
+  EmployeeOrgDepartmentsController, OrgTeamController, OrgEmployeeController, EmpOrgBranchController,WorkToolsController,
 ]

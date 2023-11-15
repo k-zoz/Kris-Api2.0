@@ -8,6 +8,7 @@ import { HttpService } from "@nestjs/axios";
 import * as moment from "moment";
 import { ConfigService } from "@nestjs/config";
 import { AppConflictException } from "@core/exception/app-exception";
+import { HolidayDto } from "@core/dto/global/holiday";
 
 @Injectable()
 export class OrganizationService {
@@ -66,6 +67,11 @@ export class OrganizationService {
 
   }
 
+  async allHolidays(orgID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.orgHelperService.holidays(organization);
+  }
+
   async orgMonthlyBirthDays(orgID: string) {
     const organization = await this.orgHelperService.findOrgByID(orgID);
     return await this.orgHelperService.birthdaysInTheMonth(organization);
@@ -74,6 +80,11 @@ export class OrganizationService {
   async orgMonthlyWorkAnniversary(orgID: string) {
     const organization = await this.orgHelperService.findOrgByID(orgID);
     return await this.orgHelperService.anniversaryInTheMonth(organization);
+  }
+
+  async monthHolidays(orgID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.orgHelperService.holidaysInTheMonth(organization);
   }
 
   async employeeWorkAnniversary(orgID: string) {
@@ -103,5 +114,13 @@ export class OrganizationService {
     const organization = await this.orgHelperService.findOrgByID(orgID);
     return await this.orgHelperService.employeeStatistics(organization);
   }
+
+  async createHoliday(orgID: string, dto: HolidayDto, creatorEmail: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    dto.date = this.utilService.convertDateAgain(dto.date);
+    return await this.orgHelperService.createHoliday(organization, dto, creatorEmail);
+  }
+
+
 }
 

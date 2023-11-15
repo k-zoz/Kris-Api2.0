@@ -92,6 +92,8 @@ model Organization {
   JobOpening               JobOpening[]
   JobOpeningResponses      JobOpeningResponses[]
   OrganizationAnnouncement OrganizationAnnouncement[]
+  WorkTools                WorkTools[]
+  OrgnizationHoliday       OrgnizationHoliday[]
 
   @@unique([orgName, orgWebsite, orgEmail, orgNumber, orgRCnumber])
 }
@@ -406,6 +408,7 @@ model Employee {
   JobOpening           JobOpening[]
   EmployeeAnnouncement EmployeeAnnouncement[]
   EmployeeCertificate  EmployeeCertificate[]
+  EmployeeWorkTools    EmployeeWorkTools[]
 
   @@unique([email, krisID])
 }
@@ -904,6 +907,41 @@ model JobOpeningResponses {
   jobOpeningID   String?
   responses      Json?         @db.Json
   JobOpening     JobOpening?   @relation(fields: [jobOpeningID], references: [id])
+  organizationID String?
+  Organization   Organization? @relation(fields: [organizationID], references: [id])
+  createdDate    DateTime      @default(now()) @db.Date
+  createdBy      String?
+}
+
+model WorkTools {
+  id                String              @id @default(uuid())
+  name              String
+  description       String?
+  organizationID    String?
+  Organization      Organization?       @relation(fields: [organizationID], references: [id])
+  createdDate       DateTime            @default(now()) @db.Date
+  createdBy         String?
+  EmployeeWorkTools EmployeeWorkTools[]
+}
+
+model EmployeeWorkTools {
+  id          String    @id @default(uuid())
+  name        String
+  tagNumber   String?
+  comments    String?
+  description String?
+  employeeID  String
+  employee    Employee  @relation(fields: [employeeID], references: [id])
+  workToolID  String
+  workTool    WorkTools @relation(fields: [workToolID], references: [id])
+  createdDate DateTime  @default(now()) @db.Date
+  createdBy   String?
+}
+
+model OrgnizationHoliday {
+  id             String        @id @default(uuid())
+  name           String
+  date           DateTime      @db.Date
   organizationID String?
   Organization   Organization? @relation(fields: [organizationID], references: [id])
   createdDate    DateTime      @default(now()) @db.Date

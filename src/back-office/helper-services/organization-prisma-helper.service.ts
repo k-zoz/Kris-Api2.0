@@ -12,6 +12,7 @@ import { Employee, Organization, Prisma } from "@prisma/client";
 import { EmployeeStatistics } from "@core/dto/global/employee.dto";
 import { PaginatedResult, PaginateFunction, paginator } from "@prisma/pagination";
 import { SearchRequest } from "@core/model/search-request";
+import { HolidayDto } from "@core/dto/global/holiday";
 
 const paginate: PaginateFunction = paginator({ perPage: 10 });
 
@@ -309,6 +310,46 @@ export class OrganizationPrismaHelperService {
     }
   }
 
+
+
+  async holidays(organization: Organization) {
+    try {
+      const employeesBirthDateData = {};
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const holidays = await this.prismaService.orgnizationHoliday.findMany({
+        where: {
+          organizationID: organization.id
+        }
+      });
+
+      holidays.forEach(hols => {
+        if (hols.date && hols.date.getFullYear() === currentYear) {
+          const month = hols.date.getMonth() + 1; // months are zero-based in JavaScript
+          const date = hols.date.getDate();
+          const year = hols.date.getFullYear();
+
+          if (!employeesBirthDateData[`${month}-${date}-${year}`]) {
+            employeesBirthDateData[`${month}-${date}-${year}`] = [];
+          }
+          const type = (hols.date.getMonth() < today.getMonth() ||
+            (hols.date.getMonth() === today.getMonth() && date < today.getDate())) ? "success" : "warning";
+
+          employeesBirthDateData[`${month}-${date}-${year}`].push({
+            type: type,
+            content: `${hols.name} `
+          });
+        }
+      });
+
+      return employeesBirthDateData;
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException("Error getting holidays. Contact support");
+    }
+  }
+
+
   async birthdays(organization: Organization) {
     try {
       const employeesBirthDateData = {};
@@ -394,6 +435,26 @@ export class OrganizationPrismaHelperService {
     }
   }
 
+  async holidaysInTheMonth(organization: Organization) {
+    try {
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
+      return await this.prismaService.orgnizationHoliday.findMany({
+        where: {
+          organizationID: organization.id,
+          date: {
+            gte: new Date(currentYear, currentMonth, 1), // start of the current month
+            lt: new Date(currentYear, currentMonth + 1, 1)
+          }
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException("Error getting holidays. Contact Support");
+    }
+  }
+
   async anniversaries(organization: Organization) {
     try {
       const employeesWorkAnniversaryData = {};
@@ -466,7 +527,6 @@ export class OrganizationPrismaHelperService {
   }
 
 
-
   // async findMany({ where, orderBy, page, select }:{ where?: Prisma.UserWhereInput, orderBy?: Prisma.UserOrderByWithRelationInput, page?: number, select?:Prisma.DeductionSelect }): Promise<PaginatedResult<Employee>> {
   //   return paginate(
   //     this.prismaService.employee,
@@ -479,4 +539,21 @@ export class OrganizationPrismaHelperService {
   //     },
   //   );
   // }
+  async createHoliday(organization: Organization, dto: HolidayDto, creatorEmail: string) {
+    try {
+      await this.prismaService.orgnizationHoliday.create({
+        data: {
+          name: dto.name,
+          date: dto.date,
+          organizationID: organization.id,
+          createdBy: creatorEmail
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException();
+    }
+  }
+
+
 }

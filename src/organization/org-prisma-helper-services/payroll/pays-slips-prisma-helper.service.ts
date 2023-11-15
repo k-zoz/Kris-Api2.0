@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
-import { AppConflictException } from "@core/exception/app-exception";
+import { AppConflictException, AppException } from "@core/exception/app-exception";
 
 @Injectable()
 export class PaysSlipsPrismaHelperService {
@@ -29,7 +29,7 @@ export class PaysSlipsPrismaHelperService {
       });
     } catch (e) {
       this.logger.error(e);
-      throw new AppConflictException();
+      throw new AppException();
     }
   }
 }

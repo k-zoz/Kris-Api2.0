@@ -10,6 +10,7 @@ import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
 import { EditOrgDto, MakeAnnouncementsDto } from "@core/dto/global/organization.dto";
 import { OrganizationService } from "@back-office/orgnization/organization.service";
 import { SkipThrottle } from "@nestjs/throttler";
+import { HolidayDto } from "@core/dto/global/holiday";
 
 @SkipThrottle()
 @Controller("organization")
@@ -64,6 +65,11 @@ export class EmployeeOrganizationController extends BaseController {
     return this.response({ payload: await this.organizationService.employeeBirthdays(orgID) });
   }
 
+  @Get("/:orgID/holidays")
+  async allHolidays(@Param("orgID") orgID: string) {
+    return this.response({ payload: await this.organizationService.allHolidays(orgID) });
+  }
+
   @Get("/:orgID/monthlyBirthdays")
   async birthDayMonth(@Param("orgID") orgID: string) {
     return this.response({ payload: await this.organizationService.orgMonthlyBirthDays(orgID) });
@@ -79,6 +85,11 @@ export class EmployeeOrganizationController extends BaseController {
     return this.response({ payload: await this.organizationService.orgMonthlyWorkAnniversary(orgID) });
   }
 
+  @Get("/:orgID/monthlyHolidays")
+  async monthlyHolidays(@Param("orgID") orgID: string) {
+    return this.response({ payload: await this.organizationService.monthHolidays(orgID) });
+  }
+
   @Get("/wiki/todayInHistory")
   async todayInHistory() {
     return this.response({ payload: await this.organizationService.wikiTodayInHistory() });
@@ -88,4 +99,15 @@ export class EmployeeOrganizationController extends BaseController {
   async employeeStatistics(@Param("orgID") orgID: string) {
     return this.response({ payload: await this.organizationService.employeeStatistics(orgID) });
   }
+
+  @Post("/:orgID/holidayCreate")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async createHoliday(@Param("orgID") orgID: string,
+                      @Body(ValidationPipe) dto: HolidayDto,
+                      @GetUser() payload: AuthPayload
+  ) {
+    return this.response({ payload: await this.organizationService.createHoliday(orgID, dto, payload.email) });
+  }
+
+
 }
