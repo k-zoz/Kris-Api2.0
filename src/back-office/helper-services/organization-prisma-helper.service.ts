@@ -6,12 +6,16 @@ import { CreateOrgDto, MakeAnnouncementsDto } from "@core/dto/global/organizatio
 import { EmailService } from "@alert/email/email.service";
 import { ConfigService } from "@nestjs/config";
 import { Resend } from "resend";
-import { NewEmployeePasswordResetEvent, NewOrganizationEvent } from "@core/event/back-office-event";
+import {
+  ErrorAutoResponse,
+  ErrorEmail,
+  NewEmployeePasswordResetEvent,
+  NewOrganizationEvent
+} from "@core/event/back-office-event";
 import * as argon from "argon2";
-import { Employee, Organization, Prisma } from "@prisma/client";
-import { EmployeeStatistics } from "@core/dto/global/employee.dto";
-import { PaginatedResult, PaginateFunction, paginator } from "@prisma/pagination";
-import { SearchRequest } from "@core/model/search-request";
+import { Employee, Organization } from "@prisma/client";
+import { ContactSupport, EmployeeStatistics } from "@core/dto/global/employee.dto";
+import { PaginateFunction, paginator } from "@prisma/pagination";
 import { HolidayDto } from "@core/dto/global/holiday";
 
 const paginate: PaginateFunction = paginator({ perPage: 10 });
@@ -311,7 +315,6 @@ export class OrganizationPrismaHelperService {
   }
 
 
-
   async holidays(organization: Organization) {
     try {
       const employeesBirthDateData = {};
@@ -556,4 +559,31 @@ export class OrganizationPrismaHelperService {
   }
 
 
+  async sendSupportMessage(dto: ContactSupport, employee: Employee) {
+    try {
+      const html = await this.emailService.errorToKrisTeam({
+        name: dto.name,
+        employeeName: employee.firstname,
+        description: dto.description
+      } as ErrorEmail);
+      await this.resend.emails.send({
+        from: `${this.mailSource}`,
+        to: `info@kimberly-ryan.net`,
+        subject: "KRIS Error-Contact Support",
+        html: `${html}`
+      });
+
+      const html2 = await this.emailService.sendAutoResponseToEmployee({ customerFirstName: employee.firstname } as ErrorAutoResponse);
+      await this.resend.emails.send({
+        from: `${this.mailSource}`,
+        to: `${employee.email}`,
+        subject: "Error Update",
+        html: `${html2}`
+      });
+      return "Email sent successfully";
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException();
+    }
+  }
 }

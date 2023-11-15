@@ -1,5 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import {
+  ErrorAutoResponse,
+  ErrorEmail,
   HODConfirmationEvent, JobApplicationConfirmationEmail,
   LeaveApplicationEvent, LeaveApprovalEvent,
   NewBackOfficerEvent,
@@ -164,6 +166,31 @@ export class EmailService {
     };
     return template(data);
   }
+
+  async errorToKrisTeam(event: ErrorEmail) {
+    const relativePath = "../../templates/contactSupport.hbs";
+    const absolutePath = path.join(__dirname, relativePath);
+    const sourceFile = fs.readFileSync(absolutePath, "utf-8");
+    const template = Handlebars.compile(sourceFile);
+    const data = {
+      name: event.name,
+      employeeName: event.employeeName,
+      description: event.description
+    };
+    return template(data);
+  }
+
+  async sendAutoResponseToEmployee(event: ErrorAutoResponse) {
+    const relativePath = "../../templates/supportAutoResponse.hbs";
+    const absolutePath = path.join(__dirname, relativePath);
+    const sourceFile = fs.readFileSync(absolutePath, "utf-8");
+    const template = Handlebars.compile(sourceFile);
+    const data = {
+      customerFirstName: event.customerFirstName
+    };
+    return template(data);
+  }
+
 
   async sendTeamLeadConfirmationEmail(event: TeamLeadConfirmationEvent) {
     const relativePath = "../../templates/teamLeadConfirmation.hbs";

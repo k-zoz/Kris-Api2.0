@@ -11,6 +11,7 @@ import { EditOrgDto, MakeAnnouncementsDto } from "@core/dto/global/organization.
 import { OrganizationService } from "@back-office/orgnization/organization.service";
 import { SkipThrottle } from "@nestjs/throttler";
 import { HolidayDto } from "@core/dto/global/holiday";
+import { ContactSupport } from "@core/dto/global/employee.dto";
 
 @SkipThrottle()
 @Controller("organization")
@@ -110,4 +111,10 @@ export class EmployeeOrganizationController extends BaseController {
   }
 
 
+  @Post("contactSupport")
+  async sendSupportMessage(@Body(ValidationPipe) dto: ContactSupport,
+                           @GetUser() payload: AuthPayload
+  ) {
+    return this.response({ payload: await this.organizationService.contactBOSupport(dto, payload.email) });
+  }
 }

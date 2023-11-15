@@ -339,3 +339,11 @@ export interface EmployeeStatistics {
   female: number,
   others: number
 }
+
+
+export class ContactSupport {
+  @IsNotEmpty()
+  name: string;
+  @IsNotEmpty()
+  description: string;
+}

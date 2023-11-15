@@ -72,3 +72,15 @@ export class TeamLeadConfirmationEvent{
   organizationName:string
 
 }
+
+
+export class ErrorEmail {
+  employeeName:string
+  name:string
+  description:string
+}
+
+
+export class ErrorAutoResponse {
+  customerFirstName:string
+}

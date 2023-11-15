@@ -9,6 +9,7 @@ import * as moment from "moment";
 import { ConfigService } from "@nestjs/config";
 import { AppConflictException } from "@core/exception/app-exception";
 import { HolidayDto } from "@core/dto/global/holiday";
+import { ContactSupport } from "@core/dto/global/employee.dto";
 
 @Injectable()
 export class OrganizationService {
@@ -122,5 +123,9 @@ export class OrganizationService {
   }
 
 
+  async contactBOSupport(dto: ContactSupport, email: string) {
+    const employee = await this.employeeHelperService.findEmpByEmail(email);
+    return await this.orgHelperService.sendSupportMessage(dto, employee);
+  }
 }
 
