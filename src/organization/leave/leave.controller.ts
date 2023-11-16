@@ -80,6 +80,13 @@ export class LeaveController extends BaseController {
     return this.response({ payload: await this.leaveService.leaveHistory(orgID, payload) });
   }
 
+  @Get("/:orgID/employeeHeaveHistory/:empID")
+  async employeeLeaveHistory(@Param("orgID") orgID: string,
+                             @Param("empID") empID: string
+  ) {
+    return this.response({ payload: await this.leaveService.employeeLeaveHistory(orgID, empID) });
+  }
+
   @Get("/:orgID/allEmployeesOnLeave")
   async getAllEmployeesOnLeave(@Param("orgID") orgID: string
   ) {

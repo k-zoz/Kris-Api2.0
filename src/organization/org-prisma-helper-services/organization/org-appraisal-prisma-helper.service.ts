@@ -348,7 +348,7 @@ export class OrgAppraisalPrismaHelperService {
     const found = await this.prismaService.employee_Appraisal.findFirst({
       where: {
         id: myAppraisalID,
-        employeeId:empID
+        employeeId: empID
       }
     });
     if (!found) {
@@ -468,7 +468,6 @@ export class OrgAppraisalPrismaHelperService {
                     Appraisal_Question_Response: {
                       where: {
                         employeeAppraisalId: myAppraisalID // replace with the actual employee appraisal ID
-
                       },
                       select: {
                         score: true
@@ -493,30 +492,64 @@ export class OrgAppraisalPrismaHelperService {
           }
         })
       ]);
-      return  myAppraisalSubmittedResponses ;
+      return myAppraisalSubmittedResponses;
     } catch (e) {
       this.logger.error(e);
       throw new AppException("Error getting appraisal responses");
     }
   }
 
-  // async myResponses(myAppraisalID: string, appraisalID: string) {
-  //   try {
-  //     const [myAppraisalSubmittedResponses] = await this.prismaService.$transaction([
-  //       this.prismaService.employee_Appraisal.findUnique({
-  //         where: {
-  //           id: myAppraisalID // replace with the actual appraisal ID
-  //         }, include: {
-  //           appraisal: true
-  //         }
-  //
-  //       })
-  //     ]);
-  //     return { myAppraisalSubmittedResponses };
-  //   } catch (e) {
-  //     this.logger.error(e);
-  //     throw new AppException("Error getting appraisal responses");
-  //   }
-  // }
+
+  async allAllpraisalAndResponses(employee: Employee) {
+    try {
+      return await this.prismaService.employee_Appraisal.findMany({
+        where: {
+          employeeId: employee.id
+        },
+        include: {
+          appraisal: {
+            include: {
+              section: {
+                select: {
+                  name: true,
+                  question: {
+                    select: {
+                      text: true,
+                      Appraisal_Question_Response: {
+                        where: {
+                          // employeeAppraisalId: {
+                          //   equals: employee.id
+                          // }
+                        },
+                        select: {
+                          text: true,
+                          score: true
+                        }
+                      }
+                    }
+                  },
+                  Appraisal_Question_Response: {
+                    where: {
+                      comment: {
+                        not: null
+                      }
+                    },
+                    select: { comment: true, score: true },
+                    orderBy: { sectionID: "asc" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+      // return employeeAppraisals;
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error getting appraisal responses");
+    }
+
+  }
+
 
 }

@@ -52,9 +52,15 @@ export class LeaveService {
 
 
   async leaveHistory(orgID: string, userPayLoad: AuthPayload) {
-    await this.orgHelperService.findOrgByID(orgID);
+    const organization = await this.orgHelperService.findOrgByID(orgID);
     const employee = await this.employeeHelperService.findEmpByEmail(userPayLoad.email);
-    return await this.leaveHelperService.getMyLeaveHistory(orgID, employee);
+    return await this.leaveHelperService.getMyLeaveHistory(organization, employee);
+  }
+
+  async employeeLeaveHistory(orgID: string, empID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    const employee = await this.employeeHelperService.findEmpById(empID);
+    return await this.leaveHelperService.getMyLeaveHistory(organization, employee);
   }
 
   async onboardLeaveForNewEmployee(orgID: string, employee) {
@@ -69,10 +75,7 @@ export class LeaveService {
     return await this.leaveHelperService.deleteEmpLeavePlans(orgID, empID);
   }
 
-  // async allEmployeesLeave(orgID: string) {
-  //   await this.orgHelperService.findOrgByID(orgID)
-  //   return await this.leaveHelperService.findAllEmpLeaveHistory(orgID);
-  // }
+
   async allEmployeesOnLeave(orgID: string) {
     await this.orgHelperService.findOrgByID(orgID);
     return await this.leaveHelperService.allEmployeeLeaveStatus(orgID);
@@ -92,12 +95,14 @@ export class LeaveService {
     return await this.leaveHelperService.approveLeaveAndSendApprovalMail(leaveApp, employee, teamReq, approveMail);
   }
 
-  async declineEmployeeLeave(leaveApplicationID: string,approveMail: string) {
+  async declineEmployeeLeave(leaveApplicationID: string, approveMail: string) {
     const teamReq = await this.leaveHelperService.findTeamRequest(leaveApplicationID);
     const employee = await this.employeeHelperService.findEmpById(teamReq.leaveApprovalRequest[0].employeeId);
     const leaveApp = await this.leaveHelperService.findLeaveApplication(teamReq.leaveApprovalRequest[0].id);
-    return await this.leaveHelperService.declineLeaveAndSendDeclineMail(leaveApp, employee, teamReq,approveMail);
+    return await this.leaveHelperService.declineLeaveAndSendDeclineMail(leaveApp, employee, teamReq, approveMail);
   }
+
+
 }
 
 

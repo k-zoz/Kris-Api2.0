@@ -129,6 +129,12 @@ export class EmpOrgAppraisalService {
     return await this.empAppraisalHelperService.myResponses(myAppraisalID, myAppraisal);
   }
 
+  async allEmployeeAppraisalandResponses(empID: string) {
+    const employee = await this.employeeHelperService.findEmpById(empID);
+    return await this.empAppraisalHelperService.allAllpraisalAndResponses(employee)
+
+  }
+
   async sendAppraisalToEmployee(orgID: string, appraisalID: string, employeeID: string) {
     const employee = await this.employeeHelperService.findEmpById(employeeID);
     const organization = await this.orgHelperService.findOrgByID(orgID);
@@ -136,4 +142,6 @@ export class EmpOrgAppraisalService {
     await this.empAppraisalHelperService.checkIfEmployeesHaveAppraisal(appraisalID, orgID);
     return await this.empAppraisalHelperService.sendAppraisalToOneEmployee(employee, appraisal);
   }
+
+
 }

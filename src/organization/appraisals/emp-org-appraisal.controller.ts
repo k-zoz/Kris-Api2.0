@@ -174,6 +174,10 @@ export class EmpOrgAppraisalController extends BaseController {
     return this.response({ payload: await this.appraisalService.allMyAppraisalResponses(myAppraisalID, payload.email) });
   }
 
+  @Get("employeeAppraisalsAndResponses/:empID")
+  async getEmployeeAppraisalAndResponses(@Param("empID") empID: string) {
+    return this.response({ payload: await this.appraisalService.allEmployeeAppraisalandResponses(empID) });
+  }
 
   //TODO dont answer same question and add comment twice
 }

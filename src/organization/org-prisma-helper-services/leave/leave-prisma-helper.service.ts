@@ -7,7 +7,7 @@ import { LeaveApplicationEvent, PasswordChangeEvent } from "@core/event/back-off
 import { EmailService } from "@alert/email/email.service";
 import { Resend } from "resend";
 import { ConfigService } from "@nestjs/config";
-import { Employee, Leave, LeaveApplication, TeamRequestsAndApproval } from "@prisma/client";
+import { Employee, Leave, LeaveApplication, Organization, TeamRequestsAndApproval } from "@prisma/client";
 import { UtilService } from "@core/utils/util.service";
 
 @Injectable()
@@ -156,7 +156,7 @@ export class LeavePrismaHelperService {
     }
   }
 
-  async getMyLeaveHistory(orgID, employee) {
+  async getMyLeaveHistory(organization:Organization, employee:Employee) {
     try {
       return await this.prismaService.$transaction(async (tx) => {
         const employeeLeave = await tx.employeeLeave.findMany({
