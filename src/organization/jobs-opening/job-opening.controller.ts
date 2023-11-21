@@ -63,6 +63,11 @@ export class JobOpeningController extends BaseController {
     return this.response({ payload: await this.jobOpeningService.allOrgJobs(orgID, orgKrisID) });
   }
 
+  @Get("/:orgID/numbOfJobs")
+  async getAllOrgJobsNumber(@Param("orgID") orgID: string) {
+    return this.response({ payload: await this.jobOpeningService.numOfJobs(orgID) });
+  }
+
 
   @Post("uploadCvAndResume")
   @UseInterceptors(FileInterceptor("file"))

@@ -8,8 +8,9 @@ import * as moment from "moment";
 import * as argon from "argon2";
 import { EmployeePayrollPreviewDto } from "@core/dto/global/Payroll.dto";
 
+const momentTzone = require('moment-timezone');
 const dayjs = require("dayjs");
-
+import utc from "dayjs-plugin-utc";
 
 @Injectable()
 export class UtilService {
@@ -61,6 +62,11 @@ export class UtilService {
     } else {
       return dayjs(date).toDate();
     }
+  }
+
+
+  localTimeZoneDate() {
+    return momentTzone().tz('Africa/Lagos').format('HH:mm:ss');
   }
 
   getDifferenceInDays(startDate, endDate): number {

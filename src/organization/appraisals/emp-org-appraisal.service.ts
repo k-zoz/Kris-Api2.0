@@ -13,6 +13,7 @@ import { OrganizationPrismaHelperService } from "@back-office/helper-services/or
 import { Appraisal } from "@prisma/client";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 
+
 @Injectable()
 export class EmpOrgAppraisalService {
   private readonly logger = new Logger(EmpOrgAppraisalService.name);
@@ -108,7 +109,7 @@ export class EmpOrgAppraisalService {
     const employee = await this.employeeHelperService.findEmpByEmail(email);
     await this.empAppraisalHelperService.findMyAppraisalById(myAppraisalID, employee.id);
     await this.empAppraisalHelperService.checkIfResponseHasAlreadyBeenGiven(myAppraisalID, sectionID, questionID);
-    return await this.empAppraisalHelperService.answerQuestionInMyAppraisal(dto, myAppraisalID, sectionID, questionID);
+    return await this.empAppraisalHelperService.answerQuestionInMyAppraisal(dto, myAppraisalID, sectionID, questionID, employee);
   }
 
   async commentAppraisal(dto: AppraisalResponseDto, myAppraisalID: string, sectionID: string, email: string) {
@@ -131,7 +132,7 @@ export class EmpOrgAppraisalService {
 
   async allEmployeeAppraisalandResponses(empID: string) {
     const employee = await this.employeeHelperService.findEmpById(empID);
-    return await this.empAppraisalHelperService.allAllpraisalAndResponses(employee)
+    return await this.empAppraisalHelperService.allAllpraisalAndResponses(employee);
 
   }
 

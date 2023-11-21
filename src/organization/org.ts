@@ -93,22 +93,25 @@ import {
 } from "@organization/org-prisma-helper-services/work-tools/work-tools-prisma-helper.service";
 import { WorkToolsController } from "@organization/work-tools/work-tools.controller";
 import { WorkToolsService } from "@organization/work-tools/work-tools.service";
+import {
+  OrgActivityLogPrismaHelperService
+} from "@organization/org-prisma-helper-services/organization/org-activity-log-prisma-helper.service";
 
-export const providers:Array<Type<any>> = [
-  LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService, EmpOrgAppraisalService,JobOpeningHelperService,
+export const providers: Array<Type<any>> = [
+  LeaveService, LeavePrismaHelperService, EmployeePrismaHelperService, EmployeeOrgDepartmentsService, EmpOrgAppraisalService, JobOpeningHelperService,
   JobOpeningService,
-  PayrollPreviewService,PayrollPreviewHelperService,PayrollApproveService,PayrollApprovePrismaHelperService,PaysSlipsPrismaHelperService,PaysSlipsService,
+  PayrollPreviewService, PayrollPreviewHelperService, PayrollApproveService, PayrollApprovePrismaHelperService, PaysSlipsPrismaHelperService, PaysSlipsService,
   OrgDeptPrismaHelperService, EmpOrgBranchService, EmpOrgClienteleService, EmpClienteleHelperService, OrgOnboardPrismaHelperService, EmpJobsService,
   PayrollPrismaHelperService, EmpPayrollService, AllowancesService, BonusesService, DeductionsService, PayGradeService, AllowancesHelperService,
   BonusHelperService, DeductionsHelperService, PaygradeHelperService, BonusesService, BonusHelperService, PayGroupService, PayGroupPrismaHelperService,
   OrgTeamPrismaHelperService, OrgTeamService, OrgEmpPrismaHelperService, OrgEmployeeService, EmpOrgOnboardingService, OrgAppraisalPrismaHelperService,
-  LocaleService, UtilService, EmployeeOrganizationService, OrgBranchPrismaHelperService, EmpJobsPrismaHelperService,WorkToolsPrismaHelperService,WorkToolsService
-]
+  LocaleService, UtilService, EmployeeOrganizationService, OrgBranchPrismaHelperService, EmpJobsPrismaHelperService, WorkToolsPrismaHelperService, WorkToolsService, OrgActivityLogPrismaHelperService
+];
 
 
-export const controllers:Array<Type<any>> = [
+export const controllers: Array<Type<any>> = [
   LeaveController, EmployeeOrganizationController, EmpOrgClienteleController, EmpOrgOnboardingController, EmpOrgAppraisalController,
   EmpJobsController, AllowancesController, BonusesController, DeductionsController, PayGradeController, BonusesController, PayGroupController,
   PayrollPreviewController, PayrollApproveController, PaysSlipsController, JobOpeningController,
-  EmployeeOrgDepartmentsController, OrgTeamController, OrgEmployeeController, EmpOrgBranchController,WorkToolsController,
-]
+  EmployeeOrgDepartmentsController, OrgTeamController, OrgEmployeeController, EmpOrgBranchController, WorkToolsController
+];

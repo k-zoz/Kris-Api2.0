@@ -35,4 +35,11 @@ export class PayrollApproveController extends BaseController {
     return this.response({ payload: await this.payrollApproveService.approvePayrollPreview(orgID, payrollPreviewID, payload.email) });
   }
 
+  @Get("/:orgID/allOrgPayroll")
+  @EmpPermission(EmployeeRoleEnum.FINANCE, EmployeeRoleEnum.MANAGEMENT)
+  async allOrgPayroll(@Param("orgID") orgID: string) {
+    return this.response({ payload: await this.payrollApproveService.allOrgPayroll(orgID) });
+  }
+
+
 }

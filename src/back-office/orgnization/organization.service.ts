@@ -10,6 +10,9 @@ import { ConfigService } from "@nestjs/config";
 import { AppConflictException } from "@core/exception/app-exception";
 import { HolidayDto } from "@core/dto/global/holiday";
 import { ContactSupport } from "@core/dto/global/employee.dto";
+import {
+  OrgActivityLogPrismaHelperService
+} from "@organization/org-prisma-helper-services/organization/org-activity-log-prisma-helper.service";
 
 @Injectable()
 export class OrganizationService {
@@ -18,6 +21,7 @@ export class OrganizationService {
   constructor(private readonly orgHelperService: OrganizationPrismaHelperService,
               private readonly utilService: UtilService,
               private readonly employeeHelperService: EmployeePrismaHelperService,
+              private readonly orgActivityLogHelperService: OrgActivityLogPrismaHelperService,
               private readonly httpService: HttpService,
               private readonly config: ConfigService
   ) {
@@ -126,6 +130,11 @@ export class OrganizationService {
   async contactBOSupport(dto: ContactSupport, email: string) {
     const employee = await this.employeeHelperService.findEmpByEmail(email);
     return await this.orgHelperService.sendSupportMessage(dto, employee);
+  }
+
+  async getAllOrgActivityLogs(orgID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.orgActivityLogHelperService.myOrganizationActivityLog(organization);
   }
 }
 

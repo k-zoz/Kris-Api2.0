@@ -6,7 +6,7 @@ import { Resend } from "resend";
 import { ConfigService } from "@nestjs/config";
 import { PdfService } from "@cloudinary/pdf/pdf.service";
 import { EventEmitter2 } from "@nestjs/event-emitter";
-
+import { Organization, Payroll_Preview } from "@prisma/client";
 
 
 @Injectable()
@@ -70,7 +70,7 @@ export class PayrollApprovePrismaHelperService {
           deduction: 0,
           bonuses: 0,
           net_pay: 0,
-          employer_Pension:0
+          employer_Pension: 0
         }
       );
       return { payrollPreview: result, totals };
@@ -81,14 +81,14 @@ export class PayrollApprovePrismaHelperService {
   }
 
 
-  async startPayrollApproval(orgID: string, payrollPreviewID: string, email, totalsPayroll) {
+  async startPayrollApproval(orgID: string, payrollPreviewID: string, email, totalsPayroll, ppPreview: Payroll_Preview) {
     try {
       await this.prismaService.$transaction(async (tx) => {
+
         await tx.payroll_Preview.update({
           where: { id: payrollPreviewID },
           data: { status: "APPROVED" }
         });
-
 
         const payrollPreview = await tx.payroll_Preview.findUnique({
           where: { id: payrollPreviewID },
@@ -97,8 +97,9 @@ export class PayrollApprovePrismaHelperService {
           }
         });
 
-        const payroll = await tx.organizationPayroll.create({
+        await tx.organizationPayroll.create({
           data: {
+            name: ppPreview.name,
             payrollPreview: {
               connect: { id: payrollPreviewID }
             },
@@ -146,4 +147,16 @@ export class PayrollApprovePrismaHelperService {
   }
 
 
+  async allOrgPayrollData(organization: Organization) {
+    try {
+      return await this.prismaService.organizationPayroll.findMany({
+        where: {
+          organizationId: organization.id
+        }
+      });
+    } catch (e) {
+      this.logger.log(e);
+      throw new AppException();
+    }
+  }
 }

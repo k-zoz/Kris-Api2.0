@@ -44,6 +44,19 @@ export class JobOpeningHelperService {
     }
   }
 
+  async numOfOrgJobs(organization: Organization) {
+    try {
+      return await this.prismaService.jobOpening.count({
+        where: {
+          organizationID: organization.id
+        }
+      });
+    } catch (e) {
+      this.logger.log(e);
+      throw new AppException();
+    }
+  }
+
   async findAllOrgPostedJobs(orgID: string) {
     try {
       const [organization, jobOpenings] = await this.prismaService.$transaction([

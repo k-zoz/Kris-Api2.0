@@ -39,6 +39,11 @@ export class JobOpeningService {
     return await this.jobOpeningPrismaHelper.findAllOrgPostedJobs(orgID);
   }
 
+  async numOfJobs(orgID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.jobOpeningPrismaHelper.numOfOrgJobs(organization)
+  }
+
   async jobApply(dto: JobApplicationRequestAndResponse, orgID: string, jobOpeningID: string) {
     const organization = await this.orgHelperService.findOrgByID(orgID);
     const jobOpening = await this.jobOpeningPrismaHelper.findOneJobOpening(jobOpeningID, orgID);

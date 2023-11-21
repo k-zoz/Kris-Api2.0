@@ -117,4 +117,10 @@ export class EmployeeOrganizationController extends BaseController {
   ) {
     return this.response({ payload: await this.organizationService.contactBOSupport(dto, payload.email) });
   }
+
+  @Get("/:orgID/activityLogs")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async getAllActivityLogs(@Param("orgID") orgID: string) {
+    return this.response({ payload: await this.organizationService.getAllOrgActivityLogs(orgID) });
+  }
 }

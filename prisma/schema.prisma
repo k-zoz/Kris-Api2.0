@@ -49,51 +49,52 @@ enum Bo_Status {
 }
 
 model Organization {
-  id              String            @id @default(uuid())
-  orgLogo         String?
-  orgName         String            @unique
-  orgWebsite      String            @unique
-  orgEmail        String            @unique
-  orgNumber       String            @unique
-  orgAddress      String
-  orgAddress2     String?
-  orgState        String
-  orgCity         String?
-  orgCountry      String
-  orgType         String?
-  orgZipCode      String?
-  orgDateFounded  DateTime?         @db.Date
-  orgRCnumber     String            @unique
-  orgIndustry     String
-  orgKrisId       String?           @unique
-  team            Team[]
-  employees       Employee[]
-  department      Department[]
-  Org_Branch      Org_Branch[]
-  Org_Clientele   Org_Clientele[]
-  Onboarding      Onboarding[]
-  Appraisal       Appraisal[]
-  HireRequest     HireRequest[]
-  leavePlan       Leave[]
-  Allowance       Allowance[]
-  Deduction       Deduction[]
-  Bonuses         Bonuses[]
-  Payslip         Payslip[]
-  PayGrade        PayGrade[]
-  PayGroup        PayGroup[]
-  Payroll_Preview Payroll_Preview[]
-
-  createdBy  String?
-  modifiedBy String?
-
-  createdDate              DateTime                   @default(now()) @db.Date
-  modifiedDate             DateTime                   @updatedAt @db.Date
+  id                       String                     @id @default(uuid())
+  orgLogo                  String?
+  orgName                  String                     @unique
+  orgWebsite               String                     @unique
+  orgEmail                 String                     @unique
+  orgNumber                String                     @unique
+  orgAddress               String
+  orgAddress2              String?
+  orgState                 String
+  orgCity                  String?
+  orgCountry               String
+  orgType                  String?
+  orgZipCode               String?
+  orgDateFounded           DateTime?                  @db.Date
+  orgRCnumber              String                     @unique
+  orgIndustry              String
+  orgKrisId                String?                    @unique
+  team                     Team[]
+  employees                Employee[]
+  department               Department[]
+  Org_Branch               Org_Branch[]
+  Org_Clientele            Org_Clientele[]
+  Onboarding               Onboarding[]
+  Appraisal                Appraisal[]
+  HireRequest              HireRequest[]
+  leavePlan                Leave[]
+  Allowance                Allowance[]
+  Deduction                Deduction[]
+  Bonuses                  Bonuses[]
+  Payslip                  Payslip[]
+  PayGrade                 PayGrade[]
+  PayGroup                 PayGroup[]
+  Payroll_Preview          Payroll_Preview[]
   OrganizationPayroll      OrganizationPayroll[]
   JobOpening               JobOpening[]
   JobOpeningResponses      JobOpeningResponses[]
   OrganizationAnnouncement OrganizationAnnouncement[]
   WorkTools                WorkTools[]
   OrgnizationHoliday       OrgnizationHoliday[]
+  ActivityLog              ActivityLog[]
+
+  createdBy  String?
+  modifiedBy String?
+
+  createdDate  DateTime @default(now()) @db.Date
+  modifiedDate DateTime @updatedAt @db.Date
 
   @@unique([orgName, orgWebsite, orgEmail, orgNumber, orgRCnumber])
 }
@@ -400,15 +401,16 @@ model Employee {
   Payroll_Preview   Payroll_Preview? @relation(fields: [payroll_PreviewId], references: [id])
   payroll_PreviewId String?
 
-  createdBy            String?
-  modifiedBy           String?
-  createdDate          DateTime               @default(now()) @db.Date
-  modifiedDate         DateTime               @updatedAt
-  EmployeePayroll      EmployeePayroll[]
-  JobOpening           JobOpening[]
-  EmployeeAnnouncement EmployeeAnnouncement[]
-  EmployeeCertificate  EmployeeCertificate[]
-  EmployeeWorkTools    EmployeeWorkTools[]
+  createdBy                   String?
+  modifiedBy                  String?
+  createdDate                 DateTime                      @default(now()) @db.Date
+  modifiedDate                DateTime                      @updatedAt
+  EmployeePayroll             EmployeePayroll[]
+  JobOpening                  JobOpening[]
+  EmployeeAnnouncement        EmployeeAnnouncement[]
+  EmployeeCertificate         EmployeeCertificate[]
+  EmployeeWorkTools           EmployeeWorkTools[]
+  Appraisal_Question_Response Appraisal_Question_Response[]
 
   @@unique([email, krisID])
 }
@@ -427,6 +429,7 @@ model EmployeeCertificate {
 model OrganizationPayroll {
   id                   String            @id @default(uuid())
   date                 DateTime          @default(now())
+  name                 String?
   totalTaxes           Float?
   totalBonuses         Float?
   totalDeduction       Float?
@@ -474,16 +477,15 @@ model EmployeePayroll {
 }
 
 model Payroll_Preview {
-  id             String            @id @default(uuid())
-  name           String?
-  date           DateTime?         @db.Date
-  startDate      DateTime?         @db.Date
-  endDate        DateTime?         @db.Date
-  employees      Employee[]
-  status         ApplicationStatus
-  organizationId String?
-  Organization   Organization?     @relation(fields: [organizationId], references: [id])
-
+  id                  String                @id @default(uuid())
+  name                String?
+  date                DateTime?             @db.Date
+  startDate           DateTime?             @db.Date
+  endDate             DateTime?             @db.Date
+  employees           Employee[]
+  status              ApplicationStatus
+  organizationId      String?
+  Organization        Organization?         @relation(fields: [organizationId], references: [id])
   createdBy           String?
   modifiedBy          String?
   createdDate         DateTime              @default(now()) @db.Date
@@ -708,10 +710,13 @@ model Appraisal_Question_Response {
 
   employeeAppraisal   Employee_Appraisal? @relation(fields: [employeeAppraisalId], references: [id])
   employeeAppraisalId String?
-  createdBy           String?
-  modifiedBy          String?
-  createdDate         DateTime            @default(now()) @db.Date
-  modifiedDate        DateTime            @updatedAt
+
+  employeeId   String?
+  employee     Employee? @relation(fields: [employeeId], references: [id])
+  createdBy    String?
+  modifiedBy   String?
+  createdDate  DateTime  @default(now()) @db.Date
+  modifiedDate DateTime  @updatedAt
 }
 
 model Employee_Appraisal {
@@ -943,6 +948,16 @@ model OrgnizationHoliday {
   name           String
   date           DateTime      @db.Date
   organizationID String?
+  Organization   Organization? @relation(fields: [organizationID], references: [id])
+  createdDate    DateTime      @default(now()) @db.Date
+  createdBy      String?
+}
+
+model ActivityLog {
+  id             String        @id @default(uuid())
+  description    String
+  organizationID String?
+  time           String
   Organization   Organization? @relation(fields: [organizationID], references: [id])
   createdDate    DateTime      @default(now()) @db.Date
   createdBy      String?

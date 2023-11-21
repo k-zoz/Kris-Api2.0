@@ -7,6 +7,11 @@ import { JwtPayload } from "@auth/model/jwt-payload";
 import { TokenService } from "@auth/token/token.service";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 import { Employee } from "@core/dto/global/employee.dto";
+import {
+  OrgActivityLogPrismaHelperService
+} from "@organization/org-prisma-helper-services/organization/org-activity-log-prisma-helper.service";
+import { ActivityLogDto } from "@core/dto/global/activity-log.dto";
+import e from "express";
 
 @Injectable()
 export class EmployeeAuthService {
@@ -14,8 +19,10 @@ export class EmployeeAuthService {
 
   constructor(private readonly employeeService: EmployeeService,
               private readonly employeeHelperService: EmployeePrismaHelperService,
+              private readonly activityLogService: OrgActivityLogPrismaHelperService,
               private readonly tokenService: TokenService
-  ) {}
+  ) {
+  }
 
   async employeeLogin(request: LoginRequest) {
     const { email, password } = request;
@@ -34,6 +41,8 @@ export class EmployeeAuthService {
     // const refreshToken = await this.tokenService.generateRefreshToken(payload);
     await this.employeeHelperService.setUserRefreshToken(email, token);
     const employee = await this.employeeHelperService.findAndExcludeFields(employeeOrg);
+    await this.activityLogService.createActivityLog({ description: `${employee.firstname} ${employee.lastname} logged in` } as ActivityLogDto, employee.organizationId);
+
     return { token, employee };
   }
 

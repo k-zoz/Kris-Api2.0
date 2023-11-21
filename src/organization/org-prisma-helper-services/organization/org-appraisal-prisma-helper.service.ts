@@ -397,7 +397,7 @@ export class OrgAppraisalPrismaHelperService {
     }
   }
 
-  async answerQuestionInMyAppraisal(dto: AppraisalResponseDto, myAppraisalID: string, sectionID: string, questionID: string) {
+  async answerQuestionInMyAppraisal(dto: AppraisalResponseDto, myAppraisalID: string, sectionID: string, questionID: string, employee: Employee) {
     try {
       await this.prismaService.$transaction(async (tx) => {
         await tx.appraisal_Question_Response.create({
@@ -405,6 +405,7 @@ export class OrgAppraisalPrismaHelperService {
             score: dto.rating,
             questionID: questionID,
             sectionID: sectionID,
+            employeeId: employee.id,
             employeeAppraisalId: myAppraisalID
           }
         });
@@ -415,13 +416,14 @@ export class OrgAppraisalPrismaHelperService {
     }
   }
 
-  async addCommentsToMyAppraisal(dto: AppraisalResponseDto, sectionID: string, myAppraisalID: string, employee) {
+  async addCommentsToMyAppraisal(dto: AppraisalResponseDto, sectionID: string, myAppraisalID: string, employee: Employee) {
     try {
       await this.prismaService.$transaction(async (tx) => {
         await tx.appraisal_Question_Response.create({
           data: {
             comment: dto.appraiserComment,
             sectionID: sectionID,
+            employeeId: employee.id,
             employeeAppraisalId: myAppraisalID
           }
         });
@@ -517,6 +519,7 @@ export class OrgAppraisalPrismaHelperService {
                       text: true,
                       Appraisal_Question_Response: {
                         where: {
+                          employeeId: employee.id
                           // employeeAppraisalId: {
                           //   equals: employee.id
                           // }
@@ -532,7 +535,11 @@ export class OrgAppraisalPrismaHelperService {
                     where: {
                       comment: {
                         not: null
-                      }
+                      },
+                      employeeId: employee.id
+                      // employeeAppraisalId: {
+                      //   equals: employee.id
+                      // }
                     },
                     select: { comment: true, score: true },
                     orderBy: { sectionID: "asc" }

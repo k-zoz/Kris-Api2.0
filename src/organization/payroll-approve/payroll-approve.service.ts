@@ -29,9 +29,13 @@ export class PayrollApproveService {
 
   async approvePayrollPreview(orgID: string, payrollPreviewID: string, email: string) {
     await this.organizationHelperService.findOrgByID(orgID);
-    await this.payrollPreviewPrismaHelper.findPayrollPreviewById(orgID, payrollPreviewID);
+    const payrollPreview = await this.payrollPreviewPrismaHelper.findPayrollPreviewById(orgID, payrollPreviewID);
     const payrollTotal = await this.payrollApproveHelperService.getPayrollPreviewWithTotals(orgID, payrollPreviewID);
-    return await this.payrollApproveHelperService.startPayrollApproval(orgID, payrollPreviewID, email, payrollTotal.totals);
+    return await this.payrollApproveHelperService.startPayrollApproval(orgID, payrollPreviewID, email, payrollTotal.totals, payrollPreview);
   }
 
+  async allOrgPayroll(orgID: string) {
+    const organization = await this.organizationHelperService.findOrgByID(orgID);
+    return await this.payrollApproveHelperService.allOrgPayrollData(organization);
+  }
 }
