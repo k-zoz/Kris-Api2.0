@@ -61,6 +61,13 @@ export class EmployeeOrganizationController extends BaseController {
     return this.response({ payload: await this.organizationService.myAnnouncements(payload.email) });
   }
 
+  @Get("hideAnnouncements/:announcementID")
+  async hideAnnouncements(@GetUser() payload: AuthPayload,
+                          @Param("announcementID") announcementID: string
+  ) {
+    return this.response({ payload: await this.organizationService.hideAnnouncements(announcementID, payload.email) });
+  }
+
   @Get("/:orgID/birthdays")
   async allEmployeeBirthdays(@Param("orgID") orgID: string) {
     return this.response({ payload: await this.organizationService.employeeBirthdays(orgID) });

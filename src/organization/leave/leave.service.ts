@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { ApplyForLeave, CreateLeaveDto } from "@core/dto/global/leave.dto";
+import { ApplyForLeave, CreateLeaveDto, UpdateLeaveDto } from "@core/dto/global/leave.dto";
 import { PrismaService } from "@prisma/prisma.service";
 import { LeavePrismaHelperService } from "@organization/org-prisma-helper-services/leave/leave-prisma-helper.service";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
@@ -27,6 +27,12 @@ export class LeaveService {
     return await this.leaveHelperService.createLeavePlanAndEmployeeLeave(dto, orgID, creatorEmail);
   }
 
+  async updateLeavePlan(orgID: string, leavePlanID: string, modifierEmail: string, dto: UpdateLeaveDto) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    dto.leaveName = this.utilService.toUpperCase(dto.leaveName);
+    const leavePlan = await this.leaveHelperService.findOrgLeaveByID(leavePlanID, organization);
+    return await this.leaveHelperService.updateLeavePlan(dto, organization, leavePlan, modifierEmail);
+  }
 
   async getAllLeavePlans(orgID) {
     await this.orgHelperService.findOrgByID(orgID);

@@ -14,6 +14,19 @@ export class CreateLeaveDto {
   leaveDocUrl:string
 }
 
+export class UpdateLeaveDto {
+  @IsOptional()
+  @IsString()
+  leaveName: string;
+  @IsOptional()
+  @IsNumber()
+  leaveDuration: number;
+  @IsOptional()
+  leaveType: any;
+  @IsOptional()
+  leaveDocUrl:string
+}
+
 export class ApplyForLeave {
   @IsNotEmpty()
   @IsString()

@@ -150,6 +150,19 @@ export class JobOpeningHelperService {
     return found;
   }
 
+  async numberOfJobOpeningAndResponses(organization: Organization) {
+    try {
+      return await this.prismaService.jobOpeningResponses.count({
+        where: {
+          organizationID: organization.id
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException();
+    }
+  }
+
   async applyForJobOpening(dto: JobApplicationRequestAndResponse, org: Organization, jobOpening: JobOpening) {
     try {
       await this.prismaService.$transaction(async (tx) => {

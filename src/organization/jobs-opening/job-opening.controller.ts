@@ -88,6 +88,11 @@ export class JobOpeningController extends BaseController {
     return this.response({ payload: await this.jobOpeningService.jobApply(dto, orgID, jobOpeningID) });
   }
 
+  @Get("/:orgID/numOfApplicants")
+  async numberOfApplicants(@Param("orgID") orgID: string) {
+    return this.response({ payload: await this.jobOpeningService.totalNumberOfAllApplicants(orgID) });
+  }
+
   @Get("/:orgID/jobOpening/:jobOpeningID")
   async getJobOpening(@Param("orgID") orgID: string,
                       @Param("jobOpeningID") jobOpeningID: string) {

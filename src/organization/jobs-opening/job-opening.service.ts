@@ -41,7 +41,7 @@ export class JobOpeningService {
 
   async numOfJobs(orgID: string) {
     const organization = await this.orgHelperService.findOrgByID(orgID);
-    return await this.jobOpeningPrismaHelper.numOfOrgJobs(organization)
+    return await this.jobOpeningPrismaHelper.numOfOrgJobs(organization);
   }
 
   async jobApply(dto: JobApplicationRequestAndResponse, orgID: string, jobOpeningID: string) {
@@ -49,6 +49,11 @@ export class JobOpeningService {
     const jobOpening = await this.jobOpeningPrismaHelper.findOneJobOpening(jobOpeningID, orgID);
     dto.profile.fullname = this.utilService.toUpperCase(dto.profile.fullname);
     return await this.jobOpeningPrismaHelper.applyForJobOpening(dto, organization, jobOpening);
+  }
+
+  async totalNumberOfAllApplicants(orgID: string) {
+    const organization = await this.orgHelperService.findOrgByID(orgID);
+    return await this.jobOpeningPrismaHelper.numberOfJobOpeningAndResponses(organization);
   }
 
   async findOneJobOpening(orgID: string, jobOpeningID: string) {

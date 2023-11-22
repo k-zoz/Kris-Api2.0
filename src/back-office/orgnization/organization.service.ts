@@ -136,5 +136,11 @@ export class OrganizationService {
     const organization = await this.orgHelperService.findOrgByID(orgID);
     return await this.orgActivityLogHelperService.myOrganizationActivityLog(organization);
   }
+
+  async hideAnnouncements(announcementID, email: string) {
+    const employee = await this.employeeHelperService.findEmpByEmail(email);
+    const announcement = await this.orgHelperService.findMyAnnouncement(employee, announcementID);
+    return await this.orgHelperService.hideMyAnnouncements(employee, announcement);
+  }
 }
 

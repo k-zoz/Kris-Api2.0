@@ -6,7 +6,7 @@ import { EmpPermission } from "@core/decorator/employee-role.decorator";
 import { EmployeeRoleEnum } from "@core/enum/employee-role-enum";
 import { GetUser } from "@auth/decorators/get-user.decorator";
 import { AuthPayload } from "@core/dto/auth/auth-payload.dto";
-import { ApplyForLeave, CreateLeaveDto } from "@core/dto/global/leave.dto";
+import { ApplyForLeave, CreateLeaveDto, UpdateLeaveDto } from "@core/dto/global/leave.dto";
 import { LeaveService } from "@organization/leave/leave.service";
 import { SkipThrottle } from "@nestjs/throttler";
 import { CloudinaryService } from "@cloudinary/cloudinary.service";
@@ -35,6 +35,16 @@ export class LeaveController extends BaseController {
         message: "Created Successfully",
         status: HttpStatus.CREATED
       });
+  }
+
+  @Post("/:orgID/leavePlan/:leavePlanID/update")
+  @EmpPermission(EmployeeRoleEnum.HUMAN_RESOURCE, EmployeeRoleEnum.MANAGEMENT)
+  async updateOrgLeavePlan(@Param("orgID") orgID: string,
+                           @Param("leavePlanID") leavePlanID: string,
+                           @Body(ValidationPipe) dto: UpdateLeaveDto,
+                           @GetUser() payload: AuthPayload
+  ) {
+    return this.response({ payload: await this.leaveService.updateLeavePlan(orgID, leavePlanID, payload.email, dto) });
   }
 
   @Get("/:orgID/allPlans")

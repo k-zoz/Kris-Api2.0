@@ -2,7 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@prisma/prisma.service";
 import { AuthMsg } from "@core/const/security-msg-const";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
-import { CreateLeaveDto } from "@core/dto/global/leave.dto";
+import { CreateLeaveDto, UpdateLeaveDto } from "@core/dto/global/leave.dto";
 import { LeaveApplicationEvent, PasswordChangeEvent } from "@core/event/back-office-event";
 import { EmailService } from "@alert/email/email.service";
 import { Resend } from "resend";
@@ -23,6 +23,41 @@ export class LeavePrismaHelperService {
   ) {
     const resendKey = this.configService.get("resendApiKey");
     this.resend = new Resend(resendKey);
+  }
+
+  async updateLeavePlan(dto: UpdateLeaveDto, organization: Organization, leavePlan: Leave, modifierEmail: string) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        await tx.leave.update({
+          where: {
+            id: leavePlan.id
+          },
+          data: {
+            name: dto.leaveName,
+            duration: dto.leaveDuration,
+            type: dto.leaveType,
+            leaveDocUrl: dto.leaveDocUrl,
+            createdBy: modifierEmail
+          }
+        });
+
+        await tx.employeeLeave.updateMany({
+          where: {
+            leaveId: leavePlan.id
+          },
+          data: {
+            leaveName: dto.leaveName,
+            leaveDocUrl: dto.leaveDocUrl,
+            remainingDuration: dto.leaveDuration,
+            createdBy: modifierEmail
+          }
+        });
+      }, { maxWait: 5000, timeout: 10000 });
+
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppException("Error updating leave");
+    }
   }
 
   async createLeavePlanAndEmployeeLeave(dto: CreateLeaveDto, orgID: string, creatorEmail: string) {
@@ -156,7 +191,7 @@ export class LeavePrismaHelperService {
     }
   }
 
-  async getMyLeaveHistory(organization:Organization, employee:Employee) {
+  async getMyLeaveHistory(organization: Organization, employee: Employee) {
     try {
       return await this.prismaService.$transaction(async (tx) => {
         const employeeLeave = await tx.employeeLeave.findMany({
@@ -193,6 +228,20 @@ export class LeavePrismaHelperService {
       throw  new AppNotFoundException("Leave Plan does not exist");
     }
     return leave;
+  }
+
+  async findOrgLeaveByID(leaveID, organization: Organization) {
+    const leavePlan = await this.prismaService.leave.findFirst({
+      where: {
+        id: leaveID,
+        organizationId: organization.id
+      }
+    });
+
+    if (!leavePlan) {
+      throw  new AppNotFoundException("Leave Plan does not exist");
+    }
+    return leavePlan;
   }
 
   async findEmpLeaveByName(leaveName, employee) {
@@ -514,5 +563,7 @@ export class LeavePrismaHelperService {
     }
 
   }
+
+
 }
 

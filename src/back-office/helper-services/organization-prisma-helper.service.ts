@@ -13,7 +13,7 @@ import {
   NewOrganizationEvent
 } from "@core/event/back-office-event";
 import * as argon from "argon2";
-import { Employee, Organization } from "@prisma/client";
+import { Employee, EmployeeAnnouncement, Organization } from "@prisma/client";
 import { ContactSupport, EmployeeStatistics } from "@core/dto/global/employee.dto";
 import { PaginateFunction, paginator } from "@prisma/pagination";
 import { HolidayDto } from "@core/dto/global/holiday";
@@ -281,12 +281,48 @@ export class OrganizationPrismaHelperService {
     try {
       return await this.prismaService.employeeAnnouncement.findMany({
         where: {
-          employeeId: employee.id
+          employeeId: employee.id,
+          OR: [
+            { viewedRequest: { equals: false } },
+            { viewedRequest: null }
+          ]
         }
       });
     } catch (e) {
       this.logger.error(e);
       throw new AppConflictException("Error getting my announcements. Contact Support");
+    }
+  }
+
+  async findMyAnnouncement(employee: Employee, announcementID: string) {
+    const found = await this.prismaService.employeeAnnouncement.findFirst({
+      where: {
+        employeeId: employee.id,
+        id: announcementID
+      }
+    });
+
+    if (!found) {
+      const msg = `Announcement with id ${announcementID} does not exist`;
+      this.logger.error(msg);
+      throw new AppNotFoundException(msg);
+    }
+    return found;
+  }
+
+  async hideMyAnnouncements(employee: Employee, announcement: EmployeeAnnouncement) {
+    try {
+      return await this.prismaService.employeeAnnouncement.update({
+        where: {
+          id: announcement.id
+        },
+        data: {
+          viewedRequest: true
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw new AppConflictException();
     }
   }
 
@@ -586,4 +622,6 @@ export class OrganizationPrismaHelperService {
       throw new AppException();
     }
   }
+
+
 }
