@@ -59,28 +59,30 @@ export class PayrollPreviewService {
     return await this.payrollPreviewPrismaHelper.disconnectEmployeeFromPayrollPreview(employee.id, payrollPreviewID, orgID, email, employee);
   }
 
+  //TODO rewrite the logic for bulk upload
+
   async updateEmployeePayrollPreviewInformation(dto: EmployeePayrollPreviewDto, orgID: string, payrollPreviewID: string, empID: string, email: string) {
     await this.organizationHelperService.findOrgByID(orgID);
     dto.basic_salary = parseFloat(dto.basic_salary);
     dto.housing = parseFloat(dto.housing);
     dto.transportation = parseFloat(dto.transportation);
-    dto.education = parseFloat(dto.education);
-    dto.location = parseFloat(dto.location);
+    //  dto.education = parseFloat(dto.education);
+    // dto.location = parseFloat(dto.location);
     dto.furniture = parseFloat(dto.furniture);
     dto.utility = parseFloat(dto.utility);
     dto.taxes = parseFloat(dto.taxes);
-    dto.gross_pay = this.utilService.calculateEmpGrossPay(dto);
-    dto.gross_pay = parseFloat(dto.gross_pay);
+   // dto.gross_pay = this.utilService.calculateEmpGrossPay(dto);
+   // dto.gross_pay = parseFloat(dto.gross_pay);
     dto.employee_Pension = this.utilService.calculateEmployeePension(dto);
     dto.employee_Pension = parseFloat(dto.employee_Pension);
-    dto.employer_Pension = this.utilService.calculateEmployerPension(dto);
-    dto.employer_Pension = parseFloat(dto.employer_Pension);
-    dto.empITF = this.utilService.calculateITF(dto);
-    dto.empITF = parseFloat(dto.empITF);
-    dto.empNHF = this.utilService.calculateNHF(dto);
-    dto.empNHF = parseFloat(dto.empNHF);
-    dto.empNSITF = this.utilService.calculateNSITF(dto);
-    dto.empNSITF = parseFloat(dto.empNSITF);
+    //  dto.employer_Pension = this.utilService.calculateEmployerPension(dto);
+    // dto.employer_Pension = parseFloat(dto.employer_Pension);
+    //  dto.empITF = this.utilService.calculateITF(dto);
+    // dto.empITF = parseFloat(dto.empITF);
+    //  dto.empNHF = this.utilService.calculateNHF(dto);
+    // dto.empNHF = parseFloat(dto.empNHF);
+    //  dto.empNSITF = this.utilService.calculateNSITF(dto);
+    //   dto.empNSITF = parseFloat(dto.empNSITF);
     dto.deduction = this.utilService.calculateTotalDeductions(dto);
     dto.deduction = parseFloat(dto.deduction);
     dto.net_pay = this.utilService.calculateEmpNetPay(dto);
