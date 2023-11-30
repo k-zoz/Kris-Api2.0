@@ -1,5 +1,4 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { PrismaService } from "@prisma/prisma.service";
 import { LoginRequest } from "@auth/model/login-request";
 import { EmployeeService } from "@back-office/employee/employee.service";
 import { AppUnauthorizedException } from "@core/exception/app-exception";
@@ -11,7 +10,7 @@ import {
   OrgActivityLogPrismaHelperService
 } from "@organization/org-prisma-helper-services/organization/org-activity-log-prisma-helper.service";
 import { ActivityLogDto } from "@core/dto/global/activity-log.dto";
-import e from "express";
+import { UtilService } from "@core/utils/util.service";
 
 @Injectable()
 export class EmployeeAuthService {
@@ -20,15 +19,16 @@ export class EmployeeAuthService {
   constructor(private readonly employeeService: EmployeeService,
               private readonly employeeHelperService: EmployeePrismaHelperService,
               private readonly activityLogService: OrgActivityLogPrismaHelperService,
-              private readonly tokenService: TokenService
-  ) {
-  }
+              private readonly tokenService: TokenService,
+              private readonly utilService: UtilService
+  ) {}
 
   async employeeLogin(request: LoginRequest) {
     const { email, password } = request;
-    const employee = await this.employeeHelperService.findFirst(email);
-    if (!employee || !(await this.employeeService.validatePassword(employee, password))) {
-      this.logger.error(`Login failed ${email}`);
+  //  request.email = this.utilService.toLowerCase(request.email)
+    const employee = await this.employeeHelperService.findFirst(request.email);
+    if (!employee || !(await this.employeeService.validatePassword(employee, request.password))) {
+      this.logger.error(`Login failed ${request.email}`);
       throw new AppUnauthorizedException("Invalid email or password");
     }
     return this.authenticateEmployee(employee);

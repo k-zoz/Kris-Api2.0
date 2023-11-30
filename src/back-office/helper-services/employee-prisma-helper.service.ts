@@ -472,14 +472,14 @@ export class EmployeePrismaHelperService {
           }
         });
 
-        if (!dto.payGroup) {
-        }
-        const payGroup = await tx.payGroup.findFirst({
-          where: {
-            organizationId: orgName.id,
-            name: dto.payGroup
-          }
-        });
+        // if (!dto.payGroup) {
+        // }
+        // const payGroup = await tx.payGroup.findFirst({
+        //   where: {
+        //     organizationId: orgName.id,
+        //     name: dto.payGroup
+        //   }
+        // });
 
 
         const saved = await tx.employee.update({
@@ -497,7 +497,7 @@ export class EmployeePrismaHelperService {
             org_BranchId: branch.id,
             departmentId: department.id,
             teamId: team.id,
-            payGroupId: payGroup.id
+            // payGroupId: payGroup.id
           }
         });
       }, { maxWait: 5000, timeout: 10000 });
