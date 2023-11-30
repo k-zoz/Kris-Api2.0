@@ -25,7 +25,7 @@ export class EmployeeAuthService {
 
   async employeeLogin(request: LoginRequest) {
     const { email, password } = request;
-  //  request.email = this.utilService.toLowerCase(request.email)
+    request.email = this.utilService.toLowerCase(request.email)
     const employee = await this.employeeHelperService.findFirst(request.email);
     if (!employee || !(await this.employeeService.validatePassword(employee, request.password))) {
       this.logger.error(`Login failed ${request.email}`);
