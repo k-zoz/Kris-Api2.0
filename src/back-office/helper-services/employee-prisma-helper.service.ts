@@ -440,7 +440,7 @@ export class EmployeePrismaHelperService {
     }
   }
 
-  async updateEmployeeWorkDetails(dto: UpdateEmployeeWork, empID, orgName, modifierMail: string) {
+  async updateEmployeeWorkDetails(dto: UpdateEmployeeWork, employee:Employee, orgName, modifierMail: string) {
     try {
       await this.prismaService.$transaction(async (tx) => {
         if (!dto.employeeBranch) {
@@ -484,7 +484,7 @@ export class EmployeePrismaHelperService {
 
         const saved = await tx.employee.update({
           where: {
-            id: empID
+            id: employee.id
           }, data: {
             idNumber: dto.idNumber,
             email: dto.email,

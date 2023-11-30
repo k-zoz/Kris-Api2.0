@@ -171,6 +171,35 @@ export class UtilService {
     }).filter(obj => Object.keys(obj).length === headers.length);
   }
 
+   returnPayrollObjects(data) {
+    const [headers, ...rows] = data; // Destructure the headers and rows from the data
+    return rows.map(row => {
+      let obj = {};
+      headers.forEach((header, i) => {
+        if (row[i] !== undefined && row[i] !== "") {
+          obj[header] = row[i];
+        }
+      });
+      return obj;
+    });
+  }
+
+   parsePayrollData(data) {
+    return data.map(item => {
+      let newItem = {};
+      for (let key in item) {
+        if (key !== 'email') {
+          newItem[key] = parseFloat(item[key].replace(/,/g, ''));
+        } else {
+          newItem[key] = item[key];
+        }
+      }
+      return newItem;
+    });
+  }
+
+
+
 
   async updateKeysInObject(data) {
     const updatedData = [];

@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards, ValidationPipe } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get, HttpStatus,
+  Param,
+  ParseFilePipeBuilder,
+  Post,
+  UploadedFile,
+  UseGuards, UseInterceptors,
+  ValidationPipe
+} from "@nestjs/common";
 import { BaseController } from "@core/utils/base-controller.controller";
 import { AuthGuard } from "@nestjs/passport";
 import { EmployeeRoleGuard } from "@core/guard/employee-role.guard";
@@ -11,6 +22,10 @@ import { CreatePayrollPreviewDto, EmployeePayrollPreviewDto } from "@core/dto/gl
 import { SearchRequest } from "@core/model/search-request";
 import { Employee } from "@core/dto/global/employee.dto";
 import { SkipThrottle } from "@nestjs/throttler";
+import { MAX_EXCEL_FILE_SIZE_IN_BYTES, VALID_FILE_TYPE_FOR_BULK_UPLOADS } from "@core/const/app.const";
+import { AuthMsg } from "@core/const/security-msg-const";
+import { FileInterceptor } from "@nestjs/platform-express";
+
 @SkipThrottle()
 @Controller("organization/payrollPreview")
 @UseGuards(AuthGuard())
@@ -83,5 +98,24 @@ export class PayrollPreviewController extends BaseController {
                                    @GetUser() payload: AuthPayload
   ) {
     return this.response({ payload: await this.payrollPreviewService.deleteEmployeesFromPayrollPreview(orgID, payrollPreviewID, empID, payload.email) });
+  }
+
+  @Post("/:orgID/:payrollPreviewID/bulkUpload")
+  @UseInterceptors(FileInterceptor("file"))
+  @EmpPermission(EmployeeRoleEnum.FINANCE, EmployeeRoleEnum.MANAGEMENT)
+  async bulkUploadEmployeePayroll(@Param("orgID") orgID: string,
+                                  @Param("payrollPreviewID") payrollPreviewID: string,
+                                  @GetUser() payload: AuthPayload,
+                                  @UploadedFile(
+                                    new ParseFilePipeBuilder()
+                                      .addFileTypeValidator({ fileType: VALID_FILE_TYPE_FOR_BULK_UPLOADS })
+                                      .addMaxSizeValidator({
+                                        maxSize: MAX_EXCEL_FILE_SIZE_IN_BYTES,
+                                        message: AuthMsg.FIlE_SIZE_MORE_THAN_5MB
+                                      })
+                                      .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
+                                  ) file: Express.Multer.File
+  ) {
+return this.response({payload: await this.payrollPreviewService.bulkUploadEmployeePayroll(orgID, payrollPreviewID, file, payload.email)})
   }
 }

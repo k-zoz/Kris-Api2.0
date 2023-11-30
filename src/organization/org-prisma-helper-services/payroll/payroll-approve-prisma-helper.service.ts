@@ -124,6 +124,11 @@ export class PayrollApprovePrismaHelperService {
                 empNHF: employee.empNHF,
                 empNSITF: employee.empNSITF,
                 empITF: employee.empITF,
+                entertainment: employee.entertainment,
+                special_allowance: employee.special_allowance,
+                payroll_net: employee.payroll_net,
+                reimbursable: employee.reimbursable,
+                other_deductions: employee.other_deductions,
                 employer_Pension: employee.employer_Pension,
                 employee_Pension: employee.employee_Pension,
                 createdBy: email

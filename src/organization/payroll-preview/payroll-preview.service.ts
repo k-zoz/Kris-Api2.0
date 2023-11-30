@@ -8,13 +8,15 @@ import { UtilService } from "@core/utils/util.service";
 import { SearchRequest } from "@core/model/search-request";
 import { EmployeePrismaHelperService } from "@back-office/helper-services/employee-prisma-helper.service";
 import { Employee } from "@core/dto/global/employee.dto";
+import { CloudinaryService } from "@cloudinary/cloudinary.service";
 
 @Injectable()
 export class PayrollPreviewService {
   constructor(private readonly payrollPreviewPrismaHelper: PayrollPreviewHelperService,
               private readonly organizationHelperService: OrganizationPrismaHelperService,
               private readonly employeeHelperPrismaService: EmployeePrismaHelperService,
-              private readonly utilService: UtilService
+              private readonly utilService: UtilService,
+              private readonly cloudinaryService: CloudinaryService
   ) {
   }
 
@@ -84,6 +86,10 @@ export class PayrollPreviewService {
     dto.net_pay = this.utilService.calculateEmpNetPay(dto);
     dto.net_pay = parseFloat(dto.net_pay);
     dto.bonuses = this.utilService.useToReturnNull();
+    dto.payroll_net = parseFloat(dto.payroll_net);
+    dto.reimbursable = parseFloat(dto.reimbursable);
+    dto.special_allowance = parseFloat(dto.special_allowance);
+    dto.entertainment = parseFloat(dto.entertainment);
     await this.payrollPreviewPrismaHelper.findPayrollPreviewById(orgID, payrollPreviewID);
     const employee = await this.employeeHelperPrismaService.findEmpById(empID);
     await this.payrollPreviewPrismaHelper.findEmployeeInPayrollPreview(employee.id, payrollPreviewID, orgID);
@@ -97,5 +103,14 @@ export class PayrollPreviewService {
     const employee = await this.employeeHelperPrismaService.findEmpById(empID);
     await this.payrollPreviewPrismaHelper.findEmployeeInPayrollPreview(employee.id, payrollPreviewID, orgID);
     return await this.payrollPreviewPrismaHelper.disconnectEmployeeFromPayrollPreview(employee.id, payrollPreviewID, orgID, email, employee);
+  }
+
+  async bulkUploadEmployeePayroll(orgID: string, payrollPreviewID: string, file: Express.Multer.File, creatorEmail: string) {
+    const organization = await this.organizationHelperService.findOrgByID(orgID);
+    const payrollPreview = await this.payrollPreviewPrismaHelper.findPayrollPreviewById(orgID, payrollPreviewID);
+    const csvData = await this.cloudinaryService.readCSVFile(file);
+    const employeeObj = await this.utilService.returnPayrollObjects(csvData);
+    const payrollData = await this.utilService.parsePayrollData(employeeObj);
+    return await this.payrollPreviewPrismaHelper.bulkUpdateEmployeePayrollInformation(payrollData, organization);
   }
 }

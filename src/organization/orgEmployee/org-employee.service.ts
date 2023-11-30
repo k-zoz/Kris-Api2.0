@@ -100,14 +100,14 @@ export class OrgEmployeeService {
 
   async updateEmployeeWorkInfo(dto: UpdateEmployeeWork, orgID: string, empID: string, modifierMail: string) {
     const orgName = await this.orgHelperService.findOrgByID(orgID);
-    await this.employeeService.findEmpById(empID);
+   const employee = await this.employeeService.findEmpById(empID);
     dto.dateOfConfirmation = this.utilService.convertDateAgain(dto.dateOfConfirmation);
     dto.dateOfJoining = this.utilService.convertDateAgain(dto.dateOfJoining);
     dto.employeeBranch = this.utilService.toUpperCase(dto.employeeBranch);
     dto.department = this.utilService.toUpperCase(dto.department);
     dto.empTeam = this.utilService.toUpperCase(dto.empTeam);
     dto.payGroup = this.utilService.toUpperCase(dto.payGroup);
-    return await this.employeeHelperService.updateEmployeeWorkDetails(dto, empID, orgName, modifierMail);
+    return await this.employeeHelperService.updateEmployeeWorkDetails(dto, employee, orgName, modifierMail);
   }
 
 

@@ -3,7 +3,7 @@ import { PrismaService } from "@prisma/prisma.service";
 import { CreatePayrollPreviewDto, EmployeePayrollPreviewDto } from "@core/dto/global/Payroll.dto";
 import { AppConflictException, AppException, AppNotFoundException } from "@core/exception/app-exception";
 import { SearchRequest } from "@core/model/search-request";
-import { Employee } from "@prisma/client";
+import { Employee, Organization } from "@prisma/client";
 
 @Injectable()
 export class PayrollPreviewHelperService {
@@ -113,6 +113,11 @@ export class PayrollPreviewHelperService {
             location: true,
             furniture: true,
             utility: true,
+            reimbursable: true,
+            payroll_net: true,
+            special_allowance: true,
+            entertainment: true,
+            other_deductions: true,
             employee_Pension: true,
             employer_Pension: true,
             empNSITF: true,
@@ -233,6 +238,42 @@ export class PayrollPreviewHelperService {
         }
       });
       return "Successful";
+    } catch (e) {
+      this.logger.log(e);
+      throw new AppException();
+    }
+  }
+
+  async bulkUpdateEmployeePayrollInformation(employeeObj: any, organization: Organization) {
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        for (const employee of employeeObj) {
+          const { email, ...details } = employee;
+          await tx.employee.updateMany({
+            where: {
+              email: employee.email,
+              organizationId: organization.id
+            },
+            data: {
+              basic_salary: details.basic_salary,
+              housing: details.housing,
+              transportation: details.transportation,
+              furniture: details.furniture,
+              entertainment: details.entertainment,
+              utility: details.utility,
+              special_allowance: details.special_allowance,
+              gross_pay: details.gross_pay,
+              employee_Pension: details.employee_Pension,
+              taxes: details.taxes,
+              other_deductions: details.other_deductions,
+              deduction: details.deduction,
+              payroll_net: details.payroll_net,
+              reimbursable: details.reimbursable,
+              net_pay: details.net_pay
+            }
+          });
+        }
+      });
     } catch (e) {
       this.logger.log(e);
       throw new AppException();

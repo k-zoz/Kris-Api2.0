@@ -162,4 +162,8 @@ export class EmployeePayrollPreviewDto {
   empNHF:any
   empNSITF:any
   empITF:any
+  special_allowance  :any
+  payroll_net        :any
+  reimbursable       :any
+  entertainment      :any
 }

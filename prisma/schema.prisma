@@ -329,6 +329,11 @@ model Employee {
   location           Float?
   furniture          Float?
   utility            Float?
+  entertainment      Float?
+  special_allowance  Float?
+  payroll_net        Float?
+  other_deductions   Float?
+  reimbursable       Float?
   employee_Pension   Float?
   employer_Pension   Float?
   empNHF             Float?
@@ -449,32 +454,37 @@ model OrganizationPayroll {
 }
 
 model EmployeePayroll {
-  id               String              @id @default(uuid())
-  employee         Employee            @relation(fields: [employeeId], references: [id])
-  employeeId       String
-  payroll          OrganizationPayroll @relation(fields: [payrollId], references: [id])
-  payrollId        String
-  bonuses          Float?
-  taxes            Float?
-  deduction        Float?
-  gross_pay        Float?
-  net_pay          Float?
-  basic_salary     Float?
-  housing          Float?
-  transportation   Float?
-  education        Float?
-  location         Float?
-  furniture        Float?
-  utility          Float?
-  employee_Pension Float?
-  employer_Pension Float?
-  empNHF           Float?
-  empNSITF         Float?
-  empITF           Float?
-  createdBy        String?
-  modifiedBy       String?
-  createdDate      DateTime            @default(now()) @db.Date
-  modifiedDate     DateTime            @updatedAt
+  id                String              @id @default(uuid())
+  employee          Employee            @relation(fields: [employeeId], references: [id])
+  employeeId        String
+  payroll           OrganizationPayroll @relation(fields: [payrollId], references: [id])
+  payrollId         String
+  bonuses           Float?
+  taxes             Float?
+  deduction         Float?
+  gross_pay         Float?
+  net_pay           Float?
+  basic_salary      Float?
+  housing           Float?
+  transportation    Float?
+  education         Float?
+  location          Float?
+  furniture         Float?
+  utility           Float?
+  employee_Pension  Float?
+  employer_Pension  Float?
+  empNHF            Float?
+  empNSITF          Float?
+  entertainment     Float?
+  special_allowance Float?
+  payroll_net       Float?
+  reimbursable      Float?
+  other_deductions  Float?
+  empITF            Float?
+  createdBy         String?
+  modifiedBy        String?
+  createdDate       DateTime            @default(now()) @db.Date
+  modifiedDate      DateTime            @updatedAt
 }
 
 model Payroll_Preview {
