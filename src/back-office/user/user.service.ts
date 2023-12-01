@@ -8,6 +8,7 @@ import { CodeValue } from "@core/dto/global/code-value";
 import { EnumValues } from "enum-values";
 import { UserPrismaHelperService } from "@back-office/helper-services/user-prisma-helper.service";
 import { AppConflictException, AppUnauthorizedException } from "@core/exception/app-exception";
+import { ConfigService } from "@nestjs/config";
 
 
 
@@ -16,7 +17,8 @@ export class UserService implements OnModuleInit {
   private readonly logger = new Logger(UserService.name);
 
   constructor(private readonly utilService: UtilService,
-              private readonly userHelperService: UserPrismaHelperService
+              private readonly userHelperService: UserPrismaHelperService,
+              private readonly configService:ConfigService,
   ) {
   }
 
@@ -28,16 +30,17 @@ export class UserService implements OnModuleInit {
     const superUserExists = await this.userHelperService.findSuperUserUser("rootadmin@kris.io");
     if (!superUserExists) {
       const superUserDTO = {
-        email: "rootadmin@kris.io",
+
+        email: this.configService.get<string>("baseUserEmail"),
         firstname: "Root",
         surname: "Admin",
         phoneNumber: "01001111111",
-        password: "root.admin@2023",
+        password: this.configService.get<string>("baseUserPassword"),
         role: "SUPER_ADMIN",
         krisID: "KR-0001",
         status: "ACTIVE",
-        createdBy: "rootadmin@kris.io",
-        authPayload: { email: "rootadmin@kris.io", role: "SUPER_ADMIN" }
+        createdBy: this.configService.get<string>("baseUserEmail"),
+        authPayload: { email: this.configService.get<string>("baseUserEmail"), role: "SUPER_ADMIN" }
       } as CreateSuperUserDto;
       await this.userHelperService.saveSuperUser(superUserDTO);
       this.logger.log(`SUPER ADMIN CREATED SUCCESSFULLY<>$$$$$$$`);

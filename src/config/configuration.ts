@@ -8,6 +8,8 @@ export default () => ({
     user: process.env.EMAIL_USER,
     password: process.env.EMAIL_PASSWORD,
   },
+  baseUserEmail:process.env.BASE_USER_EMAIL,
+  baseUserPassword:process.env.BASE_USER_PASSWORD,
   accessTokenSecret: process.env.ACCESS_TOKEN_SECRET,
   accessTokenLifetime: process.env.ACCESS_TOKEN_LIFETIME,
   refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,

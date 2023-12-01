@@ -29,10 +29,11 @@ export class EmployeeService {
     const org = await this.orgHelperService.findOrgByID(orgID);
     dto.empFirstName = this.utilService.toUpperCase(dto.empFirstName);
     dto.empLastName = this.utilService.toUpperCase(dto.empLastName);
+    dto.empEmail = this.utilService.toLowerCase(dto.empEmail);
     dto.createdBy = creatorMail;
     dto.empPassword = this.utilService.generateRandomPassword();
     dto.orgKrisId = this.utilService.generateUUID(dto.empFirstName);
-    return await this.employeeHelperService.createEmployeeAndSendWelcomeEmail(dto, orgID, org.orgName);
+     return await this.employeeHelperService.createEmployeeAndSendWelcomeEmail(dto, orgID, org.orgName);
 
   }
 
