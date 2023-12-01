@@ -30,49 +30,64 @@ export class PayrollApprovePrismaHelperService {
       const result = await this.prismaService.payroll_Preview.findUnique({
         where: { id: payrollPreviewID },
         include: {
-          employees: {
-            select: {
-              id: true,
-              firstname: true,
-              lastname: true,
-              taxes: true,
-              gross_pay: true,
-              deduction: true,
-              bonuses: true,
-              net_pay: true,
-              employee_Pension: true,
-              employer_Pension: true,
-              utility: true,
-              housing: true,
-              transportation: true,
-              education: true,
-              location: true,
-              designation: true
+          EmployeePayrollPreview: {
+            include: {
+              Employee: {
+                select: {
+                  id: true,
+                  firstname: true,
+                  lastname: true,
+                  designation: true,
+                  bonuses: true,
+                  deduction: true,
+                  taxes: true,
+                  gross_pay: true,
+                  net_pay: true,
+                  basic_salary: true,
+                  housing: true,
+                  transportation: true,
+                  education: true,
+                  location: true,
+                  furniture: true,
+                  utility: true,
+                  reimbursable: true,
+                  payroll_net: true,
+                  special_allowance: true,
+                  entertainment: true,
+                  other_deductions: true,
+                  employee_Pension: true,
+                  employer_Pension: true,
+                  empNSITF: true,
+                  empNHF: true,
+                  empITF: true
+                }
+              }
             }
           }
         }
       });
 
+      // Extract the employees from the EmployeePayrollPreview array
+      const employees = result.EmployeePayrollPreview.map(epp => epp.Employee);
 
-      const totals = result.employees.reduce(
+
+      const totals = employees.reduce(
         (acc, employee) => {
           acc.taxes += employee.taxes || 0;
           acc.gross_pay += employee.gross_pay || 0;
           acc.deduction += employee.deduction || 0;
-          acc.bonuses += employee.bonuses || 0;
           acc.net_pay += employee.net_pay || 0;
-          acc.employer_Pension += employee.employer_Pension || 0;
           return acc;
         },
         {
           taxes: 0,
           gross_pay: 0,
           deduction: 0,
-          bonuses: 0,
-          net_pay: 0,
-          employer_Pension: 0
+          net_pay: 0
         }
       );
+
+
       return { payrollPreview: result, totals };
     } catch (e) {
       this.logger.log(e);
@@ -84,6 +99,7 @@ export class PayrollApprovePrismaHelperService {
   async startPayrollApproval(orgID: string, payrollPreviewID: string, email, totalsPayroll, ppPreview: Payroll_Preview) {
     try {
       await this.prismaService.$transaction(async (tx) => {
+
 
         await tx.payroll_Preview.update({
           where: { id: payrollPreviewID },

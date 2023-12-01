@@ -71,9 +71,9 @@ export class PayrollPreviewService {
     dto.furniture = parseFloat(dto.furniture);
     dto.utility = parseFloat(dto.utility);
     dto.taxes = parseFloat(dto.taxes);
-   // dto.gross_pay = this.utilService.calculateEmpGrossPay(dto);
-   // dto.gross_pay = parseFloat(dto.gross_pay);
-    dto.employee_Pension = this.utilService.calculateEmployeePension(dto);
+    // dto.gross_pay = this.utilService.calculateEmpGrossPay(dto);
+    dto.gross_pay = parseFloat(dto.gross_pay);
+    // dto.employee_Pension = this.utilService.calculateEmployeePension(dto);
     dto.employee_Pension = parseFloat(dto.employee_Pension);
     //  dto.employer_Pension = this.utilService.calculateEmployerPension(dto);
     // dto.employer_Pension = parseFloat(dto.employer_Pension);
@@ -83,18 +83,19 @@ export class PayrollPreviewService {
     // dto.empNHF = parseFloat(dto.empNHF);
     //  dto.empNSITF = this.utilService.calculateNSITF(dto);
     //   dto.empNSITF = parseFloat(dto.empNSITF);
-    dto.deduction = this.utilService.calculateTotalDeductions(dto);
+    // dto.deduction = this.utilService.calculateTotalDeductions(dto);
     dto.deduction = parseFloat(dto.deduction);
-    dto.net_pay = this.utilService.calculateEmpNetPay(dto);
+    // dto.net_pay = this.utilService.calculateEmpNetPay(dto);
     dto.net_pay = parseFloat(dto.net_pay);
     dto.bonuses = this.utilService.useToReturnNull();
     dto.payroll_net = parseFloat(dto.payroll_net);
+    dto.other_deductions = parseFloat(dto.other_deductions);
     dto.reimbursable = parseFloat(dto.reimbursable);
     dto.special_allowance = parseFloat(dto.special_allowance);
     dto.entertainment = parseFloat(dto.entertainment);
     await this.payrollPreviewPrismaHelper.findPayrollPreviewById(orgID, payrollPreviewID);
     const employee = await this.employeeHelperPrismaService.findEmpById(empID);
-    await this.payrollPreviewPrismaHelper.findEmployeeInPayrollPreview(employee.id, payrollPreviewID, orgID);
+   // await this.payrollPreviewPrismaHelper.findEmployeeInPayrollPreview(employee.id, payrollPreviewID, orgID);
     return await this.payrollPreviewPrismaHelper.updateEmployeeInfoInPayrollPreview(dto, employee.id, payrollPreviewID, orgID, email);
   }
 
@@ -115,4 +116,6 @@ export class PayrollPreviewService {
     const payrollData = await this.utilService.parsePayrollData(employeeObj);
     return await this.payrollPreviewPrismaHelper.bulkUpdateEmployeePayrollInformation(payrollData, organization);
   }
+
+
 }

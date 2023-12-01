@@ -166,4 +166,5 @@ export class EmployeePayrollPreviewDto {
   payroll_net        :any
   reimbursable       :any
   entertainment      :any
+  other_deductions:any
 }

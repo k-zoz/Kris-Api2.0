@@ -43,7 +43,7 @@ export class PayrollPreviewHelperService {
           }
         });
 
-        await tx.payroll_Preview.create({
+        const payrollPreview = await tx.payroll_Preview.create({
           data: {
             name: dto.name,
             startDate: dto.startDate,
@@ -51,13 +51,21 @@ export class PayrollPreviewHelperService {
             date: dto.date,
             status: "PENDING",
             organizationId: orgID,
-            createdBy: email,
-            employees: {
-              connect: employees.map(employee => ({ id: employee.id }))
-            }
+            createdBy: email
+            // employees: {
+            //   connect: employees.map(employee => ({ id: employee.id }))
+            // }
           }
         });
 
+        for (const employee of employees) {
+          await tx.employeePayrollPreview.create({
+            data: {
+              employeeId: employee.id,
+              payrollId: payrollPreview.id
+            }
+          });
+        }
       });
 
     } catch (e) {
@@ -95,34 +103,38 @@ export class PayrollPreviewHelperService {
         id: payrollPreviewID
       },
       include: {
-        employees: {
-          select: {
-            id: true,
-            firstname: true,
-            lastname: true,
-            designation: true,
-            bonuses: true,
-            deduction: true,
-            taxes: true,
-            gross_pay: true,
-            net_pay: true,
-            basic_salary: true,
-            housing: true,
-            transportation: true,
-            education: true,
-            location: true,
-            furniture: true,
-            utility: true,
-            reimbursable: true,
-            payroll_net: true,
-            special_allowance: true,
-            entertainment: true,
-            other_deductions: true,
-            employee_Pension: true,
-            employer_Pension: true,
-            empNSITF: true,
-            empNHF: true,
-            empITF: true
+        EmployeePayrollPreview:{
+          include:{
+            Employee:{
+              select: {
+                id: true,
+                firstname: true,
+                lastname: true,
+                designation: true,
+                bonuses: true,
+                deduction: true,
+                taxes: true,
+                gross_pay: true,
+                net_pay: true,
+                basic_salary: true,
+                housing: true,
+                transportation: true,
+                education: true,
+                location: true,
+                furniture: true,
+                utility: true,
+                reimbursable: true,
+                payroll_net: true,
+                special_allowance: true,
+                entertainment: true,
+                other_deductions: true,
+                employee_Pension: true,
+                employer_Pension: true,
+                empNSITF: true,
+                empNHF: true,
+                empITF: true
+              }
+            }
           }
         }
       }
@@ -234,6 +246,11 @@ export class PayrollPreviewHelperService {
           empITF: dto.empITF,
           employer_Pension: dto.employer_Pension,
           employee_Pension: dto.employee_Pension,
+          payroll_net: dto.payroll_net,
+          other_deductions: dto.other_deductions,
+          reimbursable: dto.reimbursable,
+          special_allowance: dto.special_allowance,
+          entertainment: dto.entertainment,
           modifiedBy: email
         }
       });

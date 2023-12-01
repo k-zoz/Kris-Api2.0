@@ -369,17 +369,24 @@ model Employee {
   gua_relationship String?
   gua_email        String?
 
-  hierarchy_position Employee_Hierarchy?
-  role               Employee_Role[]
-  status             Employee_Status?
-  employeeLeave      EmployeeLeave[]
-  leaveApplication   LeaveApplication[]
-  EmployeeOnboarding EmployeeOnboarding[]
-  Employee_Appraisal Employee_Appraisal[]
-  HireRequest        HireRequest[]
-  Payslip            Payslip[]
-  organizationId     String
-  Organization       Organization         @relation(fields: [organizationId], references: [id])
+  hierarchy_position          Employee_Hierarchy?
+  role                        Employee_Role[]
+  status                      Employee_Status?
+  employeeLeave               EmployeeLeave[]
+  leaveApplication            LeaveApplication[]
+  EmployeeOnboarding          EmployeeOnboarding[]
+  Employee_Appraisal          Employee_Appraisal[]
+  HireRequest                 HireRequest[]
+  Payslip                     Payslip[]
+  EmployeePayroll             EmployeePayroll[]
+  JobOpening                  JobOpening[]
+  EmployeeAnnouncement        EmployeeAnnouncement[]
+  EmployeeCertificate         EmployeeCertificate[]
+  EmployeeWorkTools           EmployeeWorkTools[]
+  Appraisal_Question_Response Appraisal_Question_Response[]
+  EmployeePayrollPreview      EmployeePayrollPreview[]
+  organizationId              String
+  Organization                Organization                  @relation(fields: [organizationId], references: [id])
 
   org_Branch   Org_Branch? @relation("Org_BranchToEmployees", fields: [org_BranchId], references: [id])
   org_BranchId String?
@@ -407,16 +414,10 @@ model Employee {
   Payroll_Preview   Payroll_Preview? @relation(fields: [payroll_PreviewId], references: [id])
   payroll_PreviewId String?
 
-  createdBy                   String?
-  modifiedBy                  String?
-  createdDate                 DateTime                      @default(now()) @db.Date
-  modifiedDate                DateTime                      @updatedAt
-  EmployeePayroll             EmployeePayroll[]
-  JobOpening                  JobOpening[]
-  EmployeeAnnouncement        EmployeeAnnouncement[]
-  EmployeeCertificate         EmployeeCertificate[]
-  EmployeeWorkTools           EmployeeWorkTools[]
-  Appraisal_Question_Response Appraisal_Question_Response[]
+  createdBy    String?
+  modifiedBy   String?
+  createdDate  DateTime @default(now()) @db.Date
+  modifiedDate DateTime @updatedAt
 
   @@unique([email, krisID])
 }
@@ -487,21 +488,30 @@ model EmployeePayroll {
   modifiedDate      DateTime            @updatedAt
 }
 
+model EmployeePayrollPreview {
+  id              String          @id @default(uuid())
+  employeeId      String
+  payrollId       String
+  Employee        Employee        @relation(fields: [employeeId], references: [id])
+  Payroll_Preview Payroll_Preview @relation(fields: [payrollId], references: [id])
+}
+
 model Payroll_Preview {
-  id                  String                @id @default(uuid())
-  name                String?
-  date                DateTime?             @db.Date
-  startDate           DateTime?             @db.Date
-  endDate             DateTime?             @db.Date
-  employees           Employee[]
-  status              ApplicationStatus
-  organizationId      String?
-  Organization        Organization?         @relation(fields: [organizationId], references: [id])
-  createdBy           String?
-  modifiedBy          String?
-  createdDate         DateTime              @default(now()) @db.Date
-  modifiedDate        DateTime              @updatedAt
-  OrganizationPayroll OrganizationPayroll[]
+  id                     String                   @id @default(uuid())
+  name                   String?
+  date                   DateTime?                @db.Date
+  startDate              DateTime?                @db.Date
+  endDate                DateTime?                @db.Date
+  employees              Employee[]
+  status                 ApplicationStatus
+  organizationId         String?
+  Organization           Organization?            @relation(fields: [organizationId], references: [id])
+  createdBy              String?
+  modifiedBy             String?
+  createdDate            DateTime                 @default(now()) @db.Date
+  modifiedDate           DateTime                 @updatedAt
+  OrganizationPayroll    OrganizationPayroll[]
+  EmployeePayrollPreview EmployeePayrollPreview[]
 }
 
 model Allowance {
